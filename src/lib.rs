@@ -1,3 +1,5 @@
+//! Entry point for the library
+//! 
 extern crate sprs;
 
 pub mod utils;
