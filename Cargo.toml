@@ -35,3 +35,6 @@ criterion = "0.5"
 name = "my_benchmark"
 harness = true
 path = "benches/my_benchmark.rs"
+
+[package.metadata.docs.rs]
+rustdoc-args = [ "--html-in-header", "assets/mathjax_support.html" ]

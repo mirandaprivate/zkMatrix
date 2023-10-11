@@ -1,2 +1,5 @@
 [alias]
 ndoc = "doc --no-deps --document-private-items --open"
+
+[build]
+rustdocflags = ["--html-in-header", "assets/mathjax_support.html"]
