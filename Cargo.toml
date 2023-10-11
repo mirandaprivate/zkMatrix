@@ -25,7 +25,7 @@ sprs = "0.11.0"
 version = "0.10.0"
 default-features = false
 features = ["num-bigint"]
-documentation = "https://docs.rs/curv-kzen/0.10.0/curv/"
+# documentation = "https://docs.rs/curv-kzen/0.10.0/curv/"
 # lazy_static = "1.4"
 
 [dev-dependencies]

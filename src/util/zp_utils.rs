@@ -11,8 +11,8 @@ pub type GtElement = Gt;
 // Validated
 pub fn group_order() -> BigInt {
     // BLS12-381 scalar field $\mathbb{F}_q$
-    //! according to 
-    //! https://github.com/zkcrypto/bls12_381/blob/main/src/scalar.rs
+    /// according to 
+    /// <https://github.com/zkcrypto/bls12_381/blob/main/src/scalar.rs>
     let q: &str = "73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001";
     return BigInt::from_str_radix(q, 16).unwrap();
 }

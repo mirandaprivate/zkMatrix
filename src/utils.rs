@@ -11,13 +11,15 @@ use ndarray::Array2;
 // Validated
 pub fn group_order_bls12_384() -> BigInt {
     // BLS12-381 scalar field $\mathbb{F}_q$
-    //! according to https://github.com/zkcrypto/bls12_381/blob/main/src/scalar.rs
+    /// according to 
+    /// <https://github.com/zkcrypto/bls12_381/blob/main/src/scalar.rs>
     let q = "73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001";
     return BigInt::from_str_radix(q, 16).unwrap();
 }
 
 
-// Reversion is erquired according to https://github.com/zkcrypto/bls12_381/blob/main/src/scalar.rs
+/// Reversion is erquired according to 
+/// <https://github.com/zkcrypto/bls12_381/blob/main/src/scalar.rs>
 pub fn BigInt_to_Scalar(input_integer: &BigInt) -> Scalar {
     let mut hex_string = input_integer.to_str_radix(16);
     if hex_string.len() % 2 != 0 {
