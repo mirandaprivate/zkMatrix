@@ -1,6 +1,6 @@
-/// Utility Functions to handle sparse matrices.
-/// 
-/// The element of the sparse matrix is in Zp.
+//! Utility Functions to handle sparse matrices.
+//! 
+//! The element of the sparse matrix is in Zp.
 
 use sprs::{CsMat, CsMatI, CsVec};
 use super::zp_utils::{

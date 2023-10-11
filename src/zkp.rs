@@ -1,4 +1,4 @@
-// Dependencies or required libraries for ZKP, cryptographic primitives, etc.
+//! Dependencies or required libraries for ZKP, cryptographic primitives, etc.
 
 /// Represents the private information the prover wants to prove knowledge of
 /// without revealing it.
