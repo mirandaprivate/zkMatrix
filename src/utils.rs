@@ -6,6 +6,7 @@ use curv::arithmetic::Zero;
 use curv::arithmetic::Converter;
 use curv::arithmetic::*;
 use curv::arithmetic::traits::*;
+use ndarray::Array2;
 
 // Validated
 pub fn group_order_bls12_384() -> BigInt {
@@ -42,4 +43,62 @@ pub fn g2_point_add(a: &G2Affine, b: &G2Affine) -> G2Affine{
 
 pub fn max_of_three(a: usize, b: usize, c: usize) -> usize {
     std::cmp::max(std::cmp::max(a, b), c)
+}
+
+pub fn pairing_projective(a: &G1Projective, b: &G2Projective) -> Gt {
+    let a_affine = G1Affine::from(*a);
+    let b_affine = G2Affine::from(*b);
+    return pairing(&a_affine, &b_affine)
+}
+
+pub fn inner_product_scalar_scalar(a: &Vec<Scalar>, b: &Vec<Scalar>) -> Scalar {
+    let mut result = Scalar::zero();
+    for i in 0..a.len() {
+        result += a[i] * b[i];
+    }
+    return result;
+}
+
+pub fn inner_product_scalar_G1Projective(a: &Vec<Scalar>, b: &Vec<G1Projective>) -> G1Projective{
+    let mut result = G1Projective::identity();
+    for i in 0..a.len() {
+        result += b[i] * a[i];
+    }
+    return result;
+}
+
+
+pub fn inner_product_scalar_G2Projective(a: &Vec<Scalar>, b: &Vec<G2Projective>) -> G2Projective{
+    let mut result = G2Projective::identity();
+    for i in 0..a.len() {
+        result += b[i] * a[i];
+    }
+    return result;
+}
+
+pub fn inner_product_G1Projective_G2Projective(a: &Vec<G1Projective>, b: &Vec<G2Projective>) -> Gt{
+    let mut result = Gt::identity();
+    for i in 0..a.len() {
+        result += pairing_projective(&a[i], &b[i]);
+    }
+    return result;
+}
+
+pub fn matmul_scalar(a: &Array2<Scalar>, b: &Array2<Scalar>) -> Array2<Scalar> {
+    // Perform matrix multiplication
+    let (n1, m1) = a.dim();
+    let (n2, m2) = b.dim();
+    let mut result_vec = vec![];
+    for i in 0..n1 {
+        for j in 0..m2 {
+            let mut sum= Scalar::zero();
+            for k in 0..m1 {
+                sum += &a[(i, k)] * &b[(k, j)];
+            }
+            result_vec.push(sum);
+        }
+    }
+
+    let result = Array2::from_shape_vec((n1, m2), result_vec).unwrap();
+    return result;
 }

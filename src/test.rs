@@ -8,12 +8,15 @@ use curv::arithmetic::Zero;
 use curv::arithmetic::Converter;
 use curv::arithmetic::*;
 use crate::utils::*;
+use ndarray::Array2;
+use sprs::CsVec;
+
 
 #[test]
 pub fn pairing_demo(){
     println!("Pairing demo is started!");
 
-    /***************   Test 1 Exponentiation + Equivalence Verify  **************/
+    /***************  Test 1 Exponentiation + Equivalence Verify  *************/
     let a1_bn = BigInt::from(12345);
     let a1 = BigInt_to_Scalar(&a1_bn);
 
@@ -40,6 +43,10 @@ pub fn pairing_demo(){
         pairing(&G1Affine::generator(), &G2Affine::generator()) * c
     );
 
+    assert_eq!(
+        p,
+        pairing_projective(&G1Projective::generator(), &G2Projective::generator()) * c
+    );
 
     /***************   Test 2-1 Point addition in G1 **************/
     let g = G1Projective::generator() * Scalar::from(12345);
@@ -89,4 +96,59 @@ pub fn pairing_demo(){
     let p2 = &p + &p; // point add of Gt
     assert_eq!(Gt::identity() + p, p);
     println!("Pairing demo is executed successfully!")
+}
+
+#[test]
+pub fn matmul_demo(){
+
+    println!("*********************Matrix multiplication demo is started!**********************");
+    
+    // Create a 2x3 array
+    let a = Array2::from_shape_vec((2, 3), vec![Scalar::from(1), Scalar::from(2), Scalar::from(3), Scalar::from(4), Scalar::from(5), Scalar::from(6)]).unwrap();
+
+    // Create a 3x2 array
+    let b = Array2::from_shape_vec((3, 2), vec![Scalar::from(7), Scalar::from(8), Scalar::from(9), Scalar::from(10), Scalar::from(11), Scalar::from(12)]).unwrap();
+
+    // Perform matrix multiplication
+    let result = matmul_scalar(&a, &b);
+
+    // Print the resulting 2x2 array
+    println!("{:?}", result);
+
+    println!("Matrix multiplication demo is executed successfully!");
+
+} 
+#[test]
+pub fn sprs_demo(){
+
+    println!("*********************Sparse vector demo is started!**********************");
+
+    let q = group_order_bls12_384() - 1;
+    println!("q: {:?}", q);
+    let q_scalar = BigInt_to_Scalar(&q);
+    println!("q_scalar: {:?}", q_scalar);
+    let vec_data:Vec<Scalar> = vec![q_scalar, q_scalar, q_scalar];
+
+    let vec_indices : Vec<usize> = vec![0,2,4];
+
+    let sparse_vec: sprs::CsVecBase<Vec<usize>, Vec<Scalar>, Scalar> = CsVec::new(5, vec_indices, vec_data);
+
+    let sparse_vec_2: sprs::CsVecBase<Vec<usize>, Vec<Scalar>, Scalar> = CsVec::from(sparse_vec.clone());
+
+    let q_3:Scalar = q_scalar + q_scalar;
+
+    println!("q_3: {:?}", q_3);
+
+    // let sparse_vec_3 = sparse_vec + sparse_vec_2;
+
+    // let sparse_vec_4 = sparse_vec * sparse_vec_2;
+
+    let q_4:Scalar = q_scalar * q_scalar;
+
+    println!("q_4: {:?}", q_4);
+
+    println!("Sparse vector: {:?}", sparse_vec);
+
+    println!("Sparse vector demo is executed successfully!");
+
 }

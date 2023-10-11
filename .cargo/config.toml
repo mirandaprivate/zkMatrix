@@ -1,0 +1,2 @@
+[alias]
+ndoc = "doc --no-deps --document-private-items --open"

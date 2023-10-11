@@ -1,25 +1,35 @@
 [package]
 name = "zkmatrix"
 version = "0.1.0"
+authors = [
+    "Miranda CONG <minsheu.cong@gmail.com>", 
+    "Darren Cui <hdcui@cs.hku.hk>",
+    ]
 edition = "2021"
+description = "Zero-knowledge Proofs for Linear Algebra"
+license = "MIT"
+# document = ["", "build-dependencies", "dev-dependencies"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 bls12_381 = "0.8.0"
-# rust-gmp = "0.5"
 hex = "0.4"
+ndarray = "0.15.3"
+sprs = "0.11.0"
+# rust-gmp = "0.5"
 # rand = "0.8.4"
 # rug = "1.14.0"
 
 [dependencies.curv-kzen]
-version = "0.8"
+version = "0.10.0"
 default-features = false
 features = ["num-bigint"]
+documentation = "https://docs.rs/curv-kzen/0.10.0/curv/"
 # lazy_static = "1.4"
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.5"
 
 [[bench]]
 name = "my_benchmark"

@@ -1,4 +1,5 @@
 #![allow(warnings)]
+#[cfg(not(nightly))]
 
 use bls12_381::*;
 use bls12_381::Scalar;
