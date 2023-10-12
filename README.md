@@ -1,6 +1,6 @@
 # Conquering Large Zero-Knowledge Proof for Large Matrix Multiplication
 
-![RIM](pictures/rim.png)
+![RIM](assets/alg7.png)
 
 ---
 
