@@ -34,12 +34,14 @@ pub fn BigInt_to_Scalar(input_integer: &BigInt) -> Scalar {
 }
 
 pub fn g1_point_add(a: &G1Affine, b: &G1Affine) -> G1Affine{
-    let sum_projective = G1Projective::from(a) +  G1Projective::from(b);
+    let sum_projective  =
+        G1Projective::from(a) +  G1Projective::from(b);
     G1Affine::from(sum_projective)
 }
 
 pub fn g2_point_add(a: &G2Affine, b: &G2Affine) -> G2Affine{
-    let sum_projective = G2Projective::from(a) +  G2Projective::from(b);
+    let sum_projective = 
+        G2Projective::from(a) +  G2Projective::from(b);
     G2Affine::from(sum_projective)
 }
 
@@ -53,7 +55,10 @@ pub fn pairing_projective(a: &G1Projective, b: &G2Projective) -> Gt {
     return pairing(&a_affine, &b_affine)
 }
 
-pub fn inner_product_scalar_scalar(a: &Vec<Scalar>, b: &Vec<Scalar>) -> Scalar {
+pub fn inner_product_scalar_scalar(
+    a: &Vec<Scalar>, 
+    b: &Vec<Scalar>,
+) -> Scalar {
     let mut result = Scalar::zero();
     for i in 0..a.len() {
         result += a[i] * b[i];
@@ -61,7 +66,10 @@ pub fn inner_product_scalar_scalar(a: &Vec<Scalar>, b: &Vec<Scalar>) -> Scalar {
     return result;
 }
 
-pub fn inner_product_scalar_G1Projective(a: &Vec<Scalar>, b: &Vec<G1Projective>) -> G1Projective{
+pub fn inner_product_scalar_G1Projective(
+    a: &Vec<Scalar>, 
+    b: &Vec<G1Projective>,
+) -> G1Projective{
     let mut result = G1Projective::identity();
     for i in 0..a.len() {
         result += b[i] * a[i];
@@ -70,7 +78,10 @@ pub fn inner_product_scalar_G1Projective(a: &Vec<Scalar>, b: &Vec<G1Projective>)
 }
 
 
-pub fn inner_product_scalar_G2Projective(a: &Vec<Scalar>, b: &Vec<G2Projective>) -> G2Projective{
+pub fn inner_product_scalar_G2Projective(
+    a: &Vec<Scalar>, 
+    b: &Vec<G2Projective>,
+) -> G2Projective{
     let mut result = G2Projective::identity();
     for i in 0..a.len() {
         result += b[i] * a[i];
@@ -78,7 +89,10 @@ pub fn inner_product_scalar_G2Projective(a: &Vec<Scalar>, b: &Vec<G2Projective>)
     return result;
 }
 
-pub fn inner_product_G1Projective_G2Projective(a: &Vec<G1Projective>, b: &Vec<G2Projective>) -> Gt{
+pub fn inner_product_G1Projective_G2Projective(
+    a: &Vec<G1Projective>, 
+    b: &Vec<G2Projective>,
+) -> Gt{
     let mut result = Gt::identity();
     for i in 0..a.len() {
         result += pairing_projective(&a[i], &b[i]);
@@ -86,7 +100,10 @@ pub fn inner_product_G1Projective_G2Projective(a: &Vec<G1Projective>, b: &Vec<G2
     return result;
 }
 
-pub fn matmul_scalar(a: &Array2<Scalar>, b: &Array2<Scalar>) -> Array2<Scalar> {
+pub fn matmul_scalar(
+    a: &Array2<Scalar>, 
+    b: &Array2<Scalar>,
+) -> Array2<Scalar> {
     // Perform matrix multiplication
     let (n1, m1) = a.dim();
     let (n2, m2) = b.dim();
@@ -101,6 +118,7 @@ pub fn matmul_scalar(a: &Array2<Scalar>, b: &Array2<Scalar>) -> Array2<Scalar> {
         }
     }
 
-    let result = Array2::from_shape_vec((n1, m2), result_vec).unwrap();
+    let result = 
+        Array2::from_shape_vec((n1, m2), result_vec).unwrap();
     return result;
 }
