@@ -38,7 +38,7 @@ C_c =  \langle \hat{\mathbf{G}}  |  \mathbf{c}  |  \hat{\mathbf{H}} \rangle
 \in \mathbb{G}_T .
 $$
 
-Then, the prover can generate a zero-knowledge proof with $O(n)$ time complexity
+Then, the prover can generate a zero-knowledge proof with $O(m+n+l)$ time complexity
 for the relation:
 
 $$
@@ -65,6 +65,8 @@ $$
 $$
 
 We employ the random oracle approach.
+
+For more details, refer to the math in our paper. 
 
 ![alg](assets/alg7.png)
 
