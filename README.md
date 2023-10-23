@@ -8,9 +8,9 @@ This folder contains codes for our paper
 Given a pairing
 $e: \mathbb{G}_1 \times \mathbb{G}_2 \mapsto \mathbb{G}_T$, 
 and two vectors 
-$\vec{\mathbf{G}} \in \mathbb{G}_1^{\star}$ 
+$\hat{\mathbf{G}} \in \mathbb{G}_1^{\star}$ 
 and 
-$\vec{\mathbf{H}} \in \mathbb{G}_2^{\star}$ ,
+$\hat{\mathbf{H}} \in \mathbb{G}_2^{\star}$ ,
 
 then the two-tier commitment of a $m \times n$ matrix 
 $C_a = \mathbf{a} = \{a_{ij}\} \in \mathbb{Z}_p^{m\times n}$ is defined by:
@@ -24,11 +24,17 @@ Suppose the prover has made commitments to three $m \times n$ matrix
 $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ as follows:
 
 $$ 
-C_a = \langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle 
+C_a = \langle \hat{\mathbf{G}}  |  \mathbf{a}   |  \hat{\mathbf{H}} \rangle 
 \in \mathbb{G}_T, 
-C_b =  \langle \vec{\mathbf{G}}  |  \mathbf{b}   |  \vec{\mathbf{H}} \rangle 
+$$
+
+$$
+C_b =  \langle \hat{\mathbf{G}}  |  \mathbf{b}   |  \hat{\mathbf{H}} \rangle 
 \in \mathbb{G}_T,
-C_c =  \langle \vec{\mathbf{G}}  |  \mathbf{c}  |  \vec{\mathbf{H}} \rangle
+$$
+
+$$
+C_c =  \langle \hat{\mathbf{G}}  |  \mathbf{c}  |  \hat{\mathbf{H}} \rangle
 \in \mathbb{G}_T .
 $$
 
@@ -36,9 +42,9 @@ Then, the prover can generate a zero-knowledge proof with $O(n)$ time complexity
 for the relation:
 
 $$
-\mathcal{R} = (
+\mathcal{R} = \lbrace
      C_c \in \mathbb{G}_T, C_a \in \mathbb{G}_T, C_b \in \mathbb{G}_T;
-    \vec{\mathbf{G}} \in \mathbb{G}_1^{\star} , \vec{\mathbf{H}} \in \mathbb{G}_2^{\star} 
+    \hat{\mathbf{G}} \in \mathbb{G}_1^{\star} , \hat{\mathbf{H}} \in \mathbb{G}_2^{\star} 
 $$
 
 $$
@@ -50,12 +56,12 @@ $$
 $$
 | \mathbf{c} = \mathbf{a} \mathbf{b} 
     \wedge C_c =
-     \langle \vec{\mathbf{G}}  |  \mathbf{c}   |  \vec{\mathbf{H}} \rangle
+     \langle \hat{\mathbf{G}}  |  \mathbf{c}   |  \hat{\mathbf{H}} \rangle
     \wedge C_a =
-     \langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle
+     \langle \hat{\mathbf{G}}  |  \mathbf{a}   |  \hat{\mathbf{H}} \rangle
     \wedge C_b =
-     \langle \vec{\mathbf{G}}  |  \mathbf{b}   |  \vec{\mathbf{H}} \rangle     
-).
+     \langle \hat{\mathbf{G}}  |  \mathbf{b}   |  \hat{\mathbf{H}} \rangle     
+\rbrace.
 $$
 
 We employ the random oracle approach.
