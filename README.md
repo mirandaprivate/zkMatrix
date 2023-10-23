@@ -25,10 +25,8 @@ $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ as follows:
 $$ 
 C_a = \langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle 
 \in \mathbb{G}_T, 
-\\\\
 C_b =  \langle \vec{\mathbf{G}}  |  \mathbf{b}   |  \vec{\mathbf{H}} \rangle 
 \in \mathbb{G}_T,
-\\\\
 C_c =  \langle \vec{\mathbf{G}}  |  \mathbf{c}  |  \vec{\mathbf{H}} \rangle
 \in \mathbb{G}_T .
 $$
