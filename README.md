@@ -11,7 +11,6 @@ and two vectors
 $\hat{\mathbf{G}} \in \mathbb{G}_1^{q}$ 
 and 
 $\hat{\mathbf{H}} \in \mathbb{G}_2^{q}$ ,
-
 then the two-tier commitment of a $m \times n$ ($m,n \le q$) matrix 
 $C_a = \mathbf{a} = \{a_{ij}\} \in \mathbb{Z}_p^{m\times n}$ is defined by:
 
@@ -44,7 +43,7 @@ for the relation:
 $$
 \mathcal{R} = \lbrace
      C_c \in \mathbb{G}_T, C_a \in \mathbb{G}_T, C_b \in \mathbb{G}_T;
-    \hat{\mathbf{G}} \in \mathbb{G}_1^{\star} , \hat{\mathbf{H}} \in \mathbb{G}_2^{\star} 
+    \hat{\mathbf{G}} \in \mathbb{G}_1^{q} , \hat{\mathbf{H}} \in \mathbb{G}_2^{q} 
 $$
 
 $$
