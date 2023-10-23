@@ -8,11 +8,11 @@ This folder contains codes for our paper
 Given a pairing
 $e: \mathbb{G}_1 \times \mathbb{G}_2 \mapsto \mathbb{G}_T$, 
 and two vectors 
-$\hat{\mathbf{G}} \in \mathbb{G}_1^{\star}$ 
+$\hat{\mathbf{G}} \in \mathbb{G}_1^{q}$ 
 and 
-$\hat{\mathbf{H}} \in \mathbb{G}_2^{\star}$ ,
+$\hat{\mathbf{H}} \in \mathbb{G}_2^{q}$ ,
 
-then the two-tier commitment of a $m \times n$ matrix 
+then the two-tier commitment of a $m \times n$ ($m,n<q$) matrix 
 $C_a = \mathbf{a} = \{a_{ij}\} \in \mathbb{Z}_p^{m\times n}$ is defined by:
 
 $$
