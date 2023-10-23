@@ -12,8 +12,8 @@ $\hat{\mathbf{G}} \in \mathbb{G}_1^{q}$
 and 
 $\hat{\mathbf{H}} \in \mathbb{G}_2^{q}$,
 
-then the two-tier commitment of a $m \times n$ ($m,n \le q$) matrix 
-$C_a = \mathbf{a} = \{a_{ij}\} \in \mathbb{Z}_p^{m\times n}$ is defined by:
+then the two-tier commitment $C_a$ for a $m \times n$ ( $m,n \le q$ ) matrix 
+$\mathbf{a} = \{a_{ij}\} \in \mathbb{Z}_p^{m\times n}$ is defined by:
 
 $$
 \langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle
