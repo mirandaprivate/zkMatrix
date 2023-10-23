@@ -36,15 +36,18 @@ Then, the prover can generate a zero-knowledge proof with $O(n)$ time complexity
 for the relation:
 
 $$
-\mathcal{R} 
-= \\{ 
+\mathcal{R} = (
      C_c \in \mathbb{G}_T, C_a \in \mathbb{G}_T, C_b \in \mathbb{G}_T;
     \vec{\mathbf{G}} \in \mathbb{G}_1^{\star} , \vec{\mathbf{H}} \in \mathbb{G}_2^{\star} 
-\\\\
+$$
+
+$$
 : \mathbf{a} \in \mathbb{Z}_p^{m\times l},
     \mathbf{b} \in \mathbb{Z}_p^{l \times n},
     \mathbf{c} \in \mathbb{Z}_p^{m \times n}
-    \\\\
+$$
+
+$$
 | \mathbf{c} = \mathbf{a} \mathbf{b} 
     \wedge C_c =
      \langle \vec{\mathbf{G}}  |  \mathbf{c}   |  \vec{\mathbf{H}} \rangle
@@ -52,7 +55,7 @@ $$
      \langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle
     \wedge C_b =
      \langle \vec{\mathbf{G}}  |  \mathbf{b}   |  \vec{\mathbf{H}} \rangle     
-\\}.
+).
 $$
 
 We employ the random oracle approach.
