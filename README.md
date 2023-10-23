@@ -17,7 +17,7 @@ $C_a = \mathbf{a} = \{a_{ij}\} \in \mathbb{Z}_p^{m\times n}$ is defined by:
 
 $$
 \langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle
-: = \bigoplus_{i=1}^m \bigoplus_{j=1}^n a_{ij} e(G_i, H_j)
+: = \bigoplus_{i=1}^m \bigoplus_{j=1}^n a_{ij} e(G_i, H_j).
 $$ 
 
 Suppose the prover has made commitments to three $m \times n$ matrix 
