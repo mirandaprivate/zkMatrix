@@ -12,11 +12,11 @@ $\hat{\mathbf{G}} \in \mathbb{G}_1^{q}$
 and 
 $\hat{\mathbf{H}} \in \mathbb{G}_2^{q}$,
 
-then the two-tier commitment $C_a$ for a $m \times n$ ( $m,n \le q$ ) matrix 
-$\mathbf{a} = \{a_{ij}\} \in \mathbb{Z}_p^{m\times n}$ is defined by:
+then the two-tier commitment $C_a \in \mathbb{G}_T$ for a $m \times n$ ( $m,n \le q$ ) matrix 
+$\mathbf{a} = \lbrace a_{ij} \rbrace \in \mathbb{Z}_p^{m\times n}$ is defined by:
 
 $$
-\langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle
+\langle \hat{\mathbf{G}}  |  \mathbf{a}   |  \hat{\mathbf{H}} \rangle
 : = \bigoplus_{i=1}^m \bigoplus_{j=1}^n a_{ij} e(G_i, H_j).
 $$ 
 
