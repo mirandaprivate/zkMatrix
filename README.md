@@ -22,6 +22,7 @@ $$
 
 Suppose the prover has made commitments to three $m \times n$ matrix 
 $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ as follows:
+
 $$ 
 C_a = \langle \vec{\mathbf{G}}  |  \mathbf{a}   |  \vec{\mathbf{H}} \rangle 
 \in \mathbb{G}_T, 
@@ -33,6 +34,7 @@ $$
 
 Then, the prover can generate a zero-knowledge proof with $O(n)$ time complexity
 for the relation:
+
 $$
 \mathcal{R} 
 = \\{ 
