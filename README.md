@@ -13,6 +13,7 @@ and
 $\hat{\mathbf{H}} \in \mathbb{G}_2^{q}$,
 
 then the two-tier commitment $C_a \in \mathbb{G}_T$ for a $m \times n$ ( $m,n \le q$ ) matrix 
+
 $\mathbf{a} = \lbrace a_{ij} \rbrace \in \mathbb{Z}_p^{m\times n}$ is defined by:
 
 $$
