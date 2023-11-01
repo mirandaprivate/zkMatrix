@@ -2,23 +2,43 @@
 //! 
 //! # Example
 //! 
+//! 
+use core::convert::From;
+
 #[derive(Debug, Clone)]
-struct Mat<'a, T> {
-    pub id: &'a str,
+pub struct Mat<T> {
+    pub id: String,
     pub shape: (usize, usize),
     pub data: Vec<(usize, usize, T)>,
 }
 
-impl<'a, T> Mat<'a, T> {
+impl< T: From<u64> > Mat<T> {
     pub fn new(
-        id: &'a str, 
+        id: &str, 
         shape: (usize, usize)) -> Self {
+        let id = String::from(id);
         let data: Vec<(usize, usize, T)> = Vec::new();
-        Self {
-            id,
-            shape,
-            data,
-        }
+        Self {id, shape, data}
+    }
+
+    pub fn new_from_data_vec(
+        id: &str, 
+        shape: (usize, usize),
+        data: Vec<(usize, usize, T)>) -> Self {
+        let id = String::from(id);
+        Self {id, shape, data}
+    }
+
+    pub fn new_from_u64_vec(
+        id: &str, 
+        shape: (usize, usize),
+        data: Vec<(usize, usize, u64)>) -> Self {
+        let id = String::from(id);
+        let data = data.iter().map(
+            |(row, col, val)| (*row, *col, T::from(*val))
+        ).collect();
+        
+        Self {id, shape, data}
     }
 
     pub fn push(&mut self, row: usize, col: usize, val: T) {
@@ -26,7 +46,7 @@ impl<'a, T> Mat<'a, T> {
     }
 }
 
-impl<T: PartialEq + Clone> PartialEq for Mat<'_, T> {
+impl<T: PartialEq + Clone> PartialEq for Mat<T> {
 
     fn eq(&self, other: &Self) -> bool {
         if self.shape != other.shape {
@@ -46,7 +66,7 @@ impl<T: PartialEq + Clone> PartialEq for Mat<'_, T> {
     }
 }
 
-impl<T: PartialEq + Clone> Eq for Mat<'_, T> {}
+impl<T: PartialEq + Clone> Eq for Mat<T> {}
 
 #[cfg(test)]
 mod tests {
