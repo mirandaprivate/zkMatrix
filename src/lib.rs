@@ -4,12 +4,13 @@
 //!
 #![doc = include_str!("../README.md")]
 
-extern crate sprs;
+// extern crate sprs;
 
 pub mod utils;
 mod test;
 
-pub mod util;
-pub mod protocols;
+// pub mod util;
+// pub mod protocols;
 pub mod curve;
-
+pub mod dirac;
+pub mod mat;

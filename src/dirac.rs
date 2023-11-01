@@ -1,6 +1,7 @@
 use bls12_381::{Scalar, G1Projective, G2Projective, pairing, Gt, G1Affine, G2Affine};
 use rand::Rng;
 use std::thread;
+use std::sync::Arc;
 
 fn random_scalar<R: Rng + ?Sized>(rng: &mut R) -> Scalar {
     Scalar::from_raw([
@@ -23,7 +24,7 @@ const MATRIX_SIZE: usize = 64;
 const NUM_NONZERO_ENTRIES: usize = 256;
 const NUM_THREADS: usize = 8;
 
-fn main() {
+fn dirac() {
     let mut rng = rand::thread_rng();
     let mut m: Vec<(usize, usize, Scalar)> = Vec::new();
 
@@ -36,12 +37,15 @@ fn main() {
     let v1: Vec<G1Projective> = (0..MATRIX_SIZE).map(|_| random_g1(&mut rng)).collect();
     let v2: Vec<G2Projective> = (0..MATRIX_SIZE).map(|_| random_g2(&mut rng)).collect();
 
+    let v1_arc = Arc::new(v1);
+
     let chunk_size = NUM_NONZERO_ENTRIES / NUM_THREADS;
     let m_chunks: Vec<Vec<(usize, usize, Scalar)>> = m.chunks(chunk_size).map(|chunk| chunk.to_vec()).collect();
 
     let mut aggregate_intermediate = vec![G1Projective::identity(); MATRIX_SIZE];
     let mut handles: Vec<_> = m_chunks.into_iter().map(|chunk| {
-        let v1_clone = v1.clone();
+        // let v1_clone = v1.clone();
+        let v1_clone = v1_arc.clone();
         thread::spawn(move || {
             let mut local_intermediate = vec![G1Projective::identity(); MATRIX_SIZE];
             for &(row, col, ref val) in &chunk {
@@ -64,4 +68,14 @@ fn main() {
     }
 
     println!("Result: {:?}", result);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_dirac() {
+        dirac();
+    }
 }
