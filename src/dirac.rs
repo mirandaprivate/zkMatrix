@@ -1,22 +1,20 @@
+use core::fmt::Debug;
+use core::num;
+use std::marker::{Send, Sync};
 use std::ops::{Add, Mul, AddAssign};
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+use crate::mat::Mat;
+
 
 use bls12_381::{pairing, G1Affine, G1Projective, G2Affine, G2Projective, Gt, Scalar};
 use curv::arithmetic::Zero;
-use rand::Rng;
-use std::sync::{Arc, Mutex};
-use std::marker::{Send, Sync};
-use std::thread;
-use core::fmt::Debug;
 
-use crate::mat::Mat;
 
 const MATRIX_SIZE: usize = 64;
 const NUM_NONZERO_ENTRIES: usize = 256;
 const NUM_THREADS: usize = 8;
-
-fn random_scalar<R: Rng + ?Sized>(rng: &mut R) -> Scalar {
-    Scalar::from_raw([rng.gen(), rng.gen(), rng.gen(), rng.gen()])
-}
 
 pub fn inner_product<T, U, V>(vec_a: &Vec<T>, vec_b: &Vec<U>) -> V
 where
@@ -72,14 +70,17 @@ where
 
 fn dirac(v1: &Vec<G1Projective>, v2: &Vec<G2Projective>, m: &Vec<(usize, usize, Scalar)>) -> Gt {
     let m = Arc::new(m);
-    let v1 = Arc::new(v1.clone());  
+    let v1 = Arc::new(v1.clone()); 
+
+    let num_nonzero_entries = m.len(); 
+    let v_len = v1.len();
     
-    let aggregate_intermediate = m.chunks(NUM_NONZERO_ENTRIES / NUM_THREADS).map(|chunk| {
+    let aggregate_intermediate = m.chunks(num_nonzero_entries / NUM_THREADS).map(|chunk| {
         let v1 = Arc::clone(&v1);
         let chunk = chunk.to_owned();
         thread::spawn(move || 
             chunk.iter().fold(
-                vec![G1Projective::identity(); MATRIX_SIZE],
+                vec![G1Projective::identity(); v_len],
                 |mut acc, &(row, col, ref val)| {
                     acc[row] += v1[col] * val;
                     acc
@@ -87,7 +88,7 @@ fn dirac(v1: &Vec<G1Projective>, v2: &Vec<G2Projective>, m: &Vec<(usize, usize, 
             )
         )
     }).fold(
-        vec![G1Projective::identity(); MATRIX_SIZE],
+        vec![G1Projective::identity(); v_len],
          |acc, handle| 
         handle.join().unwrap().iter().enumerate().map(
             |(i, &l)| l + acc[i]
