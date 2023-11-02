@@ -9,10 +9,14 @@
 //!  
 use core::convert::From;
 
+use bincode;
 use bls12_381::{Scalar, G1Projective, G2Projective, Gt, G1Affine, G2Affine};
 use curv::BigInt;
 use curv::arithmetic::Samplable;
 use curv::arithmetic::traits::Converter;
+use serde::ser::{Serializer};
+use serde::de::{Deserializer};
+use serde::{Serialize, Deserialize};
 
 pub use curv::arithmetic::Zero;
 pub use std::ops::{Add, Mul, Neg, Sub, AddAssign};
@@ -29,6 +33,9 @@ pub struct G2Element { pub value: G2Projective }
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct GtElement { pub value: Gt }
 
+#[repr(C, packed)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct GtElementPack { pub value: Gt }
 
 unsafe impl Send for ZpElement {}
 unsafe impl Sync for ZpElement {}
@@ -41,6 +48,172 @@ unsafe impl Sync for G2Element {}
 
 unsafe impl Send for GtElement {}
 unsafe impl Sync for GtElement {}
+
+
+impl Serialize for ZpElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let bytes = &self.value.to_bytes();
+        let serialized = bincode::serialize(&bytes)
+        .map_err(serde::ser::Error::custom)?;
+        serializer.serialize_bytes(&serialized)
+    }
+}
+
+impl<'de> Deserialize<'de> for ZpElement{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>, 
+    {
+        let bytes = <&[u8]>::deserialize(deserializer)?;
+        let bytes_32: &[u8; 32] = &bytes[..32].try_into().unwrap();
+        let deserialized_scaler = Scalar::from_bytes(bytes_32).unwrap();
+        Ok(ZpElement { value: deserialized_scaler })
+    }
+}
+
+// #[derive(Serialize, Deserialize, Debug, PartialEq)]
+// struct G1_BYTES_TYPE { bytes: [u8; 48] }
+
+impl Serialize for G1Element {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {   
+        let g1_affine_value = G1Affine::from(self.value);
+
+        let bytes = g1_affine_value.to_compressed().to_vec();
+        let serialized = bincode::serialize(&bytes)
+        .map_err(serde::ser::Error::custom)?;
+        // println!("serialized_G2Element: {:?}", serialized);
+        serializer.serialize_bytes(&serialized)
+    }
+}
+
+impl<'de> Deserialize<'de> for G1Element{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>, 
+    {
+        let bytes = <Vec<u8>>::deserialize(deserializer).unwrap();
+        // println!("deserialized_G2Element: {:?}", bytes);
+        // println!("deserialized_G2Element: {:?}", bytes.len());
+        let bytes_48: &[u8; 48] = &bytes[bytes.len() - 48..].try_into().unwrap();
+        let deserialized_g1 = G1Projective::from(
+            G1Affine::from_compressed(&bytes_48).unwrap()
+        );
+        Ok(G1Element { value: deserialized_g1 })
+    }
+}
+
+impl Serialize for G2Element {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {   
+        let g2_affine_value = G2Affine::from(self.value);
+
+        let bytes = g2_affine_value.to_compressed().to_vec();
+        let serialized = bincode::serialize(&bytes)
+        .map_err(serde::ser::Error::custom)?;
+        // println!("serialized_G2Element: {:?}", serialized);
+        serializer.serialize_bytes(&serialized)
+    }
+}
+
+impl<'de> Deserialize<'de> for G2Element{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>, 
+    {
+        let bytes = <Vec<u8>>::deserialize(deserializer).unwrap();
+        // println!("deserialized_G2Element: {:?}", bytes);
+        // println!("deserialized_G2Element: {:?}", bytes.len());
+        let bytes_96: &[u8; 96] = &bytes[bytes.len() - 96..].try_into().unwrap();
+        let deserialized_g2 = G2Projective::from(
+            G2Affine::from_compressed(&bytes_96).unwrap()
+        );
+        Ok(G2Element { value: deserialized_g2 })
+    }
+}
+
+impl Serialize for GtElementPack {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {   
+        let gt_value = self.value;
+
+        let bytes: [u8; 576] = unsafe { std::mem::transmute_copy(&gt_value) };
+
+        // println!("GtElement: {:?}", bytes);
+        
+        let bytes_1 = bytes.to_vec();
+        // println!("deserialized_G2Element: {:?}", bytes);
+        // println!("deserialized_G2Element: {:?}", bytes.len());
+        let bytes_576: &[u8; 576] = &bytes_1[bytes_1.len() - 576..].try_into().unwrap();
+        // println!("deserialized_G2Element: {:?}", bytes_576);
+
+        let gt_value_1: &Gt = unsafe {
+            std::mem::transmute_copy(&bytes_576)
+        };
+
+        // println!("Debug GtElement: {:?}", gt_value);        
+        // println!("Debug GtElement 1: {:?}", gt_value_1);
+
+        assert_eq!(gt_value, *gt_value_1);
+
+        let serialized = bincode::serialize(&bytes_1)
+        .map_err(serde::ser::Error::custom)?;
+        serializer.serialize_bytes(&serialized)
+    }
+}
+
+impl<'de> Deserialize<'de> for GtElementPack{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>, 
+    {
+        let bytes = <Vec<u8>>::deserialize(deserializer).unwrap();
+        // println!("deserialized_G2Element: {:?}", bytes);
+        // println!("deserialized_G2Element: {:?}", bytes.len());
+        let bytes_576: &[u8; 576] = &bytes[bytes.len() - 576..].try_into().unwrap();
+        // println!("deserialized_GtElement: {:?}", bytes_576);
+
+        let deserialized_gt: &Gt = unsafe {
+            std::mem::transmute_copy(&bytes_576)
+        };
+        // println!("Debug deserialized_gt: {:?}", *deserialized_gt);
+        // let deserialized_gt = G2Projective::from(
+        //     G2Affine::from_compressed(&bytes_576).unwrap()
+        // );
+        Ok(GtElementPack { value: *deserialized_gt})
+    }
+}
+
+impl Serialize for GtElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {   
+        let gt_pack = GtElementPack::from(*self);
+
+        gt_pack.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for GtElement{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>, 
+    {
+        let gt_pack = GtElementPack::deserialize(deserializer)
+        .unwrap();
+        Ok(GtElement { value: gt_pack.value })
+    }
+}
 
 fn bigint_to_scalar(input_integer: &BigInt) -> Scalar {
     let mut hex_string = input_integer.to_str_radix(16);
@@ -173,6 +346,12 @@ impl From<u64> for GtElement {
         GtElement { 
             value: bls12_381::pairing(&g1_value, &g2_gen) 
         }
+    }
+}
+
+impl From<GtElement> for GtElementPack{
+    fn from(input_gt: GtElement) -> Self {
+        GtElementPack { value: input_gt.value.clone() }
     }
 }
 
@@ -524,6 +703,34 @@ mod tests {
         assert_eq!(g1_zero * g2_zero, gt_zero);
         assert_eq!(1 as u64 * gt_value, gt_value);
         assert_eq!(gt_value * 1 as u64, gt_value);
+
+        let serialized_data = 
+        (zp_value, g1_value, g2_value, gt_value);
+        let zp_ser = bincode::serialize(&zp_value).unwrap();
+        let g1_ser = bincode::serialize(&g1_value).unwrap();
+        let zp_de: ZpElement = bincode::deserialize(&zp_ser[..]).unwrap();
+        let g1_de: G1Element = bincode::deserialize(&g1_ser[..]).unwrap();
+
+        assert_eq!(zp_value, zp_de);
+        assert_eq!(g1_value, g1_de);
+        let encoded: Vec<u8> = bincode::serialize(&serialized_data).unwrap();
+        
+        let gt_value_pack = GtElementPack::from(gt_value);
+        let gt_ser_pack = bincode::serialize(&gt_value_pack).unwrap();
+        let gt_de_pack: GtElementPack = bincode::deserialize(
+            &gt_ser_pack[..]).unwrap();
+        assert_eq!(gt_value_pack, gt_de_pack);
+
+        let gt_ser = bincode::serialize(&gt_value).unwrap();
+        let gt_de: GtElement = bincode::deserialize(&gt_ser[..]).unwrap();
+        assert_eq!(gt_value, gt_de);
+
+        let decoded: (ZpElement, G1Element, G2Element, GtElement) = 
+            bincode::deserialize(&encoded[..]).unwrap();
+        assert_eq!(serialized_data, decoded);
+
+        println!("Encoded: {:?}", serialized_data);
+        println!("Decoded: {:?}", decoded);
 
     }
 
