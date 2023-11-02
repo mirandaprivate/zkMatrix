@@ -10,7 +10,7 @@ use std::ops::{Add, Mul};
 
 use crate::curve::{ZpElement, G1Element, G2Element, GtElement};
 use crate::mat::Mat;
-use crate::config::SQRT_MATRIX_DIM;
+use crate::config::{SQRT_MATRIX_DIM, MATRIX_DIM};
 
 pub fn kronecker<T, U, V>(mat_a: &Mat<T>, mat_b: &Mat<U>) -> Mat<V>
 where
@@ -109,7 +109,7 @@ pub fn gen_mat_a_zp_direct() -> Mat<ZpElement>{
         })
     }).collect();
 
-    let mat_dim = SQRT_MATRIX_DIM * SQRT_MATRIX_DIM;
+    let mat_dim = MATRIX_DIM;
 
     Mat::new_from_data_vec("a", (mat_dim, mat_dim), m)
 }
