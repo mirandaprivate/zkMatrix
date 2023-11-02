@@ -70,38 +70,44 @@ where
 
 }
 
-fn dirac() {
-    let mut rng = rand::thread_rng();
-    let m = Arc::new((0..NUM_NONZERO_ENTRIES).map(|_| 
-        (rng.gen_range(0..MATRIX_SIZE), rng.gen_range(0..MATRIX_SIZE), random_scalar(&mut rng))
-    ).collect::<Vec<_>>());
+fn dirac(v1: &Vec<G1Projective>, v2: &Vec<G2Projective>, m: &Vec<(usize, usize, Scalar)>) -> Gt {
+    let m = Arc::new(m);
+    let v1 = Arc::new(v1.clone());  
     
-    let v1 = Arc::new((0..MATRIX_SIZE).map(|_| G1Projective::generator() * random_scalar(&mut rng)).collect::<Vec<_>>());
-
     let aggregate_intermediate = m.chunks(NUM_NONZERO_ENTRIES / NUM_THREADS).map(|chunk| {
         let v1 = Arc::clone(&v1);
         let chunk = chunk.to_owned();
-        thread::spawn(move || chunk.iter().fold(vec![G1Projective::identity(); MATRIX_SIZE], |mut acc, &(row, col, ref val)| {
-            acc[row] += v1[col] * val;
-            acc
-        }))
-    }).fold(vec![G1Projective::identity(); MATRIX_SIZE], |acc, handle| 
-        handle.join().unwrap().iter().enumerate().map(|(i, &l)| l + acc[i]).collect()
+        thread::spawn(move || 
+            chunk.iter().fold(
+                vec![G1Projective::identity(); MATRIX_SIZE],
+                |mut acc, &(row, col, ref val)| {
+                    acc[row] += v1[col] * val;
+                    acc
+                }
+            )
+        )
+    }).fold(
+        vec![G1Projective::identity(); MATRIX_SIZE],
+         |acc, handle| 
+        handle.join().unwrap().iter().enumerate().map(
+            |(i, &l)| l + acc[i]
+        ).collect()
     );
 
-    let v2 = (0..MATRIX_SIZE).map(|_| G2Projective::generator() * random_scalar(&mut rng)).collect::<Vec<_>>();
-    let result = aggregate_intermediate.iter().enumerate().map(|(i, &aggr)| 
+    let result = aggregate_intermediate.iter().enumerate().map(
+        |(i, &aggr)| 
         pairing(&G1Affine::from(aggr), &G2Affine::from(&v2[i]))
     ).fold(Gt::identity(), |acc, x| acc + x);
 
-    println!("Result: {:?}", result);
+    result
 }
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::*;
+    use crate::{test_data::*, dirac};
+
     use crate::curve::{ZpElement, G1Element, G2Element, GtElement};
 
     #[test]
@@ -116,9 +122,14 @@ mod tests {
         let proj_test: Vec<G1Element> = proj_left(&mat_a, &vec_g);
         assert_eq!(proj_test, vec_ga);
         let gah_test = inner_product(&proj_test, &vec_h);
-
+        
         assert_eq!(gah_test, gah);
-
+        
+        let vec_g_g1 = vec_g.iter().map(|&x| x.value).collect::<Vec<_>>();
+        let vec_h_g2 = vec_h.iter().map(|&x| x.value).collect::<Vec<_>>();
+        let mat_a_scalar = mat_a.data.iter().map(|&(row, col, x)| (row, col, x.value) ).collect::<Vec<_>>();
         // dirac();
+
+        assert_eq!(dirac(&vec_g_g1, &vec_h_g2, &mat_a_scalar), gah.value);
     }
 }

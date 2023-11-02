@@ -17,16 +17,17 @@ use curv::arithmetic::traits::Converter;
 
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct ZpElement { value: Scalar }
+pub struct ZpElement { pub value: Scalar }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct G1Element { value: G1Projective }
+pub struct G1Element { pub value: G1Projective }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct G2Element { value: G2Projective }
+pub struct G2Element { pub value: G2Projective }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct GtElement { value: Gt }
+pub struct GtElement { pub value: Gt }
+
 
 unsafe impl Send for ZpElement {}
 unsafe impl Sync for ZpElement {}
