@@ -14,8 +14,8 @@ use bls12_381::{Scalar, G1Projective, G2Projective, Gt, G1Affine, G2Affine};
 use curv::BigInt;
 use curv::arithmetic::Samplable;
 use curv::arithmetic::traits::Converter;
-use serde::ser::{Serializer};
-use serde::de::{Deserializer};
+use serde::ser::Serializer;
+use serde::de::Deserializer;
 use serde::{Serialize, Deserialize};
 
 pub use curv::arithmetic::Zero;
