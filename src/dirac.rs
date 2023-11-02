@@ -22,7 +22,7 @@ pub fn inner_product<T, U, V>(vec_a: &Vec<T>, vec_b: &Vec<U>) -> V
 where
     T: Clone + Copy + Mul<U, Output =V>,
     U: Clone + Copy,
-    V: Clone + Copy + Add + Zero + From<u64>,
+    V: Clone + Copy + Add + Zero,
 {
     vec_a.iter()
     .zip(vec_b.iter())
