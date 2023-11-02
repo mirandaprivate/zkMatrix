@@ -15,3 +15,5 @@ pub mod curve;
 pub mod dirac;
 pub mod mat;
 pub mod test_data;
+
+mod config;

@@ -8,13 +8,14 @@
 //! as the pairing operation.
 //!  
 use core::convert::From;
-use std::ops::{Add, Mul, Neg, Sub, AddAssign};
 
 use bls12_381::{Scalar, G1Projective, G2Projective, Gt, G1Affine, G2Affine};
 use curv::BigInt;
-use curv::arithmetic::{Samplable, Zero};
+use curv::arithmetic::Samplable;
 use curv::arithmetic::traits::Converter;
 
+pub use curv::arithmetic::Zero;
+pub use std::ops::{Add, Mul, Neg, Sub, AddAssign};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct ZpElement { pub value: Scalar }
@@ -327,6 +328,86 @@ impl Mul<GtElement> for ZpElement {
     }
 }
 
+impl Mul<ZpElement> for u64 {
+    type Output = ZpElement;
+
+    fn mul(self, rhs: ZpElement) -> Self::Output {
+        ZpElement { 
+            value: bigint_to_scalar(&BigInt::from(self)) * &rhs.value 
+        }
+    }
+}
+
+impl Mul<G1Element> for u64 {
+    type Output = G1Element;
+
+    fn mul(self, rhs: G1Element) -> Self::Output {
+        G1Element { 
+            value: bigint_to_scalar(&BigInt::from(self)) * &rhs.value 
+        }
+    }
+}
+
+impl Mul<G2Element> for u64 {
+    type Output = G2Element;
+
+    fn mul(self, rhs: G2Element) -> Self::Output {
+        G2Element { 
+            value: bigint_to_scalar(&BigInt::from(self)) * &rhs.value 
+        }
+    }
+}
+
+impl Mul<GtElement> for u64 {
+    type Output = GtElement;
+
+    fn mul(self, rhs: GtElement) -> Self::Output {
+        GtElement { 
+            value: &rhs.value * bigint_to_scalar(&BigInt::from(self))  
+        }
+    }
+}
+
+impl Mul<u64> for ZpElement {
+    type Output = ZpElement;
+
+    fn mul(self, rhs: u64) -> Self::Output {
+        ZpElement { 
+            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+        }
+    }
+}
+
+impl Mul<u64> for G1Element{
+    type Output = G1Element;
+
+    fn mul(self, rhs: u64) -> Self::Output {
+        G1Element { 
+            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+        }
+    }
+}
+
+impl Mul<u64> for G2Element{
+    type Output = G2Element;
+
+    fn mul(self, rhs: u64) -> Self::Output {
+        G2Element { 
+            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+        }
+    }
+}
+
+impl Mul<u64> for GtElement{
+    type Output = GtElement;
+
+    fn mul(self, rhs: u64) -> Self::Output {
+        GtElement { 
+            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+        }
+    }
+}
+
 impl Mul<ZpElement> for G1Element {
     type Output = G1Element;
 
@@ -416,18 +497,24 @@ mod tests {
         assert_eq!(scalar_zero - scalar_zero, ZpElement::zero());
         assert_eq!(- scalar_zero - scalar_zero, ZpElement::zero());
         assert_eq!(- scalar_zero * scalar_zero, ZpElement::zero());
+        assert_eq!(1 as u64 * scalar_zero, scalar_zero);
+        assert_eq!(scalar_zero * 1 as u64, scalar_zero);
 
         assert_eq!(g1_value + g1_zero, g1_value);
         assert_eq!(g1_value - g1_zero, g1_value);
         assert_eq!(- g1_value - g1_zero, - g1_value);
         assert_eq!(- g1_value * scalar_zero, g1_zero);
         assert_eq!(scalar_zero * g1_value, g1_zero);
+        assert_eq!(1 as u64 * g1_value, g1_value);
+        assert_eq!(g1_value * 1 as u64, g1_value);
 
         assert_eq!(g2_value + g2_zero, g2_value);
         assert_eq!(g2_value - g2_zero, g2_value);
         assert_eq!(- g2_value - g2_zero, - g2_value);
         assert_eq!(- g2_value * scalar_zero, g2_zero);
         assert_eq!(scalar_zero * g2_value, g2_zero);
+        assert_eq!(1 as u64 * g2_value, g2_value);
+        assert_eq!(g2_value * 1 as u64, g2_value);
 
         assert_eq!(gt_value + gt_zero, gt_value);
         assert_eq!(gt_value - gt_zero, gt_value);
@@ -435,6 +522,8 @@ mod tests {
         assert_eq!(- gt_value * scalar_zero, gt_zero);
         assert_eq!(scalar_zero * gt_value, gt_zero);
         assert_eq!(g1_zero * g2_zero, gt_zero);
+        assert_eq!(1 as u64 * gt_value, gt_value);
+        assert_eq!(gt_value * 1 as u64, gt_value);
 
     }
 

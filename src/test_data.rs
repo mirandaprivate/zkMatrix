@@ -10,8 +10,7 @@ use std::ops::{Add, Mul};
 
 use crate::curve::{ZpElement, G1Element, G2Element, GtElement};
 use crate::mat::Mat;
-
-const SQRT_MATRIX_DIM: usize = 2usize.pow(3);
+use crate::config::SQRT_MATRIX_DIM;
 
 pub fn kronecker<T, U, V>(mat_a: &Mat<T>, mat_b: &Mat<U>) -> Mat<V>
 where
@@ -72,7 +71,7 @@ pub fn gen_vec_v_direct() -> Vec<ZpElement> {
     vec_v
 }
 
-pub fn gen_mat_a_from_kronecker() -> Mat<ZpElement>{
+pub fn gen_mat_a_zp_from_kronecker() -> Mat<ZpElement>{
     
     let mat_a_left: Mat<ZpElement> = Mat::new_from_data_vec(
         "mat_a_left", 
@@ -98,7 +97,7 @@ pub fn gen_mat_a_from_kronecker() -> Mat<ZpElement>{
     mat_a
 }
 
-pub fn gen_mat_a_direct() -> Mat<ZpElement>{
+pub fn gen_mat_a_zp_direct() -> Mat<ZpElement>{
     let m: Vec<(usize, usize, ZpElement)> =
     (0..SQRT_MATRIX_DIM).flat_map(|left_ij|{
         (0..SQRT_MATRIX_DIM).flat_map(move|right_i|{
@@ -106,6 +105,23 @@ pub fn gen_mat_a_direct() -> Mat<ZpElement>{
                 left_ij * SQRT_MATRIX_DIM + right_i,
                 left_ij * SQRT_MATRIX_DIM + right_j,
                 ZpElement::from((left_ij as u64 + 1) * (right_i as u64 + 1) * (right_j as u64 + 1))
+            ))
+        })
+    }).collect();
+
+    let mat_dim = SQRT_MATRIX_DIM * SQRT_MATRIX_DIM;
+
+    Mat::new_from_data_vec("a", (mat_dim, mat_dim), m)
+}
+
+pub fn gen_mat_a_u64_direct() -> Mat<u64>{
+    let m: Vec<(usize, usize, u64)> =
+    (0..SQRT_MATRIX_DIM).flat_map(|left_ij|{
+        (0..SQRT_MATRIX_DIM).flat_map(move|right_i|{
+            (0..SQRT_MATRIX_DIM).map(move|right_j|(
+                left_ij * SQRT_MATRIX_DIM + right_i,
+                left_ij * SQRT_MATRIX_DIM + right_j,
+                (left_ij as u64 + 1) * (right_i as u64 + 1) * (right_j as u64 + 1)
             ))
         })
     }).collect();
@@ -265,7 +281,7 @@ mod tests{
 
     #[test]
     fn test_gen_mat(){
-        assert_eq!(gen_mat_a_from_kronecker(), gen_mat_a_direct());
+        assert_eq!(gen_mat_a_zp_from_kronecker(), gen_mat_a_zp_direct());
         assert_eq!(gen_vec_v_from_kronecker(), gen_vec_v_direct());
         assert_eq!(gen_mat_a_gt_from_kronecker(), gen_mat_a_gt_direct());
         assert_eq!(gen_vec_v_gt_from_kronecker(), gen_vec_v_gt_direct());
