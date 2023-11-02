@@ -8,6 +8,8 @@
 //! as the pairing operation.
 //!  
 use core::convert::From;
+use std::fs::File;
+use std::io::Write;
 
 use bincode;
 use bls12_381::{Scalar, G1Projective, G2Projective, Gt, G1Affine, G2Affine};
@@ -18,8 +20,11 @@ use serde::ser::Serializer;
 use serde::de::Deserializer;
 use serde::{Serialize, Deserialize};
 
+use crate::config::{DATA_DIR_PUBLIC, DATA_DIR_PRIVATE};
+
 pub use curv::arithmetic::Zero;
 pub use std::ops::{Add, Mul, Neg, Sub, AddAssign};
+
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct ZpElement { pub value: Scalar }
@@ -49,6 +54,9 @@ unsafe impl Sync for G2Element {}
 unsafe impl Send for GtElement {}
 unsafe impl Sync for GtElement {}
 
+pub trait Double {
+    fn double(&self) -> Self;
+}
 
 impl Serialize for ZpElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -214,6 +222,33 @@ impl<'de> Deserialize<'de> for GtElement{
         Ok(GtElement { value: gt_pack.value })
     }
 }
+
+trait ToFile {
+    fn to_file(&self, file_name: String, public_data: bool) -> std::io::Result<()>;
+    fn from_file(file_name: String, public_data:bool) -> std::io::Result<Self> 
+    where
+        Self: Sized;
+}  
+
+impl ToFile for GtElement {
+    fn to_file(&self, file_name: String, public_data: bool) -> std::io::Result<()> {
+        
+        let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
+        let mut file = File::create(format!("{}{}", dir, file_name))?;
+        
+        let encoded: Vec<u8> = bincode::serialize(&self).unwrap();
+        file.write_all(&encoded)?;
+        Ok(())
+    }
+
+    fn from_file(file_name: String, public_data: bool) -> std::io::Result<Self> {
+        let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
+        let file = File::open(format!("{}{}", dir, file_name))?;
+        let decoded: Self = bincode::deserialize_from(file).unwrap();
+        Ok(decoded)
+    }
+}
+
 
 fn bigint_to_scalar(input_integer: &BigInt) -> Scalar {
     let mut hex_string = input_integer.to_str_radix(16);
@@ -631,7 +666,29 @@ impl Mul<G1Element> for G2Element {
     }
 }
 
+impl Double for ZpElement{
+    fn double(&self) -> Self {
+        ZpElement { value: self.value.double() }
+    }
+}
 
+impl Double for G1Element{
+    fn double(&self) -> Self {
+        G1Element { value: self.value.double() }
+    }
+}
+
+impl Double for G2Element{
+    fn double(&self) -> Self {
+        G2Element { value: self.value.double() }
+    }
+}
+
+impl Double for GtElement{
+    fn double(&self) -> Self {
+        GtElement { value: self.value.double() }
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -678,6 +735,7 @@ mod tests {
         assert_eq!(- scalar_zero * scalar_zero, ZpElement::zero());
         assert_eq!(1 as u64 * scalar_zero, scalar_zero);
         assert_eq!(scalar_zero * 1 as u64, scalar_zero);
+        assert_eq!(scalar_zero.double(), scalar_zero);
 
         assert_eq!(g1_value + g1_zero, g1_value);
         assert_eq!(g1_value - g1_zero, g1_value);
@@ -686,6 +744,7 @@ mod tests {
         assert_eq!(scalar_zero * g1_value, g1_zero);
         assert_eq!(1 as u64 * g1_value, g1_value);
         assert_eq!(g1_value * 1 as u64, g1_value);
+        assert_eq!(g1_value.double(), G1Element::from(4));
 
         assert_eq!(g2_value + g2_zero, g2_value);
         assert_eq!(g2_value - g2_zero, g2_value);
@@ -694,6 +753,7 @@ mod tests {
         assert_eq!(scalar_zero * g2_value, g2_zero);
         assert_eq!(1 as u64 * g2_value, g2_value);
         assert_eq!(g2_value * 1 as u64, g2_value);
+        assert_eq!(g2_value.double(), G2Element::from(6));
 
         assert_eq!(gt_value + gt_zero, gt_value);
         assert_eq!(gt_value - gt_zero, gt_value);
@@ -703,6 +763,7 @@ mod tests {
         assert_eq!(g1_zero * g2_zero, gt_zero);
         assert_eq!(1 as u64 * gt_value, gt_value);
         assert_eq!(gt_value * 1 as u64, gt_value);
+        assert_eq!(gt_value.double(), GtElement::from(12));
 
         let serialized_data = 
         (zp_value, g1_value, g2_value, gt_value);

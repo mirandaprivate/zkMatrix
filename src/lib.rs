@@ -3,17 +3,21 @@
 //! Zero-knowledge proof for linear algebra 
 //!
 #![doc = include_str!("../README.md")]
-
 // extern crate sprs;
 
-pub mod utils;
+mod utils;
+mod config;
 mod test;
 
 // pub mod util;
 // pub mod protocols;
 pub mod curve;
+pub mod commit_mat;
 pub mod dirac;
 pub mod mat;
+// pub mod protocols;
+pub mod setup;
+
 pub mod test_data;
 
-mod config;
+

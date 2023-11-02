@@ -1,6 +1,7 @@
 [alias]
 ndoc = "doc --no-deps --document-private-items --open"
 ntest = "test -- --nocapture"
+nbench = "bench -- --ignored"
 
 [build]
 rustdocflags = ["--html-in-header", "assets/mathjax_support.html"]

@@ -2,107 +2,167 @@
 #![feature(test)]
 
 extern crate test;
+extern crate rand;
 
-use bls12_381::*;
-use bls12_381::Scalar;
-use hex;
-use curv::BigInt;
-use curv::arithmetic::Zero;
-use curv::arithmetic::Converter;
-use curv::arithmetic::*;
-use zkmatrix::utils::*;
+use std::arch::x86_64::_MM_FROUND_RAISE_EXC;
+
+use rand::Rng;
+
+use zkmatrix::curve::{ZpElement, G1Element, G2Element, GtElement, Double};
+use zkmatrix::mat::Mat;
+use zkmatrix::commit_mat::CommitMat;
+use zkmatrix::dirac;
+use zkmatrix::test_data::*;
+
 use test::Bencher;
 
-#[bench]
-fn bench_scalar_mul_256bits(b: &mut Bencher){
-    let l_in_256bits: BigInt = BigInt::strict_sample(256);
-    let r_in_256bits: BigInt = BigInt::strict_sample(256);
-    let l_scalar: Scalar = BigInt_to_Scalar(&l_in_256bits);
-    let r_scalar: Scalar = BigInt_to_Scalar(&r_in_256bits);
-    b.iter(|| l_scalar * r_scalar );
-}
 
 #[bench]
-fn bench_scalar_add_256bits(b: &mut Bencher){
-    let l_in_256bits: BigInt = BigInt::strict_sample(256);
-    let r_in_256bits: BigInt = BigInt::strict_sample(256);
-    let l_scalar: Scalar = BigInt_to_Scalar(&l_in_256bits);
-    let r_scalar: Scalar = BigInt_to_Scalar(&r_in_256bits);
+fn bench_scalar_add_scalar(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_scalar =  ZpElement::from(l_u64);
+    let r_scalar =  ZpElement::from(r_u64);
     b.iter(|| l_scalar + r_scalar );
 }
 
 #[bench]
-fn bench_G1_exp_256bits(b: &mut Bencher) {
-    let rand_in_256bits: BigInt = BigInt::strict_sample(256);
-    let scal: Scalar = BigInt_to_Scalar(&rand_in_256bits);
-    b.iter(|| G1Affine::generator() * scal);
+fn bench_g1_add_g1(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_g1 =  G1Element::from(l_u64);
+    let r_g1 =  G1Element::from(r_u64);
+    b.iter(|| l_g1 + r_g1 );
+}
+
+#[bench]
+fn bench_g2_add_g2(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_g2 =  G1Element::from(l_u64);
+    let r_g2 =  G1Element::from(r_u64);
+    b.iter(|| l_g2 + r_g2 );
 }
 
 
 #[bench]
-fn bench_G1_add_256bits_projective(b: &mut Bencher) {
-    let rand_in_256bits: BigInt = BigInt::strict_sample(256);
-    let scal: Scalar = BigInt_to_Scalar(&rand_in_256bits);
-    let base: G1Projective = G1Projective::generator() * scal;
-    b.iter(|| base + base);
+fn bench_gt_add_gt(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_gt =  G1Element::from(l_u64);
+    let r_gt =  G1Element::from(r_u64);
+    b.iter(|| l_gt + r_gt );
+}
+
+#[bench]
+fn bench_g1_mul_scalar(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_g1 =  G1Element::from(l_u64);
+    let r_scalar =  ZpElement::from(r_u64);
+    b.iter(|| l_g1 * r_scalar );
 }
 
 
 #[bench]
-fn bench_G2_exp_256bits(b: &mut Bencher) {
-    let rand_in_256bits: BigInt = BigInt::strict_sample(256);
-    let scal: Scalar = BigInt_to_Scalar(&rand_in_256bits);
-    b.iter(|| G2Affine::generator() * scal);
+fn bench_g2_mul_scalar(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_g1 =  G1Element::from(l_u64);
+    let r_scalar =  ZpElement::from(r_u64);
+    b.iter(|| l_g1 * r_scalar );
 }
 
 #[bench]
-fn bench_G2_exp_256bits_projective(b: &mut Bencher) {
-    let rand_in_256bits: BigInt = BigInt::strict_sample(256);
-    let scal: Scalar = BigInt_to_Scalar(&rand_in_256bits);
-    let base: G2Projective = G2Projective::generator() * scal;
-    b.iter(|| G2Projective::generator() * scal);
+fn bench_gt_mul_scalar(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_gt =  G1Element::from(l_u64);
+    let r_scalar =  ZpElement::from(r_u64);
+    b.iter(|| l_gt * r_scalar );
 }
 
 #[bench]
-fn bench_G2_add_256bits_projective(b: &mut Bencher) {
-    let rand_in_256bits: BigInt = BigInt::strict_sample(256);
-    let scal: Scalar = BigInt_to_Scalar(&rand_in_256bits);
-    let base: G2Projective = G2Projective::generator() * scal;
-    b.iter(|| base + base);
-}
-
-
-#[bench]
-fn bench_GT_exp_256bits(b: &mut Bencher) {
-    let x: Scalar = BigInt_to_Scalar(&BigInt::from(12345));
-    let y: Scalar = BigInt_to_Scalar(&BigInt::from(12345));
-    let g: G1Affine = G1Affine::from(G1Affine::generator() * x);
-    let h: G2Affine = G2Affine::from(G2Affine::generator() * y);
-    let p: Gt = pairing(&g, &h);
-    let rand_in_256bits: BigInt = BigInt::strict_sample(256);
-    let scal: Scalar = BigInt_to_Scalar(&rand_in_256bits);
-    b.iter(|| p * scal);
+fn bench_g1_mul_g2(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_g1 =  G1Element::from(l_u64);
+    let r_g2 =  G2Element::from(r_u64);
+    b.iter(|| l_g1 * r_g2 );
 }
 
 
 #[bench]
-fn bench_pairing(b: &mut Bencher) {
-    let rand1: BigInt = BigInt::strict_sample(256);
-    let scal1: Scalar = BigInt_to_Scalar(&rand1);
-    let rand2: BigInt = BigInt::strict_sample(256);
-    let scal2: Scalar = BigInt_to_Scalar(&rand2);
-    let g: G1Affine = G1Affine::from(G1Affine::generator() * scal1);
-    let h: G2Affine = G2Affine::from(G2Affine::generator() * scal2);
-    b.iter(|| pairing(&g, &h));
+fn bench_scalar_mul_scalar(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let l_scalar =  ZpElement::from(l_u64);
+    let r_scalar =  ZpElement::from(r_u64);
+    b.iter(|| l_scalar * r_scalar );
+}
+
+
+
+#[bench]
+fn bench_u64_mul_u64(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    b.iter(|| l_u64 * r_u64 );
 }
 
 #[bench]
-fn bench_Pairing_Projective(b: &mut Bencher) {
-    let rand1: BigInt = BigInt::strict_sample(256);
-    let scal1: Scalar = BigInt_to_Scalar(&rand1);
-    let rand2: BigInt = BigInt::strict_sample(256);
-    let scal2: Scalar = BigInt_to_Scalar(&rand2);
-    let g: G1Projective = G1Projective::generator() * scal1;
-    let h: G2Projective = G2Projective::generator() * scal2;
-    b.iter(|| pairing_projective(&g, &h));
+fn bench_u64_add_u64(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    b.iter(|| l_u64 + r_u64 );
+}
+
+#[bench]
+fn bench_scalar_double(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let l_scalar =  ZpElement::from(l_u64);
+    b.iter(|| l_scalar.double() );
+}
+
+#[bench]
+fn bench_g1_double(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let l_g1 =  G1Element::from(l_u64);
+    b.iter(|| l_g1.double() );
+}
+
+#[bench]
+fn bench_g2_double(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let l_g2 =  G2Element::from(l_u64);
+    b.iter(|| l_g2.double() );
+}
+
+
+#[bench]
+fn bench_gt_double(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let l_gt =  GtElement::from(l_u64);
+    b.iter(|| l_gt.double() );
+}
+
+
+#[bench]
+#[ignore = "expensive"]
+fn bench_dirac(b: &mut Bencher){
+    let mat_a: Mat<u64> = gen_mat_a_u64_direct();
+    let vec_g: Vec<G1Element> = gen_vec_v_g1_direct();
+    let vec_h: Vec<G2Element> = gen_vec_v_g2_direct();
+    b.iter(|| dirac::dirac(&vec_g, &mat_a, &vec_h) );
+}
+
+#[bench]
+fn bench_mat_reduce_scalar(b: &mut Bencher){
+    let mat_a: Mat<u64> = gen_mat_a_u64_direct();
+    let left: Vec<ZpElement> = gen_vec_v_direct();
+    let right: Vec<ZpElement> = gen_vec_v_direct();
+    b.iter(||dirac::inner_product(
+        &dirac::proj_left(&mat_a, &left),
+        &right) 
+    );
 }

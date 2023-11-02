@@ -6,11 +6,15 @@
 //! The dimension of the resulting matrix is:
 //!     (SQRT_MATRIX_DIM * SQRT_MATRIX_DIM, SQRT_MATRIX_DIM * SQRT_MATRIX_DIM)
 //! 
+
+#![allow(dead_code)]
+
 use std::ops::{Add, Mul};
 
 use crate::curve::{ZpElement, G1Element, G2Element, GtElement};
 use crate::mat::Mat;
 use crate::config::{SQRT_MATRIX_DIM, MATRIX_DIM};
+
 
 pub fn kronecker<T, U, V>(mat_a: &Mat<T>, mat_b: &Mat<U>) -> Mat<V>
 where
@@ -255,6 +259,20 @@ pub fn gen_vec_va_g1_from_kronecker() -> Vec<G1Element>{
 
     let vec_va_right: Vec<G1Element> = (0..SQRT_MATRIX_DIM).map(|i|
          G1Element::from( (sum_n_square * (i+1)) as u64)
+    ).collect();
+
+    kronecker_vec(&vec_va_left, &vec_va_right)
+}
+
+pub fn gen_vec_va_g2_from_kronecker() -> Vec<G2Element>{
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM).map(|i| i*i).sum();
+
+    let vec_va_left: Vec<ZpElement> = (0..SQRT_MATRIX_DIM).map(|i|
+        ZpElement::from(((i+1)*(i+1)) as u64)
+    ).collect();
+
+    let vec_va_right: Vec<G2Element> = (0..SQRT_MATRIX_DIM).map(|i|
+         G2Element::from( (sum_n_square * (i+1)) as u64)
     ).collect();
 
     kronecker_vec(&vec_va_left, &vec_va_right)

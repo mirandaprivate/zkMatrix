@@ -51,7 +51,7 @@ impl< T: From<u64> > Mat<T> {
     }    
 }
 
-trait ToFile {
+pub trait ToFile {
     fn to_file(&self, file_name: String, public_data: bool) -> std::io::Result<()>;
     fn from_file(file_name: String, public_data:bool) -> std::io::Result<Self> 
     where
@@ -62,7 +62,7 @@ impl<T: Serialize + for<'de> Deserialize<'de> > ToFile for Mat<T> {
     fn to_file(&self, file_name: String, public_data: bool) -> std::io::Result<()> {
         
         let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
-        let mut file = File::create(format!("{}{}", dir, file_name))?;
+        let mut file = File::create(format!("{}{}.dat", dir, file_name))?;
         
         let encoded: Vec<u8> = bincode::serialize(&self).unwrap();
         file.write_all(&encoded)?;
@@ -71,8 +71,14 @@ impl<T: Serialize + for<'de> Deserialize<'de> > ToFile for Mat<T> {
 
     fn from_file(file_name: String, public_data: bool) -> std::io::Result<Self> {
         let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
-        let file = File::open(format!("{}{}", dir, file_name))?;
-        let decoded: Self = bincode::deserialize_from(file).unwrap();
+        let file = File::open(format!("{}{}.dat", dir, file_name))?;
+        let decoded: Self = bincode::deserialize_from(file)
+        .map_err(
+            |e| 
+            std::io::Error::new(
+                std::io::ErrorKind::Other, 
+                format!("Error: {:?} when reading {}", e, file_name))
+            )?;
         Ok(decoded)
     }
 }
@@ -80,7 +86,7 @@ impl<T: Serialize + for<'de> Deserialize<'de> > ToFile for Mat<T> {
 impl<T: Serialize + for<'de> Deserialize<'de> > ToFile for Vec<T> {
     fn to_file(&self, file_name: String, public_data: bool) -> std::io::Result<()> {
         let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
-        let mut file = File::create(format!("{}{}", dir, file_name))?;
+        let mut file = File::create(format!("{}{}.dat", dir, file_name))?;
 
         let encoded: Vec<u8> = bincode::serialize(&self).unwrap();
         file.write_all(&encoded)?;
@@ -89,8 +95,14 @@ impl<T: Serialize + for<'de> Deserialize<'de> > ToFile for Vec<T> {
 
     fn from_file(file_name: String, public_data: bool) -> std::io::Result<Self> {
         let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
-        let file = File::open(format!("{}{}", dir, file_name))?;
-        let decoded: Self = bincode::deserialize_from(file).unwrap();
+        let file = File::open(format!("{}{}.dat", dir, file_name))?;
+        let decoded: Self = bincode::deserialize_from(file)
+        .map_err(
+            |e| 
+            std::io::Error::new(
+                std::io::ErrorKind::Other, 
+                format!("Error: {:?} when reading {}", e, file_name))
+            )?;
         Ok(decoded)
     }
 }
@@ -141,16 +153,16 @@ mod tests {
         
         assert_eq!(mat_1, mat_2);
 
-        mat_1.to_file("mat_test.dat".to_string(), true).unwrap();
+        mat_1.to_file("mat_test".to_string(), true).unwrap();
         let mat_1_read: Mat<GtElement> = Mat::from_file(
-            "mat_test.dat".to_string(), true)
+            "mat_test".to_string(), true)
         .unwrap();
         assert_eq!(mat_1, mat_1_read);
 
         let vec_1: Vec<GtElement> = vec![GtElement::from(1), GtElement::from(2)];
-        vec_1.to_file("vec_test.dat".to_string(), false).unwrap();
+        vec_1.to_file("vec_test".to_string(), false).unwrap();
         let vec_1_read: Vec<GtElement> = Vec::from_file(
-             "vec_test.dat".to_string(), false)
+             "vec_test".to_string(), false)
         .unwrap();
         assert_eq!(vec_1, vec_1_read);
     }
