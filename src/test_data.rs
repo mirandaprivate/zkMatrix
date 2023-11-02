@@ -205,6 +205,16 @@ pub fn gen_vec_v_g1_direct() -> Vec<G1Element> {
     vec_v
 }
 
+pub fn gen_vec_v_g2_direct() -> Vec<G2Element> {
+    let vec_v: Vec<G2Element> = 
+        (0..SQRT_MATRIX_DIM).flat_map(|i|{
+            (0..SQRT_MATRIX_DIM).map(move|j|{
+                    G2Element::from(((i+1)*(j+1)) as u64)
+                })
+        }).collect();
+    
+    vec_v
+}
 
 pub fn gen_vec_va_gt_from_kronecker() -> Vec<GtElement>{
     let sum_n_square: usize = (1..=SQRT_MATRIX_DIM).map(|i| i*i).sum();
@@ -234,6 +244,19 @@ pub fn gen_vec_va_g1_from_kronecker() -> Vec<G1Element>{
     kronecker_vec(&vec_va_left, &vec_va_right)
 }
 
+pub fn gen_vav_direct() -> ZpElement {
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM).map(|i| i*i).sum();
+    let sum_n_cubic: usize = (1..=SQRT_MATRIX_DIM).map(|i| i*i*i).sum();
+
+    ZpElement::from((sum_n_cubic * sum_n_square * sum_n_square) as u64)
+}
+
+pub fn gen_vav_gt_direct() -> GtElement{
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM).map(|i| i*i).sum();
+    let sum_n_cubic: usize = (1..=SQRT_MATRIX_DIM).map(|i| i*i*i).sum();
+
+    GtElement::from((sum_n_cubic * sum_n_square * sum_n_square) as u64)
+}
 
 #[cfg(test)]
 mod tests{

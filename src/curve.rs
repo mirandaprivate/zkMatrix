@@ -28,6 +28,18 @@ pub struct G2Element { value: G2Projective }
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct GtElement { value: Gt }
 
+unsafe impl Send for ZpElement {}
+unsafe impl Sync for ZpElement {}
+
+unsafe impl Send for G1Element {}
+unsafe impl  Sync for G1Element {}
+    
+unsafe impl Send for G2Element {}
+unsafe impl Sync for G2Element {}
+
+unsafe impl Send for GtElement {}
+unsafe impl Sync for GtElement {}
+
 fn bigint_to_scalar(input_integer: &BigInt) -> Scalar {
     let mut hex_string = input_integer.to_str_radix(16);
     if hex_string.len() % 2 != 0 {
