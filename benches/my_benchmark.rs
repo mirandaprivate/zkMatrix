@@ -101,6 +101,17 @@ fn bench_scalar_mul_scalar(b: &mut Bencher){
     b.iter(|| l_scalar * r_scalar );
 }
 
+#[bench]
+fn bench_scalar_mac_scalar(b: &mut Bencher){
+    let l_u64: u64 = rand::thread_rng().gen();
+    let r_u64: u64 = rand::thread_rng().gen();
+    let a_u64: u64 = rand::thread_rng().gen();
+    let l_scalar =  ZpElement::from(l_u64);
+    let r_scalar =  ZpElement::from(r_u64);
+    let a_scalar =  ZpElement::from(a_u64);
+    b.iter(|| a_scalar + l_scalar * r_scalar );
+}
+
 
 
 #[bench]
