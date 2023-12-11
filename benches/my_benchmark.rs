@@ -68,16 +68,16 @@ fn bench_g1_mul_scalar(b: &mut Bencher){
 fn bench_g2_mul_scalar(b: &mut Bencher){
     let l_u64: u64 = rand::thread_rng().gen();
     let r_u64: u64 = rand::thread_rng().gen();
-    let l_g1 =  G1Element::from(l_u64);
+    let l_g2 =  G2Element::from(l_u64);
     let r_scalar =  ZpElement::from(r_u64);
-    b.iter(|| l_g1 * r_scalar );
+    b.iter(|| l_g2 * r_scalar );
 }
 
 #[bench]
 fn bench_gt_mul_scalar(b: &mut Bencher){
     let l_u64: u64 = rand::thread_rng().gen();
     let r_u64: u64 = rand::thread_rng().gen();
-    let l_gt =  G1Element::from(l_u64);
+    let l_gt =  GtElement::from(l_u64);
     let r_scalar =  ZpElement::from(r_u64);
     b.iter(|| l_gt * r_scalar );
 }
