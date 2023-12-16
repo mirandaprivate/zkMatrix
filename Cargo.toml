@@ -23,6 +23,7 @@ serde = {version = "1.0.130", features = ["derive"]}
 # rust-gmp = "0.5"
 rand = "0.8.4"
 byteorder = "1.4.3"
+curve25519-dalek = "4.1.1"
 # rug = "1.14.0"
 
 [dependencies.curv-kzen]
@@ -39,6 +40,11 @@ criterion = "0.5"
 name = "my_benchmark"
 harness = true
 path = "benches/my_benchmark.rs"
+
+[[bench]]
+name = "bench_25519"
+harness = true
+path = "benches/bench_25519.rs"
 
 [package.metadata.docs.rs]
 rustdoc-args = [ "--html-in-header", "assets/mathjax_support.html" ]

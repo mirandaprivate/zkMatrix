@@ -6,6 +6,7 @@ extern crate rand;
 
 use std::arch::x86_64::_MM_FROUND_RAISE_EXC;
 
+use curve25519_dalek::scalar::Scalar;
 use rand::Rng;
 
 use zkmatrix::curve::{ZpElement, G1Element, G2Element, GtElement, Double};
@@ -39,8 +40,8 @@ fn bench_g1_add_g1(b: &mut Bencher){
 fn bench_g2_add_g2(b: &mut Bencher){
     let l_u64: u64 = rand::thread_rng().gen();
     let r_u64: u64 = rand::thread_rng().gen();
-    let l_g2 =  G1Element::from(l_u64);
-    let r_g2 =  G1Element::from(r_u64);
+    let l_g2 =  G2Element::from(l_u64);
+    let r_g2 =  G2Element::from(r_u64);
     b.iter(|| l_g2 + r_g2 );
 }
 
@@ -49,8 +50,8 @@ fn bench_g2_add_g2(b: &mut Bencher){
 fn bench_gt_add_gt(b: &mut Bencher){
     let l_u64: u64 = rand::thread_rng().gen();
     let r_u64: u64 = rand::thread_rng().gen();
-    let l_gt =  G1Element::from(l_u64);
-    let r_gt =  G1Element::from(r_u64);
+    let l_gt =  GtElement::from(l_u64);
+    let r_gt =  GtElement::from(r_u64);
     b.iter(|| l_gt + r_gt );
 }
 
