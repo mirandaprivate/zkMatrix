@@ -15,7 +15,7 @@ use rand::Rng;
 use test::Bencher;
 
 #[bench]
-#[ignore = "only for the asiaccs paper"]
+#[ignore = "only for testing curve25519"]
 fn bench_fixed_base_me(b: &mut Bencher){
     let length = 1024;
     let scalars = vec![
@@ -30,7 +30,7 @@ fn bench_fixed_base_me(b: &mut Bencher){
 }
 
 #[bench]
-#[ignore = "only for the asiaccs paper"]
+#[ignore = "only for testing curve25519"]
 fn bench_fixed_base_precompute(b: &mut Bencher){
     let length = 1024;
     let scalars = vec![
@@ -47,7 +47,7 @@ fn bench_fixed_base_precompute(b: &mut Bencher){
 }
 
 #[bench]
-#[ignore = "only for the asiaccs paper"]
+#[ignore = "only for testing curve25519"]
 fn bench_scalar_mul(b: &mut Bencher){
     let l_u64: u64 = rand::thread_rng().gen();
     let r_u64: u64 = rand::thread_rng().gen();
@@ -57,7 +57,7 @@ fn bench_scalar_mul(b: &mut Bencher){
 }
 
 #[bench]
-#[ignore = "only for the asiaccs paper"]
+#[ignore = "only for testing curve25519"]
 fn bench_g_mul_scalar(b: &mut Bencher){
     let l_u64: u64 = rand::thread_rng().gen();
     let r_u64: u64 = rand::thread_rng().gen();
@@ -68,7 +68,7 @@ fn bench_g_mul_scalar(b: &mut Bencher){
 
 
 #[bench]
-#[ignore = "only for the asiaccs paper"]
+#[ignore = "only for testing curve25519"]
 fn bench_g_add_scalar(b: &mut Bencher){
     let l_u64: u64 = rand::thread_rng().gen();
     let r_u64: u64 = rand::thread_rng().gen();

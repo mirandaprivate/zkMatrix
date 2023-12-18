@@ -516,6 +516,7 @@ impl Mul for ZpElement {
     fn mul(self, rhs: Self) -> Self::Output {
         ZpElement { value: self.value * &rhs.value }
     }
+
 }
 
 impl Mul<G1Element> for ZpElement {

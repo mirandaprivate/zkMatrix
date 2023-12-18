@@ -3,7 +3,7 @@ use std::marker::{Send, Sync};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use crate::curve::{Add, Mul, AddAssign, Zero, G1Element, G2Element, GtElement};
+use crate::utils::curve::{Add, Mul, AddAssign, Zero, G1Element, G2Element, GtElement};
 
 use crate::mat::Mat;
 
@@ -12,16 +12,53 @@ use crate::config::NUM_THREADS;
 
 pub fn inner_product<T, U, V>(vec_a: &Vec<T>, vec_b: &Vec<U>) -> V
 where
-    T: Clone + Copy + Mul<U, Output =V>,
-    U: Clone + Copy,
-    V: Clone + Copy + Add + Zero,
+    T: 'static + Clone + Copy + Send + Sync + Mul<U, Output =V>,
+    U: 'static + Clone + Copy + Send + Sync,
+    V: 'static + Clone + Copy + Send + Sync + Add + Zero,
 {
-    vec_a.iter()
-    .zip(vec_b.iter())
-    .fold(
-        V::zero(),
-        |acc, (&a_val, &b_val)| acc + a_val * b_val,
-    )
+    let length = vec_a.len();
+
+    if length != vec_b.len() {
+        panic!("Length of two vectors are not equal!");
+    }
+
+    if length <= NUM_THREADS {
+        return vec_a.iter()
+        .zip(vec_b.iter())
+        .fold(
+            V::zero(),
+            |acc, (&a_val, &b_val)| acc + a_val * b_val,
+        );
+    }
+
+    let a_chunks: Vec<_> = vec_a.chunks(length / NUM_THREADS).collect();
+    let b_chunks: Vec<_> = vec_b.chunks(length / NUM_THREADS).collect();
+
+    let mut handles = Vec::new();
+
+    for (a_chunk, b_chunk) in a_chunks.iter().zip(b_chunks.iter()) {
+        let a_chunk = a_chunk.to_vec(); // Clone the chunk
+        let b_chunk = b_chunk.to_vec(); // Clone the chunk
+        let handle = thread::spawn(
+            move || {
+                a_chunk.iter()
+                .zip(b_chunk.iter())
+                .fold(
+                    V::zero(),
+                    |acc, (&a_val, &b_val)| acc + a_val * b_val,
+                )
+            });
+        handles.push(handle);
+    }
+
+    let mut result = V::zero();
+
+    for handle in handles {
+        result = result + handle.join().unwrap();
+    }
+
+    return result;
+
 }
 
 
@@ -146,8 +183,8 @@ where
     U: 'static + Clone + Copy + Send + Sync + Mul<T, Output = V>,
     V: 'static + Clone + Copy + Send + Sync + Debug + Add + AddAssign + Zero
         + Mul<R, Output = W>,
-    R: Clone + Copy,
-    W: Clone + Copy + Add + Zero,
+    R: 'static + Clone + Copy + Send + Sync,
+    W: 'static + Clone + Copy + Send + Sync + Add + Zero,
 {
     let proj_left = proj_left(mat_a, g_base);
     let result = inner_product(&proj_left, &h_base);
@@ -177,16 +214,16 @@ mod tests {
     use super::*;
     use crate::test_data::*;
 
-    use crate::curve::{G1Element, G2Element, GtElement};
+    use crate::utils::curve::{G1Element, G2Element, GtElement};
 
     #[test]
     fn test_dirac() {
         // ga = a left-muliplied by g 
-        let mat_a: Mat<u64> = gen_mat_a_u64_direct();
-        let vec_g: Vec<G1Element> = gen_vec_v_g1_direct();
-        let vec_ga: Vec<G1Element> = gen_vec_va_g1_from_kronecker();
-        let vec_h: Vec<G2Element> = gen_vec_v_g2_direct();
-        let gah: GtElement = gen_vav_gt_direct();
+        let mat_a: Mat<u64> = gen_mat_a_u64_direct_test();
+        let vec_g: Vec<G1Element> = gen_vec_v_g1_direct_test();
+        let vec_ga: Vec<G1Element> = gen_vec_va_g1_from_kronecker_test();
+        let vec_h: Vec<G2Element> = gen_vec_v_g2_direct_test();
+        let gah: GtElement = gen_vav_gt_direct_test();
 
         let proj_test_left: Vec<G1Element> = proj_left(&mat_a, &vec_g);
         assert_eq!(proj_test_left, vec_ga);
@@ -207,47 +244,5 @@ mod tests {
         assert_eq!(gah_test_3, gah);
         assert_eq!(gah_test_4, gah);
 
-        // fn dirac_raw(v1: &Vec<G1Projective>, v2: &Vec<G2Projective>, m: &Vec<(usize, usize, Scalar)>) -> Gt {
-            // use bls12_381::{pairing, G1Affine, G1Projective, G2Affine, G2Projective, Gt, Scalar};
-        //     let m = Arc::new(m);
-        //     let v1 = Arc::new(v1.clone()); 
-        
-        //     let num_nonzero_entries = m.len(); 
-        //     let v_len = v1.len();
-            
-        //     let aggregate_intermediate = m.chunks(
-        //         num_nonzero_entries / NUM_THREADS)
-        //         .map(|chunk| {
-        //             let v1 = Arc::clone(&v1);
-        //             let chunk = chunk.to_owned();
-        //             thread::spawn(
-        //                 move || 
-        //                 chunk.iter().fold(
-        //                     vec![G1Projective::identity(); v_len],
-        //                     |mut acc, &(row, col, ref val)| {
-        //                         acc[row] += v1[col] * val;
-        //                         acc
-        //                     }))
-        //         })
-        //         .fold(
-        //             vec![G1Projective::identity(); v_len],
-        //             |acc, handle| 
-        //             handle.join().unwrap().iter().enumerate().map(
-        //                 |(i, &l)| l + acc[i]
-        //             ).collect()
-        //         );
-        
-        //     let result = aggregate_intermediate.iter().enumerate().map(
-        //         |(i, &aggr)| 
-        //         pairing(&G1Affine::from(aggr), &G2Affine::from(&v2[i]))
-        //     ).fold(Gt::identity(), |acc, x| acc + x);
-        
-        //     result
-        // }
-        
-        // let vec_g_g1 = vec_g.iter().map(|&x| x.value).collect::<Vec<_>>();
-        // let vec_h_g2 = vec_h.iter().map(|&x| x.value).collect::<Vec<_>>();
-        // let mat_a_scalar = mat_a.data.iter().map(|&(row, col, x)| (row, col, x.value) ).collect::<Vec<_>>();
-        // assert_eq!(dirac_raw(&vec_g_g1, &vec_h_g2, &mat_a_scalar), gah.value);
     }
 }
