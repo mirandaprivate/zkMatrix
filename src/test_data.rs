@@ -9,13 +9,18 @@
 
 #![allow(dead_code)]
 
-use std::ops::{Add, Mul};
 
 use crate::mat::Mat;
 use crate::config::{SQRT_MATRIX_DIM_TEST, MATRIX_DIM_TEST};
+use crate::experiment_data::gen_matrices_dense;
+
 use crate::utils::curve::{ZpElement, G1Element, G2Element, GtElement};
 use crate::utils::kronecker::{kronecker, kronecker_vec};
 
+
+pub fn gen_test_matrices() -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>){
+    gen_matrices_dense(MATRIX_DIM_TEST)
+}
 
 pub fn gen_vec_v_from_kronecker_test() -> Vec<ZpElement>{
 
