@@ -3,6 +3,9 @@ use std::marker::{Send, Sync};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+use rayon::{ThreadPoolBuilder, prelude::*};
+
+
 use crate::utils::curve::{Add, Mul, AddAssign, Zero, G1Element, G2Element, GtElement};
 
 use crate::mat::Mat;
@@ -31,33 +34,25 @@ where
         );
     }
 
-    let a_chunks: Vec<_> = vec_a.chunks(length / NUM_THREADS).collect();
-    let b_chunks: Vec<_> = vec_b.chunks(length / NUM_THREADS).collect();
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(NUM_THREADS)
+        .build()
+        .unwrap();
 
-    let mut handles = Vec::new();
+    let inner_product = pool.install(|| {
+        vec_a.par_iter()
+        .zip(vec_b.par_iter())
+        .fold(
+            || V::zero(),
+            |acc, (&a_val, &b_val)| acc + a_val * b_val,
+        )
+        .reduce(
+            || V::zero(),
+            |acc, val| acc + val,
+        )
+    });
 
-    for (a_chunk, b_chunk) in a_chunks.iter().zip(b_chunks.iter()) {
-        let a_chunk = a_chunk.to_vec(); // Clone the chunk
-        let b_chunk = b_chunk.to_vec(); // Clone the chunk
-        let handle = thread::spawn(
-            move || {
-                a_chunk.iter()
-                .zip(b_chunk.iter())
-                .fold(
-                    V::zero(),
-                    |acc, (&a_val, &b_val)| acc + a_val * b_val,
-                )
-            });
-        handles.push(handle);
-    }
-
-    let mut result = V::zero();
-
-    for handle in handles {
-        result = result + handle.join().unwrap();
-    }
-
-    return result;
+    return inner_product;
 
 }
 

@@ -13,6 +13,10 @@ use std::ops::{Add, Mul};
 
 use curv::arithmetic::Zero;
 use rand::Rng;
+
+use rayon::prelude::*;
+use rayon::ThreadPoolBuilder;
+
 use crate::mat::Mat;
 
 use crate::utils::curve::ZpElement;
@@ -44,14 +48,20 @@ fn mat_mul_dense_u64_to_zp(a: &Vec<Vec<u64>>, b: &Vec<Vec<u64>>)
     let mut result = 
         vec![vec![ZpElement::zero(); b_cols]; a_rows];
 
-    for i in 0..a_rows {
-        for j in 0..b_cols {
-            for k in 0..a_cols {
-                result[i][j] += 
-                    ZpElement::from(a[i][k] * b[k][j]);
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        result.par_iter_mut().enumerate().for_each(|(i, row)| {
+            for j in 0..b_cols {
+                for k in 0..a_cols {
+                    row[j] += ZpElement::from(a[i][k] * b[k][j]);
+                }
             }
-        }
-    }
+        });
+    });
 
     result
 }
@@ -65,14 +75,20 @@ fn mat_mul_dense_u64_to_u64(a: &Vec<Vec<u64>>, b: &Vec<Vec<u64>>)
     let mut result = 
         vec![vec![0 as u64; b_cols]; a_rows];
 
-    for i in 0..a_rows {
-        for j in 0..b_cols {
-            for k in 0..a_cols {
-                result[i][j] += 
-                    a[i][k] * b[k][j];
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        result.par_iter_mut().enumerate().for_each(|(i, row)| {
+            for j in 0..b_cols {
+                for k in 0..a_cols {
+                    row[j] += a[i][k] * b[k][j];
+                }
             }
-        }
-    }
+        });
+    });
 
     result
 }
@@ -117,17 +133,25 @@ fn diag_kronecker_dense_from_u64(a: &Vec<u64>, b: &Vec<Vec<u64>>)
     
     let sqrt_dim = a.len();
 
-    (0..sqrt_dim).flat_map(|left_ij|{
-        (0..sqrt_dim).flat_map( move |right_i|{
-            (0..sqrt_dim).map( move |right_j|{
-                (
-                    left_ij * sqrt_dim + right_i,
-                    left_ij * sqrt_dim + right_j,
-                    ZpElement::from(a[left_ij] * b[right_i][right_j]) 
-                )
-            })
-        })
-    }).collect()
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        (0..sqrt_dim).into_par_iter().flat_map(|left_ij|{
+            (0..sqrt_dim).flat_map( |right_i|{
+                (0..sqrt_dim).map( move |right_j|{
+                    (
+                        left_ij * sqrt_dim + right_i,
+                        left_ij * sqrt_dim + right_j,
+                        ZpElement::from(a[left_ij]) * ZpElement::from(b[right_i][right_j]) 
+                    )
+                })
+            }).collect::<Vec<(usize, usize, ZpElement)>>()
+        }).collect::<Vec<(usize, usize, ZpElement)>>()
+    })
+    
 }
 
 fn diag_kronecker_dense_from_zp(a: &Vec<ZpElement>, b: &Vec<Vec<ZpElement>>) 
@@ -135,17 +159,24 @@ fn diag_kronecker_dense_from_zp(a: &Vec<ZpElement>, b: &Vec<Vec<ZpElement>>)
     
     let sqrt_dim = a.len();
 
-    (0..sqrt_dim).flat_map(|left_ij|{
-        (0..sqrt_dim).flat_map( move |right_i|{
-            (0..sqrt_dim).map( move |right_j|{
-                (
-                    left_ij * sqrt_dim + right_i,
-                    left_ij * sqrt_dim + right_j,
-                    a[left_ij] * b[right_i][right_j] 
-                )
-            })
-        })
-    }).collect()
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        (0..sqrt_dim).into_par_iter().flat_map(|left_ij|{
+            (0..sqrt_dim).flat_map( |right_i|{
+                (0..sqrt_dim).map( move |right_j|{
+                    (
+                        left_ij * sqrt_dim + right_i,
+                        left_ij * sqrt_dim + right_j,
+                        a[left_ij] * b[right_i][right_j] 
+                    )
+                })
+            }).collect::<Vec<(usize, usize, ZpElement)>>()
+        }).collect::<Vec<(usize, usize, ZpElement)>>()
+    })
 }
 
 fn gen_matrices(sqrt_dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
