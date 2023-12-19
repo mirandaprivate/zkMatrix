@@ -3,10 +3,14 @@
 //! 
 use rand::Rng;
 use serde::{Serialize, Deserialize};
+use rayon::prelude::*;
+use rayon::ThreadPoolBuilder;
 
 use crate::utils::curve::{G1Element, G2Element, ZpElement};
 
 use crate::utils::to_file::FileIO;
+
+use crate::config::NUM_THREADS;
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct SRS {
@@ -50,21 +54,42 @@ impl SRS {
         let g_hat_minus = s_hat_pow_q_squre * g_hat;
         let h_hat_minus = s_hat_pow_q_squre * h_hat;
 
-        let g_hat_vec = s_vec.iter()
-            .map(|&x| x * g_hat)
-            .collect();
+        let pool = ThreadPoolBuilder::new()
+            .num_threads(NUM_THREADS)
+            .build()
+            .unwrap();
 
-        let g_hat_prime_vec = s_prime_vec.iter()
-            .map(|&x| x * g_hat)
-            .collect();
+        let g_hat_vec = 
+            pool.install(||{
+                s_vec.par_iter()
+                .map(|&x| x * g_hat)
+                .collect()
+                }
+            );
 
-        let h_hat_vec = s_prime_vec.iter()
+        let g_hat_prime_vec = 
+            pool.install(||{
+                s_prime_vec.par_iter()
+                .map(|&x| x * g_hat)
+                .collect()
+                }
+            );
+
+        let h_hat_vec = 
+            pool.install(||{
+                s_prime_vec.par_iter()
+                .map(|&x| x * h_hat)
+                .collect()
+                }
+            );
+
+        let h_hat_prime_vec = 
+            pool.install(||{
+                s_vec.iter()
             .map(|&x| x * h_hat)
-            .collect();
-
-        let h_hat_prime_vec = s_vec.iter()
-           .map(|&x| x * h_hat)
-            .collect();
+                .collect()
+                }
+            );
 
         Self {
             q,
