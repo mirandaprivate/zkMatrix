@@ -390,6 +390,92 @@ impl From<GtElement> for GtElementPack{
     }
 }
 
+impl From<i64> for ZpElement {
+    fn from(input_integer: i64) -> Self {
+        if input_integer.signum() == -1 {
+            ZpElement { 
+                value: -bigint_to_scalar(
+                     & BigInt::from(input_integer.abs() as u64)
+                    ) 
+            }
+        } else {
+            ZpElement { 
+                value: bigint_to_scalar( 
+                    & BigInt::from(input_integer as u64)
+                ) 
+            }
+        }
+    }
+}
+
+impl From<i64> for G1Element{
+    fn from(input_integer: i64) -> Self {
+        if input_integer.signum() == -1 {
+            G1Element { 
+                value: G1Projective::generator() 
+                * (-bigint_to_scalar( 
+                    & BigInt::from(input_integer.abs() as u64)
+                )
+                ) 
+            }
+        } else {
+            G1Element { 
+                value: G1Projective::generator() 
+                * bigint_to_scalar( 
+                    & BigInt::from(input_integer as u64)
+                ) 
+            }
+        }
+    }
+}
+
+
+impl From<i64> for G2Element{
+    fn from(input_integer: i64) -> Self {
+        if input_integer.signum() == -1 {
+            G2Element { 
+                value: G2Projective::generator() 
+                * (-bigint_to_scalar( 
+                    & BigInt::from(input_integer.abs() as u64)
+                )
+                ) 
+            }
+        } else {
+            G2Element { 
+                value: G2Projective::generator() 
+                * bigint_to_scalar( 
+                    & BigInt::from(input_integer as u64)
+                ) 
+            }
+        }
+    }
+}
+
+impl From<i64> for GtElement{
+    fn from(input_integer: i64) -> Self {
+        if input_integer.signum() == -1 {
+            let g1_value = G1Affine::from(
+                G1Projective::generator()
+                *(- bigint_to_scalar( & BigInt::from(input_integer.abs() as u64)))
+            );
+            let g2_gen = G2Affine::from(G2Projective::generator());
+            GtElement { 
+                value: bls12_381::pairing(&g1_value, &g2_gen) 
+            }
+        } else {
+            let g1_value = G1Affine::from(
+                G1Projective::generator()
+                * bigint_to_scalar( & BigInt::from(input_integer as u64))
+            );
+            let g2_gen = G2Affine::from(G2Projective::generator());
+            GtElement { 
+                value: bls12_381::pairing(&g1_value, &g2_gen) 
+            }
+        }
+    }
+}
+
+
 impl Add for ZpElement {
     type Output = Self;
 
@@ -702,20 +788,20 @@ mod tests {
         let g2_zero = G2Element::zero();
         let gt_zero = GtElement::zero();
 
-        assert_eq!(scalar_zero, ZpElement::from(0));
-        assert_eq!(g1_zero, G1Element::from(0));
-        assert_eq!(g2_zero, G2Element::from(0));
-        assert_eq!(gt_zero, GtElement::from(0));
+        assert_eq!(scalar_zero, ZpElement::from(0 as u64));
+        assert_eq!(g1_zero, G1Element::from(0 as u64));
+        assert_eq!(g2_zero, G2Element::from(0 as u64));
+        assert_eq!(gt_zero, GtElement::from(0 as u64));
 
-        let g1_value = G1Element::from(2);
-        let g2_value = G2Element::from(3);
-        let gt_value = GtElement::from(6);
+        let g1_value = G1Element::from(-2 as i64);
+        let g2_value = G2Element::from(-3 as i64);
+        let gt_value = GtElement::from(6 as i64);
 
         assert_eq!(g1_value * g2_value, gt_value);
 
-        let mut g1_mut = G1Element::from(1);
-        let mut g2_mut = G2Element::from(2);
-        let mut gt_mut = GtElement::from(5);
+        let mut g1_mut = G1Element::from(-3 as i64);
+        let mut g2_mut = G2Element::from(-4 as i64);
+        let mut gt_mut = GtElement::from(5 as i64);
 
         g1_mut += G1Element::generator();
         g2_mut += G2Element::generator();
@@ -725,10 +811,10 @@ mod tests {
         assert_eq!(g2_mut, g2_value);
         assert_eq!(gt_mut, gt_value);
 
-        let zp_value = ZpElement::from(2);
+        let zp_value = ZpElement::from(2 as i64);
         let zp_exp = zp_value.pow(3);
 
-        assert_eq!(zp_exp, ZpElement::from(8));
+        assert_eq!(zp_exp, ZpElement::from(8 as i64));
 
         assert_eq!(scalar_zero + scalar_zero, ZpElement::zero());
         assert_eq!(scalar_zero - scalar_zero, ZpElement::zero());
@@ -745,7 +831,7 @@ mod tests {
         assert_eq!(scalar_zero * g1_value, g1_zero);
         assert_eq!(1 as u64 * g1_value, g1_value);
         assert_eq!(g1_value * 1 as u64, g1_value);
-        assert_eq!(g1_value.double(), G1Element::from(4));
+        assert_eq!(g1_value.double(), G1Element::from(-4 as i64));
 
         assert_eq!(g2_value + g2_zero, g2_value);
         assert_eq!(g2_value - g2_zero, g2_value);
@@ -754,7 +840,7 @@ mod tests {
         assert_eq!(scalar_zero * g2_value, g2_zero);
         assert_eq!(1 as u64 * g2_value, g2_value);
         assert_eq!(g2_value * 1 as u64, g2_value);
-        assert_eq!(g2_value.double(), G2Element::from(6));
+        assert_eq!(g2_value.double(), G2Element::from(-6 as i64));
 
         assert_eq!(gt_value + gt_zero, gt_value);
         assert_eq!(gt_value - gt_zero, gt_value);
@@ -764,7 +850,7 @@ mod tests {
         assert_eq!(g1_zero * g2_zero, gt_zero);
         assert_eq!(1 as u64 * gt_value, gt_value);
         assert_eq!(gt_value * 1 as u64, gt_value);
-        assert_eq!(gt_value.double(), GtElement::from(12));
+        assert_eq!(gt_value.double(), GtElement::from(12 as i64));
 
         let serialized_data = 
         (zp_value, g1_value, g2_value, gt_value);

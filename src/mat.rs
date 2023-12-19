@@ -88,14 +88,14 @@ mod tests {
         assert_eq!(mat_1.id, "test_mat");
         assert_eq!(mat_1.shape, (2, 2));
 
-        mat_1.push(1, 1, GtElement::from(3));
-        mat_1.push(1, 2, GtElement::from(1));
+        mat_1.push(1, 1, GtElement::from(3 as i64));
+        mat_1.push(1, 2, GtElement::from(1 as i64));
 
-        assert_eq!(mat_1.data[1], (1, 2, GtElement::from(1)));
+        assert_eq!(mat_1.data[1], (1, 2, GtElement::from(1 as i64)));
 
         let mut mat_2:Mat<GtElement>  = Mat::new("test_mat_2", (2, 2));
-        mat_2.push(1, 2, GtElement::from(1));
-        mat_2.push(1, 1, GtElement::from(3));
+        mat_2.push(1, 2, GtElement::from(1 as i64));
+        mat_2.push(1, 1, GtElement::from(3 as i64));
         
         assert_eq!(mat_1, mat_2);
 
@@ -105,7 +105,7 @@ mod tests {
         .unwrap();
         assert_eq!(mat_1, mat_1_read);
 
-        let vec_1: Vec<GtElement> = vec![GtElement::from(1), GtElement::from(2)];
+        let vec_1: Vec<GtElement> = vec![GtElement::from(1 as i64), GtElement::from(2 as i64)];
         vec_1.to_file("vec_test".to_string(), false).unwrap();
         let vec_1_read: Vec<GtElement> = Vec::from_file(
              "vec_test".to_string(), false)
