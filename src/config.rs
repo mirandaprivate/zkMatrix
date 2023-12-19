@@ -10,7 +10,7 @@ pub const MATRIX_DIM: usize = SQRT_MATRIX_DIM * SQRT_MATRIX_DIM;
 pub const LOG_DIM_TEST: usize = 10;
 pub const Q_TEST: usize = 2usize.pow(LOG_DIM_TEST as u32+1);
 
-pub const SQRT_MATRIX_DIM_TEST: usize = 2usize.pow(10);
+pub const SQRT_MATRIX_DIM_TEST: usize = 2usize.pow(3);
 pub const MATRIX_DIM_TEST: usize = SQRT_MATRIX_DIM_TEST * SQRT_MATRIX_DIM_TEST;
 
 pub const DATA_DIR_PUBLIC: &str = "data/public/";

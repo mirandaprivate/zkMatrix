@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
 
 use bincode;
 use serde::{Serialize, Deserialize};
@@ -25,13 +25,27 @@ pub trait FileIO {
         Self: Sized + for<'de> Deserialize<'de>,
     {
         let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
-        let file = File::open(format!("{}{}.dat", dir, file_name))?;
-        let decoded: Self = bincode::deserialize_from(file)
+        let mut file = File::open(format!("{}{}.dat", dir, file_name)).map_err(
+            |e| 
+            std::io::Error::new(
+                std::io::ErrorKind::Other, 
+                format!("Error: {:?} when opening file {}.dat", e, file_name))
+            )?;
+        
+        let mut encoded: Vec<u8> = Vec::new();
+        file.read_to_end(&mut encoded).map_err(
+            |e| 
+            std::io::Error::new(
+                std::io::ErrorKind::Other, 
+                format!("Error: {:?} when reading u8 in file {}.dat", e, file_name))
+            )?;
+
+        let decoded: Self = bincode::deserialize(&encoded)
         .map_err(
             |e| 
             std::io::Error::new(
                 std::io::ErrorKind::Other, 
-                format!("Error: {:?} when reading {}", e, file_name))
+                format!("Error: {:?} when deserilizing file {}.dat", e, file_name))
             )?;
         Ok(decoded)
     }

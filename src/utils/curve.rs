@@ -276,6 +276,9 @@ impl ZpElement {
         ZpElement { value: self.value.pow(&exponent_256bits)}
     }
 
+    pub fn inv(&self) -> Self {
+        ZpElement { value: self.value.invert().unwrap() }
+    }
 }
 
 impl G1Element {

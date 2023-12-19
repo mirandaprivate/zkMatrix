@@ -286,6 +286,22 @@ mod tests{
 
         assert_eq!(mat_mul_dense_zp_to_zp(&a_d_dense, &b_d_dense), c_d_dense);
 
+        let log_dim = (SQRT_MATRIX_DIM_TEST as u64).ilog2() as usize;
+
+        let a_read: Mat<ZpElement> = Mat::<ZpElement>::from_file(
+            format!("a_dense_2e{:?}", log_dim), false
+            ).unwrap();
+        let b_read = Mat::<ZpElement>::from_file(
+            format!("b_dense_2e{:?}", log_dim), false).unwrap();
+        let c_read = Mat::<ZpElement>::from_file(
+            format!("c_dense_2e{:?}", log_dim), false).unwrap();
+        
+        let a_read_dense = sprs_to_dense_zp(&a_read);
+        let b_read_dense = sprs_to_dense_zp(&b_read);
+        let c_read_dense = sprs_to_dense_zp(&c_read);
+
+        assert_eq!(mat_mul_dense_zp_to_zp(&a_read_dense, &b_read_dense), c_read_dense);
+    
         // let a_dense = sprs_to_dense_zp(&_a);
         // let b_dense = sprs_to_dense_zp(&_b);
         // let c_dense = sprs_to_dense_zp(&_c);
