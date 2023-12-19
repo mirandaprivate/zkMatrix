@@ -1,4 +1,4 @@
 /target
-/data
+/data/**/*.dat
 /Cargo.lock
 /.vscode
