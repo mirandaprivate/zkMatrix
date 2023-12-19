@@ -1,0 +1,1 @@
+Data in this folder are supposed to be private to the prover
