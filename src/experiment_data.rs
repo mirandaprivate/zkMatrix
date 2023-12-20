@@ -172,26 +172,26 @@ fn gen_matrices_sparse(sqrt_dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<
     let c_right = mat_mul_dense_i64_to_i64(&a_right, &b_right);
 
     let a = Mat::new_from_data_vec(
-        "a",
+        &format!("a_sprs_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
         diag_kronecker_dense_from_i64(&a_left, &a_right)
     );
 
     let b = Mat::new_from_data_vec(
-        "b",
+        &format!("b_sprs_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
         diag_kronecker_dense_from_i64(&b_left, &b_right)
     );
 
     let c = Mat::new_from_data_vec(
-        "c",
+        &format!("c_sprs_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
         diag_kronecker_dense_from_i64(&c_left, &c_right)
     );
 
-    a.to_file(format!("a_sprs_2e{:?}", log_dim), false).unwrap();
-    b.to_file(format!("b_sprs_2e{:?}", log_dim), false).unwrap();
-    c.to_file(format!("c_sprs_2e{:?}", log_dim), false).unwrap();
+    a.to_file(a.id.to_string(), false).unwrap();
+    b.to_file(b.id.to_string(), false).unwrap();
+    c.to_file(c.id.to_string(), false).unwrap();
 
     (c, a, b)
 }
@@ -251,15 +251,18 @@ pub fn gen_matrices_dense(dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<Zp
 
     let c_zp = mat_mul_dense_i64_to_zp(&a_u64, &b_u64);
 
-    let a = dense_to_sprs_zp_from_i64("a", &a_u64);
+    let a = dense_to_sprs_zp_from_i64(
+        &format!("a_dense_2e{:?}", log_dim), &a_u64);
 
-    let b = dense_to_sprs_zp_from_i64("b", &b_u64);
+    let b = dense_to_sprs_zp_from_i64(
+        &format!("b_dense_2e{:?}", log_dim), &b_u64);
 
-    let c = dense_to_sprs_zp("c", &c_zp);
+    let c = dense_to_sprs_zp(
+        &format!("c_dense_2e{:?}", log_dim), &c_zp);
 
-    a.to_file(format!("a_dense_2e{:?}", log_dim), false).unwrap();
-    b.to_file(format!("b_dense_2e{:?}", log_dim), false).unwrap();
-    c.to_file(format!("c_dense_2e{:?}", log_dim), false).unwrap();
+    a.to_file(a.id.to_string(), false).unwrap();
+    b.to_file(b.id.to_string(), false).unwrap();
+    c.to_file(c.id.to_string(), false).unwrap();
 
     (c, a, b)
 }
@@ -292,9 +295,11 @@ mod tests{
             format!("a_dense_2e{:?}", log_dim), false
             ).unwrap();
         let b_read = Mat::<ZpElement>::from_file(
-            format!("b_dense_2e{:?}", log_dim), false).unwrap();
+            format!("b_dense_2e{:?}", log_dim), false
+            ).unwrap();
         let c_read = Mat::<ZpElement>::from_file(
-            format!("c_dense_2e{:?}", log_dim), false).unwrap();
+            format!("c_dense_2e{:?}", log_dim), false
+            ).unwrap();
         
         let a_read_dense = sprs_to_dense_zp(&a_read);
         let b_read_dense = sprs_to_dense_zp(&b_read);

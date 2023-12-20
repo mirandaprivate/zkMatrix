@@ -91,7 +91,7 @@ impl SRS {
                 }
             );
 
-        Self {
+        let srs = Self {
             q,
             g_hat,
             h_hat,
@@ -101,7 +101,11 @@ impl SRS {
             h_hat_vec,
             g_hat_prime_vec,
             h_hat_prime_vec,
-         }
+        };
+
+        srs.to_file("srs".to_string(), true).unwrap();
+
+        srs
 
     }
 
@@ -120,7 +124,6 @@ mod tests {
     #[test]
     fn test_srs() {
         let srs = SRS::new(Q_TEST);
-        srs.to_file(String::from("srs"), true).unwrap();
         let srs_read = FileIO::from_file(String::from("srs"), true).unwrap();
         println!("srs: {:?}", srs);
         assert_eq!(srs, srs_read);
