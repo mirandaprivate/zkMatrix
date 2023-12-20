@@ -204,6 +204,11 @@ pub fn braket(
     dirac(&g_base, &mat_a, &h_base)
 }
 
+
+pub fn bra_opt(mat_a: &Mat<u64>, v_base: &Vec<G1Element>) -> Vec<G1Element> {
+    proj_left(&mat_a, &v_base)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

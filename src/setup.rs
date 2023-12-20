@@ -14,15 +14,15 @@ use crate::config::NUM_THREADS;
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct SRS {
-    q: usize,
-    g_hat: G1Element,
-    h_hat: G2Element,
-    g_hat_minus: G1Element,
-    h_hat_minus: G2Element,
-    g_hat_vec: Vec<G1Element>,
-    h_hat_vec: Vec<G2Element>,
-    g_hat_prime_vec: Vec<G1Element>,
-    h_hat_prime_vec: Vec<G2Element>,
+    pub q: usize,
+    pub g_hat: G1Element,
+    pub h_hat: G2Element,
+    pub g_hat_minus: G1Element,
+    pub h_hat_minus: G2Element,
+    pub g_hat_vec: Vec<G1Element>,
+    pub h_hat_vec: Vec<G2Element>,
+    pub g_hat_prime_vec: Vec<G1Element>,
+    pub h_hat_prime_vec: Vec<G2Element>,
 }
 
 impl SRS {

@@ -5,9 +5,11 @@
 //! Cache the first-tier commitments in data/private.
 //! 
 
-use crate::utils::curve::{G1Element, G2Element, GtElement};
-use crate::utils::dirac;
 use crate::mat::Mat;
+use crate::setup::SRS;
+
+use crate::utils::curve::{G1Element, G2Element, GtElement, ZpElement};
+use crate::utils::dirac;
 use crate::utils::to_file::FileIO;
 
 pub trait CommitMat {
@@ -18,6 +20,14 @@ pub trait CommitMat {
     fn commit_col_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>)
     -> GtElement;
+
+    fn commit_rm(&self, srs: &SRS) -> GtElement {
+        self.commit_row_major(&srs.g_hat_vec, &srs.h_hat_vec)
+    }
+
+    fn commit_cm(&self, srs: &SRS) -> GtElement {
+        self.commit_col_major(&srs.g_hat_vec, &srs.h_hat_vec)
+    }
 }
 
 impl CommitMat for Mat<u64> {
@@ -37,6 +47,33 @@ impl CommitMat for Mat<u64> {
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
     -> GtElement {
         let left_cache = dirac::bra(&self, &g_base_vec);
+        left_cache.to_file(
+            format!("{}_left_cache", self.id), false)
+        .unwrap();
+        
+        let result = dirac::inner_product(&left_cache, &h_base_vec);
+        result
+    }
+}
+
+
+impl CommitMat for Mat<ZpElement> {
+    fn commit_row_major(
+        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
+    -> GtElement {
+        let right_cache = dirac:: proj_right(&self, &h_base_vec);
+        right_cache.to_file(
+            format!("{}_right_cache", self.id), false)
+        .unwrap();
+
+        let result = dirac::inner_product(&g_base_vec, &right_cache);
+        result
+    }
+
+    fn commit_col_major(
+            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
+    -> GtElement {
+        let left_cache = dirac::proj_left(&self, &g_base_vec);
         left_cache.to_file(
             format!("{}_left_cache", self.id), false)
         .unwrap();

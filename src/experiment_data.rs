@@ -18,7 +18,6 @@ use rayon::ThreadPoolBuilder;
 use crate::mat::Mat;
 
 use crate::utils::curve::ZpElement;
-use crate::utils::to_file::FileIO;
 
 
 
@@ -156,7 +155,7 @@ fn diag_kronecker_dense_from_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>)
 
 
 
-fn gen_matrices_sparse(sqrt_dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
+pub fn gen_matrices_sparse(sqrt_dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
     
     let dim = sqrt_dim * sqrt_dim;
     let log_dim = (dim as u64).ilog2() as usize;
@@ -188,10 +187,6 @@ fn gen_matrices_sparse(sqrt_dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
         diag_kronecker_dense_from_i64(&c_left, &c_right)
     );
-
-    a.to_file(a.id.to_string(), false).unwrap();
-    b.to_file(b.id.to_string(), false).unwrap();
-    c.to_file(c.id.to_string(), false).unwrap();
 
     (c, a, b)
 }
@@ -260,9 +255,6 @@ pub fn gen_matrices_dense(dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<Zp
     let c = dense_to_sprs_zp(
         &format!("c_dense_2e{:?}", log_dim), &c_zp);
 
-    a.to_file(a.id.to_string(), false).unwrap();
-    b.to_file(b.id.to_string(), false).unwrap();
-    c.to_file(c.id.to_string(), false).unwrap();
 
     (c, a, b)
 }
@@ -273,7 +265,9 @@ mod tests{
 
     use super::*;
 
+    use crate::utils::to_file::FileIO;
     use crate::config::SQRT_MATRIX_DIM_TEST;
+
 
     #[test]
     fn test_experiment_data(){
@@ -290,6 +284,10 @@ mod tests{
         assert_eq!(mat_mul_dense_zp_to_zp(&a_d_dense, &b_d_dense), c_d_dense);
 
         let log_dim = (SQRT_MATRIX_DIM_TEST as u64).ilog2() as usize;
+
+        _a_d.to_file(_a_d.id.to_string(), false).unwrap();
+        _b_d.to_file(_b_d.id.to_string(), false).unwrap();
+        _c_d.to_file(_c_d.id.to_string(), false).unwrap();
 
         let a_read: Mat<ZpElement> = Mat::<ZpElement>::from_file(
             format!("a_dense_2e{:?}", log_dim), false
