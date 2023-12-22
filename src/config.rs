@@ -1,6 +1,6 @@
 pub const NUM_THREADS: usize = 8;
 
-pub const LOG_DIM: usize = 12;
+pub const LOG_DIM: usize = 10;
 
 pub const Q: usize = 2usize.pow(LOG_DIM as u32+1);
 

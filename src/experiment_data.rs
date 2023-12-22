@@ -127,7 +127,7 @@ fn mat_mul_diag_i64_to_i64(a: &Vec<i64>, b: &Vec<i64>) -> Vec<i64> {
     }).collect()
 }
 
-fn diag_kronecker_dense_from_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>) 
+pub fn diag_kronecker_dense_from_i64_to_zp(a: &Vec<i64>, b: &Vec<Vec<i64>>) 
     -> Vec<(usize, usize, ZpElement)> {
     
     let sqrt_dim = a.len();
@@ -154,8 +154,34 @@ fn diag_kronecker_dense_from_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>)
 }
 
 
+pub fn diag_kronecker_dense_from_i64_to_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>) 
+    -> Vec<(usize, usize, i64)> {
+    
+    let sqrt_dim = a.len();
 
-pub fn gen_matrices_sparse(sqrt_dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        (0..sqrt_dim).into_par_iter().flat_map(|left_ij|{
+            (0..sqrt_dim).flat_map( |right_i|{
+                (0..sqrt_dim).map( move |right_j|{
+                    (
+                        left_ij * sqrt_dim + right_i,
+                        left_ij * sqrt_dim + right_j,
+                        a[left_ij] * b[right_i][right_j] 
+                    )
+                })
+            }).collect::<Vec<(usize, usize, i64)>>()
+        }).collect::<Vec<(usize, usize, i64)>>()
+    })
+}
+
+
+pub fn gen_matrices_sparse(sqrt_dim: usize) 
+    -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
     
     let dim = sqrt_dim * sqrt_dim;
     let log_dim = (dim as u64).ilog2() as usize;
@@ -173,19 +199,19 @@ pub fn gen_matrices_sparse(sqrt_dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, 
     let a = Mat::new_from_data_vec(
         &format!("a_sprs_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
-        diag_kronecker_dense_from_i64(&a_left, &a_right)
+        diag_kronecker_dense_from_i64_to_zp(&a_left, &a_right)
     );
 
     let b = Mat::new_from_data_vec(
         &format!("b_sprs_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
-        diag_kronecker_dense_from_i64(&b_left, &b_right)
+        diag_kronecker_dense_from_i64_to_zp(&b_left, &b_right)
     );
 
     let c = Mat::new_from_data_vec(
         &format!("c_sprs_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
-        diag_kronecker_dense_from_i64(&c_left, &c_right)
+        diag_kronecker_dense_from_i64_to_zp(&c_left, &c_right)
     );
 
     (c, a, b)

@@ -1,14 +1,16 @@
 use std::time::Instant;
 
+use zkmatrix::commit_mat::CommitMat;
+use zkmatrix::mat::Mat;
+use zkmatrix::setup::SRS;
 
-use zkMatrix::utils::curve::{ZpElement, G1Element, G2Element, GtElement};
-use zkMatrix::utils::to_file::FileIO;
-use zkMatrix::commit_mat::CommitMat;
-use zkMatrix::setup::SRS;
-use zkMatrix::mat::Mat;
+use zkmatrix::utils::curve::ZpElement;
+use zkmatrix::utils::to_file::FileIO;
 
-use zkMatrix::experiment_data;
-use zkMatrix::config::{Q, LOG_DIM, SQRT_MATRIX_DIM};
+use zkmatrix::utils::dirac;
+
+use zkmatrix::experiment_data;
+use zkmatrix::config::{Q, LOG_DIM, SQRT_MATRIX_DIM};
 
 
 fn experiment_srs_gen(){
@@ -38,6 +40,64 @@ fn experiment_gen_matrices(){
     a.to_file(a.id.to_string(), false).unwrap();
     b.to_file(b.id.to_string(), false).unwrap();
 
+}
+
+fn experiment_braket(){
+
+
+    let srs = SRS::from_file(String::from("srs"), true).unwrap();
+
+    let a_left = experiment_data::gen_mat_rand_diag_i64(
+        SQRT_MATRIX_DIM,26);
+    let a_right = experiment_data::gen_mat_rand_dense_i64(
+        SQRT_MATRIX_DIM, 26);
+    let a: Mat<i64> = Mat::new_from_data_vec(
+        "a_i64_sprs", 
+        (SQRT_MATRIX_DIM*SQRT_MATRIX_DIM, SQRT_MATRIX_DIM*SQRT_MATRIX_DIM), 
+        experiment_data::diag_kronecker_dense_from_i64_to_i64(
+            &a_left, &a_right),
+    );
+
+    let a_zp: Mat<ZpElement> = Mat::new_from_data_vec(
+        "a_zp_sprs", 
+        (SQRT_MATRIX_DIM*SQRT_MATRIX_DIM, SQRT_MATRIX_DIM*SQRT_MATRIX_DIM), 
+        experiment_data::diag_kronecker_dense_from_i64_to_zp(
+            &a_left, &a_right),
+    );
+
+    let timer_bra_opt = Instant::now();
+    
+    let result_bra_opt = dirac::bra_opt_i64(&a, &srs.g_hat_vec);
+    
+    println!(" ** Bra opt time: {:?}", timer_bra_opt.elapsed());
+
+    let timer_bra_no_opt = Instant::now();
+
+    let result_bra_no_opt = dirac::proj_left(
+        &a_zp, &srs.g_hat_vec);
+
+    println!(" ** Bra no opt time: {:?}", timer_bra_no_opt.elapsed());
+
+    assert_eq!(result_bra_opt, result_bra_no_opt);
+    println!("Assert Equal of two method");
+    
+    let timer_ket_opt = Instant::now();
+    
+    let result_ket_opt = dirac::ket_opt_i64(
+        &a, &srs.h_hat_vec);
+    
+    println!(" ** Ket opt time: {:?}", timer_ket_opt.elapsed());
+
+    let timer_ket_no_opt = Instant::now();
+
+    let result_ket_no_opt = dirac::proj_right(
+        &a_zp, &srs.h_hat_vec);
+
+    println!(" ** Ket no opt time: {:?}", timer_ket_no_opt.elapsed());
+
+    assert_eq!(result_ket_opt, result_ket_no_opt);
+    println!("Assert Equal of two method");
+    
 }
 
 fn experiment_commit_matrices(){
@@ -84,7 +144,8 @@ fn experiment_commit_matrices(){
 
 
 fn main(){
-    experiment_srs_gen();
-    experiment_gen_matrices();
-    experiment_commit_matrices();
+    // experiment_srs_gen();
+    // experiment_gen_matrices();
+    // experiment_commit_matrices();
+    experiment_braket();
 }

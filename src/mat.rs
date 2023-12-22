@@ -14,7 +14,7 @@ pub struct Mat<T> {
     pub data: Vec<(usize, usize, T)>,
 }
 
-impl< T: From<u64> > Mat<T> {
+impl<T> Mat<T> {
     pub fn new(
         id: &str, 
         shape: (usize, usize)) -> Self {
@@ -31,17 +31,6 @@ impl< T: From<u64> > Mat<T> {
         Self {id, shape, data}
     }
 
-    pub fn new_from_u64_vec(
-        id: &str, 
-        shape: (usize, usize),
-        data: Vec<(usize, usize, u64)>) -> Self {
-        let id = String::from(id);
-        let data = data.iter().map(
-            |(row, col, val)| (*row, *col, T::from(*val))
-        ).collect();
-        
-        Self {id, shape, data}
-    }
 
     pub fn push(&mut self, row: usize, col: usize, val: T) {
         self.data.push((row, col, val));

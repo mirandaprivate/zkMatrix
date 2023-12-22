@@ -12,6 +12,8 @@ use crate::mat::Mat;
 
 use crate::config::NUM_THREADS;
 
+use super::curve::Double;
+
 
 pub fn inner_product<T, U, V>(vec_a: &Vec<T>, vec_b: &Vec<U>) -> V
 where
@@ -202,8 +204,178 @@ pub fn braket(
 }
 
 
-pub fn bra_opt(mat_a: &Mat<u64>, v_base: &Vec<G1Element>) -> Vec<G1Element> {
-    proj_left(&mat_a, &v_base)
+pub fn bra_opt_u64(mat_a: &Mat<u64>, v_base: &Vec<G1Element>) -> Vec<G1Element> {
+    
+    let a_data  = &mat_a.data;
+    let n_row = mat_a.shape.0;
+    let n_col = mat_a.shape.1;
+    let mut v_base_mut = v_base[..n_row].to_vec();
+
+    let result_mutexes: Vec<Mutex<G1Element>> = (0..n_col).map(
+        |_| Mutex::new(G1Element::zero())
+        ).collect();
+    
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(NUM_THREADS)
+        .build()
+        .unwrap();
+    
+    for j_bit in 0..64{
+        let v_base_arc = Arc::new(v_base_mut.clone());
+        
+        pool.install(|| {
+            a_data.par_iter().for_each(|&(row, col, val)| {
+                let v_base_clone = Arc::clone(&v_base_arc);
+                let result_mutex = &result_mutexes[col];
+                let mut result = result_mutex.lock().unwrap();
+                if (val >> j_bit) & 1 == 1 {
+                    *result += v_base_clone[row];
+                }
+            });
+        });
+
+        pool.install(|| {
+            v_base_mut.par_iter_mut().for_each(|v| {
+                *v = v.double();
+            });
+        });
+
+    }
+
+    // let v_base_arc = Arc::new(v_base_mut.clone());
+    // pool.install(|| {
+    //     a_data.par_iter().for_each(|&(row, col, val)| {
+    //         let v_base_clone = Arc::clone(&v_base_arc);
+    //         let result_mutex = &result_mutexes[col];
+    //         let mut result = result_mutex.lock().unwrap();
+    //         *result += v_base_clone[row] * val;
+    //     });
+    // });
+
+    result_mutexes.into_iter().map(
+        |mutex| mutex.into_inner().unwrap()
+    ).collect()
+
+}
+
+
+pub fn bra_opt_i64(mat_a: &Mat<i64>, v_base: &Vec<G1Element>) -> Vec<G1Element> {
+
+    let n_row = mat_a.shape.0;
+    let n_col = mat_a.shape.1;
+    let mut v_base_mut = v_base[..n_row].to_vec();
+       
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(NUM_THREADS)
+        .build()
+        .unwrap();
+
+    let a_abs_sign: Vec<(usize, usize, u64, bool)> =  pool.install(
+            || {
+                mat_a.data.par_iter().map(|&(row, col, val)| 
+                    (
+                        row, col, val.abs() as u64, val < 0,
+                    )
+                ).collect()
+            }
+        );
+
+    let result_mutexes: Vec<Mutex<G1Element>> = (0..n_col).map(
+        |_| Mutex::new(G1Element::zero())
+        ).collect();
+    
+    
+    for j_bit in 0..64{
+        let v_base_arc = Arc::new(v_base_mut.clone());
+        
+        pool.install(|| {
+            a_abs_sign.par_iter().for_each(|&(row, col, val, sign)| {
+                let v_base_clone = Arc::clone(&v_base_arc);
+                let result_mutex = &result_mutexes[col];
+                let mut result = result_mutex.lock().unwrap();
+                if (val >> j_bit) & 1 == 1 {
+                    if sign {
+                        *result += - v_base_clone[row];
+                    } else {
+                        *result += v_base_clone[row];
+                    }
+                }
+            });
+        });
+
+        pool.install(|| {
+            v_base_mut.par_iter_mut().for_each(|v| {
+                *v = v.double();
+            });
+        });
+
+    }
+
+
+    result_mutexes.into_iter().map(
+        |mutex| mutex.into_inner().unwrap()
+    ).collect()
+    
+}
+
+
+pub fn ket_opt_i64(mat_a: &Mat<i64>, v_base: &Vec<G2Element>) -> Vec<G2Element> {
+
+    let n_row = mat_a.shape.0;
+    let n_col = mat_a.shape.1;
+    let mut v_base_mut = v_base[..n_col].to_vec();
+       
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(NUM_THREADS)
+        .build()
+        .unwrap();
+
+    let a_abs_sign: Vec<(usize, usize, u64, bool)> =  pool.install(
+            || {
+                mat_a.data.par_iter().map(|&(row, col, val)| 
+                    (
+                        row, col, val.abs() as u64, val < 0,
+                    )
+                ).collect()
+            }
+        );
+
+    let result_mutexes: Vec<Mutex<G2Element>> = (0..n_row).map(
+        |_| Mutex::new(G2Element::zero())
+        ).collect();
+    
+    
+    for j_bit in 0..64{
+        let v_base_arc = Arc::new(v_base_mut.clone());
+        
+        pool.install(|| {
+            a_abs_sign.par_iter().for_each(|&(row, col, val, sign)| {
+                let v_base_clone = Arc::clone(&v_base_arc);
+                let result_mutex = &result_mutexes[row];
+                let mut result = result_mutex.lock().unwrap();
+                if (val >> j_bit) & 1 == 1 {
+                    if sign {
+                        *result += - v_base_clone[col];
+                    } else {
+                        *result += v_base_clone[col];
+                    }
+                }
+            });
+        });
+
+        pool.install(|| {
+            v_base_mut.par_iter_mut().for_each(|v| {
+                *v = v.double();
+            });
+        });
+
+    }
+
+
+    result_mutexes.into_iter().map(
+        |mutex| mutex.into_inner().unwrap()
+    ).collect()
+    
 }
 
 #[cfg(test)]
@@ -227,6 +399,9 @@ mod tests {
         let gah_test_1 = inner_product(&proj_test_left, &vec_h);
         let bra_test = bra(&mat_a, &vec_g);
         assert_eq!(bra_test, vec_ga);
+
+        let bra_opt_test = bra_opt_u64(&mat_a, &vec_g);
+        assert_eq!(bra_opt_test, vec_ga);
 
         let proj_test_right: Vec<G2Element> = proj_right(&mat_a, &vec_h);
         let gah_test_2 = inner_product(&vec_g, &proj_test_right);
