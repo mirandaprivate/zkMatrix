@@ -8,8 +8,9 @@
 use crate::mat::Mat;
 use crate::setup::SRS;
 
-use crate::utils::curve::{G1Element, G2Element, GtElement, ZpElement};
+use crate::utils::curve::{G1Element, G2Element, GtElement};
 use crate::utils::dirac;
+use crate::utils::dirac::BraKet;
 use crate::utils::to_file::FileIO;
 
 pub trait CommitMat {
@@ -22,11 +23,13 @@ pub trait CommitMat {
     -> GtElement;
 
     fn commit_rm(&self, srs: &SRS) -> GtElement {
-        self.commit_row_major(&srs.g_hat_vec, &srs.h_hat_vec)
+        self.commit_row_major(
+            &srs.g_hat_vec, &srs.h_hat_vec)
     }
 
     fn commit_cm(&self, srs: &SRS) -> GtElement {
-        self.commit_col_major(&srs.g_hat_vec, &srs.h_hat_vec)
+        self.commit_col_major(
+            &srs.g_hat_vec, &srs.h_hat_vec)
     }
 }
 
@@ -34,55 +37,86 @@ impl CommitMat for Mat<u64> {
     fn commit_row_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
     -> GtElement {
-        let right_cache = dirac:: ket(&self, &h_base_vec);
+        let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
             format!("{}_right_cache", self.id), false)
         .unwrap();
 
-        let result = dirac::inner_product(&g_base_vec, &right_cache);
+        let result = dirac::inner_product(
+            &g_base_vec, &right_cache);
         result
     }
 
     fn commit_col_major(
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
     -> GtElement {
-        let left_cache = dirac::bra(&self, &g_base_vec);
+        let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
             format!("{}_left_cache", self.id), false)
         .unwrap();
         
-        let result = dirac::inner_product(&left_cache, &h_base_vec);
+        let result = dirac::inner_product(
+            &left_cache, &h_base_vec);
         result
     }
 }
 
-
-impl CommitMat for Mat<ZpElement> {
+impl CommitMat for Mat<i64> {
     fn commit_row_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
     -> GtElement {
-        let right_cache = dirac:: proj_right(&self, &h_base_vec);
+        let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
             format!("{}_right_cache", self.id), false)
         .unwrap();
 
-        let result = dirac::inner_product(&g_base_vec, &right_cache);
+        let result = dirac::inner_product(
+            &g_base_vec, &right_cache);
         result
     }
 
     fn commit_col_major(
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
     -> GtElement {
-        let left_cache = dirac::proj_left(&self, &g_base_vec);
+        let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
             format!("{}_left_cache", self.id), false)
         .unwrap();
         
-        let result = dirac::inner_product(&left_cache, &h_base_vec);
+        let result = dirac::inner_product(
+            &left_cache, &h_base_vec);
         result
     }
 }
-    
+
+impl CommitMat for Mat<i128> {
+    fn commit_row_major(
+        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
+    -> GtElement {
+        let right_cache = self.ket(&h_base_vec);
+        right_cache.to_file(
+            format!("{}_right_cache", self.id), false)
+        .unwrap();
+
+        let result = dirac::inner_product(
+            &g_base_vec, &right_cache);
+        result
+    }
+
+    fn commit_col_major(
+            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
+    -> GtElement {
+        let left_cache = self.bra(&g_base_vec);
+        left_cache.to_file(
+            format!("{}_left_cache", self.id), false)
+        .unwrap();
+        
+        let result = dirac::inner_product(
+            &left_cache, &h_base_vec);
+        result
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -158,10 +192,12 @@ mod tests {
             {
                 Ok(vec) => vec,
                 Err(_) => {
-                    let left_proj: Vec<G1Element> = gen_vec_va_g1_from_kronecker_test();
+                    let left_proj: Vec<G1Element> 
+                        = gen_vec_va_g1_from_kronecker_test();
                     left_proj.to_file(
-                        format!("{}_left_test", mat_a.id).to_string(), false)
-                    .unwrap();
+                        format!("{}_left_test", mat_a.id).to_string(),
+                        false,
+                    ).unwrap();
                     left_proj
                 }
             }

@@ -37,7 +37,6 @@ impl<T> Mat<T> {
     }    
 }
 
-
 impl<T: Serialize + for<'de> Deserialize<'de> > FileIO for Mat<T> {}
 
 impl<T: Serialize + for<'de> Deserialize<'de> > FileIO for Vec<T> {}

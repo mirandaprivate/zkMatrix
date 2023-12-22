@@ -2,4 +2,4 @@
 /data/**/*.dat
 /Cargo.lock
 /.vscode
-!/data/public/srs.dat
+# !/data/public/srs.dat

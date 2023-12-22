@@ -249,6 +249,12 @@ impl ToFile for GtElement {
     }
 }
 
+fn u128_to_raw(input_integer: u128) -> [u64; 4] {
+    let low = input_integer as u64;
+    let high = (input_integer >> 64) as u64;
+
+    [low, high, 0, 0]
+}
 
 fn bigint_to_scalar(input_integer: &BigInt) -> Scalar {
     let mut hex_string = input_integer.to_str_radix(16);
@@ -351,7 +357,7 @@ impl From<BigInt> for ZpElement {
 impl From<u64> for ZpElement {
     fn from(input_integer: u64) -> Self {
         ZpElement { 
-            value: bigint_to_scalar( & BigInt::from(input_integer)) 
+            value: Scalar::from(input_integer),
         }
     }
 }
@@ -360,7 +366,7 @@ impl From<u64> for G1Element {
     fn from(input_integer: u64) -> Self {
         G1Element { 
             value: G1Projective::generator() 
-            * bigint_to_scalar( & BigInt::from(input_integer))
+            * Scalar::from(input_integer),
         }
     }
 }
@@ -369,7 +375,7 @@ impl From<u64> for G2Element {
     fn from(input_integer: u64) -> Self {
         G2Element { 
             value: G2Projective::generator() 
-            * bigint_to_scalar( & BigInt::from(input_integer))
+            * Scalar::from(input_integer),
         }
     }
 }
@@ -378,7 +384,47 @@ impl From<u64> for GtElement {
     fn from(input_integer: u64) -> Self {
         let g1_value = G1Affine::from(
             G1Projective::generator()
-            * bigint_to_scalar( & BigInt::from(input_integer))
+            * Scalar::from(input_integer)
+        );
+        let g2_gen = G2Affine::from(G2Projective::generator());
+        GtElement { 
+            value: bls12_381::pairing(&g1_value, &g2_gen) 
+        }
+    }
+}
+
+
+impl From<u128> for ZpElement {
+    fn from(input_integer: u128) -> Self {
+        ZpElement { 
+            value: Scalar::from_raw(u128_to_raw(input_integer)), 
+        }
+    }
+}
+
+impl From<u128> for G1Element {
+    fn from(input_integer: u128) -> Self {
+        G1Element { 
+            value: G1Projective::generator() 
+            * Scalar::from_raw(u128_to_raw(input_integer)),
+        }
+    }
+}
+
+impl From<u128> for G2Element {
+    fn from(input_integer: u128) -> Self {
+        G2Element { 
+            value: G2Projective::generator() 
+            * Scalar::from_raw(u128_to_raw(input_integer)),
+        }
+    }
+}
+
+impl From<u128> for GtElement {
+    fn from(input_integer: u128) -> Self {
+        let g1_value = G1Affine::from(
+            G1Projective::generator()
+            * Scalar::from_raw(u128_to_raw(input_integer))
         );
         let g2_gen = G2Affine::from(G2Projective::generator());
         GtElement { 
@@ -397,15 +443,11 @@ impl From<i64> for ZpElement {
     fn from(input_integer: i64) -> Self {
         if input_integer.signum() == -1 {
             ZpElement { 
-                value: -bigint_to_scalar(
-                     & BigInt::from(input_integer.abs() as u64)
-                    ) 
+                value: - Scalar::from(input_integer.abs() as u64),
             }
         } else {
             ZpElement { 
-                value: bigint_to_scalar( 
-                    & BigInt::from(input_integer as u64)
-                ) 
+                value: Scalar::from(input_integer as u64),
             }
         }
     }
@@ -416,17 +458,13 @@ impl From<i64> for G1Element{
         if input_integer.signum() == -1 {
             G1Element { 
                 value: G1Projective::generator() 
-                * (-bigint_to_scalar( 
-                    & BigInt::from(input_integer.abs() as u64)
-                )
+                * (-Scalar::from(input_integer.abs() as u64)
                 ) 
             }
         } else {
             G1Element { 
                 value: G1Projective::generator() 
-                * bigint_to_scalar( 
-                    & BigInt::from(input_integer as u64)
-                ) 
+                * Scalar::from(input_integer as u64)
             }
         }
     }
@@ -438,17 +476,12 @@ impl From<i64> for G2Element{
         if input_integer.signum() == -1 {
             G2Element { 
                 value: G2Projective::generator() 
-                * (-bigint_to_scalar( 
-                    & BigInt::from(input_integer.abs() as u64)
-                )
-                ) 
+                * Scalar::from(input_integer.abs() as u64)
             }
         } else {
             G2Element { 
                 value: G2Projective::generator() 
-                * bigint_to_scalar( 
-                    & BigInt::from(input_integer as u64)
-                ) 
+                * Scalar::from(input_integer as u64)
             }
         }
     }
@@ -459,7 +492,7 @@ impl From<i64> for GtElement{
         if input_integer.signum() == -1 {
             let g1_value = G1Affine::from(
                 G1Projective::generator()
-                *(- bigint_to_scalar( & BigInt::from(input_integer.abs() as u64)))
+                *Scalar::from(input_integer.abs() as u64)
             );
             let g2_gen = G2Affine::from(G2Projective::generator());
             GtElement { 
@@ -468,7 +501,98 @@ impl From<i64> for GtElement{
         } else {
             let g1_value = G1Affine::from(
                 G1Projective::generator()
-                * bigint_to_scalar( & BigInt::from(input_integer as u64))
+                * Scalar::from(input_integer as u64)
+            );
+            let g2_gen = G2Affine::from(G2Projective::generator());
+            GtElement { 
+                value: bls12_381::pairing(&g1_value, &g2_gen) 
+            }
+        }
+    }
+}
+
+
+impl From<i128> for ZpElement {
+    fn from(input_integer: i128) -> Self {
+        if input_integer.signum() == -1 {
+            ZpElement { 
+                value: -Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                    ) 
+            }
+        } else {
+            ZpElement { 
+                value: Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                ) 
+            }
+        }
+    }
+}
+
+impl From<i128> for G1Element{
+    fn from(input_integer: i128) -> Self {
+        if input_integer.signum() == -1 {
+            G1Element { 
+                value: G1Projective::generator() 
+                * (-Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                )
+                ) 
+            }
+        } else {
+            G1Element { 
+                value: G1Projective::generator() 
+                * Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                )
+            }
+        }
+    }
+}
+
+
+impl From<i128> for G2Element{
+    fn from(input_integer: i128) -> Self {
+        if input_integer.signum() == -1 {
+            G2Element { 
+                value: G2Projective::generator() 
+                * (-Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                )
+                ) 
+            }
+        } else {
+            G2Element { 
+                value: G2Projective::generator() 
+                * Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                )
+            }
+        }
+    }
+}
+
+impl From<i128> for GtElement{
+    fn from(input_integer: i128) -> Self {
+        if input_integer.signum() == -1 {
+            let g1_value = G1Affine::from(
+                G1Projective::generator()
+                *(- Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                )
+                )
+            );
+            let g2_gen = G2Affine::from(G2Projective::generator());
+            GtElement { 
+                value: bls12_381::pairing(&g1_value, &g2_gen) 
+            }
+        } else {
+            let g1_value = G1Affine::from(
+                G1Projective::generator()
+                * Scalar::from_raw(
+                    u128_to_raw(input_integer.abs() as u128)
+                )            
             );
             let g2_gen = G2Affine::from(G2Projective::generator());
             GtElement { 
@@ -677,7 +801,7 @@ impl Mul<u64> for ZpElement {
 
     fn mul(self, rhs: u64) -> Self::Output {
         ZpElement { 
-            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+            value: self.value * &Scalar::from(rhs) 
         }
     }
 }
@@ -687,7 +811,7 @@ impl Mul<u64> for G1Element{
 
     fn mul(self, rhs: u64) -> Self::Output {
         G1Element { 
-            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+            value: self.value * &Scalar::from(rhs) 
         }
     }
 }
@@ -697,7 +821,7 @@ impl Mul<u64> for G2Element{
 
     fn mul(self, rhs: u64) -> Self::Output {
         G2Element { 
-            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+            value: self.value * &Scalar::from(rhs) 
         }
     }
 }
@@ -707,7 +831,87 @@ impl Mul<u64> for GtElement{
 
     fn mul(self, rhs: u64) -> Self::Output {
         GtElement { 
-            value: self.value * &bigint_to_scalar(&BigInt::from(rhs)) 
+            value: self.value * &Scalar::from(rhs) 
+        }
+    }
+}
+
+impl Mul<i64> for ZpElement {
+    type Output = ZpElement;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        ZpElement { 
+            value: self.value * ZpElement::from(rhs).value
+        }
+    }
+}
+
+impl Mul<i64> for G1Element{
+    type Output = G1Element;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        G1Element { 
+            value: self.value * ZpElement::from(rhs).value 
+        }
+    }
+}
+
+impl Mul<i64> for G2Element{
+    type Output = G2Element;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        G2Element { 
+            value: self.value * ZpElement::from(rhs).value 
+        }
+    }
+}
+
+impl Mul<i64> for GtElement{
+    type Output = GtElement;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        GtElement { 
+            value: self.value * ZpElement::from(rhs).value 
+        }
+    }
+}
+
+impl Mul<i128> for ZpElement {
+    type Output = ZpElement;
+
+    fn mul(self, rhs: i128) -> Self::Output {
+        ZpElement { 
+            value: self.value * ZpElement::from(rhs).value 
+        }
+    }
+}
+
+impl Mul<i128> for G1Element{
+    type Output = G1Element;
+
+    fn mul(self, rhs: i128) -> Self::Output {
+        G1Element { 
+            value: self.value * ZpElement::from(rhs).value 
+        }
+    }
+}
+
+impl Mul<i128> for G2Element{
+    type Output = G2Element;
+
+    fn mul(self, rhs: i128) -> Self::Output {
+        G2Element { 
+            value: self.value * ZpElement::from(rhs).value 
+        }
+    }
+}
+
+impl Mul<i128> for GtElement{
+    type Output = GtElement;
+
+    fn mul(self, rhs: i128) -> Self::Output {
+        GtElement { 
+            value: self.value * ZpElement::from(rhs).value 
         }
     }
 }

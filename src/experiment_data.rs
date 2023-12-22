@@ -179,8 +179,97 @@ pub fn diag_kronecker_dense_from_i64_to_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>)
     })
 }
 
+pub fn diag_kronecker_dense_from_i64_to_i128(a: &Vec<i64>, b: &Vec<Vec<i64>>) 
+    -> Vec<(usize, usize, i128)> {
+    
+    let sqrt_dim = a.len();
+
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        (0..sqrt_dim).into_par_iter().flat_map(|left_ij|{
+            (0..sqrt_dim).flat_map( |right_i|{
+                (0..sqrt_dim).map( move |right_j|{
+                    (
+                        left_ij * sqrt_dim + right_i,
+                        left_ij * sqrt_dim + right_j,
+                        (a[left_ij] as i128) * (b[right_i][right_j] as i128) 
+                    )
+                })
+            }).collect::<Vec<(usize, usize, i128)>>()
+        }).collect::<Vec<(usize, usize, i128)>>()
+    })
+}
 
 pub fn gen_matrices_sparse(sqrt_dim: usize) 
+    -> (Mat<i128>, Mat<i64>, Mat<i64>) {
+    
+    let dim = sqrt_dim * sqrt_dim;
+    let log_dim = (dim as u64).ilog2() as usize;
+
+
+    let a_left = gen_mat_rand_diag_i64(sqrt_dim,26);
+    let a_right = gen_mat_rand_dense_i64(sqrt_dim, 26);
+
+    let b_left = gen_mat_rand_diag_i64(sqrt_dim, 26);
+    let b_right = gen_mat_rand_dense_i64(sqrt_dim, 26);
+
+    let c_left = mat_mul_diag_i64_to_i64(&a_left, &b_left);
+    let c_right = mat_mul_dense_i64_to_i64(&a_right, &b_right);
+
+    let a = Mat::new_from_data_vec(
+        &format!("a_sprs_i64_2e{:?}", log_dim),
+        (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
+        diag_kronecker_dense_from_i64_to_i64(&a_left, &a_right)
+    );
+
+    let b = Mat::new_from_data_vec(
+        &format!("b_sprs_i64_2e{:?}", log_dim),
+        (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
+        diag_kronecker_dense_from_i64_to_i64(&b_left, &b_right)
+    );
+
+    let c = Mat::new_from_data_vec(
+        &format!("c_sprs_i128_2e{:?}", log_dim),
+        (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
+        diag_kronecker_dense_from_i64_to_i128(&c_left, &c_right)
+    );
+
+    (c, a, b)
+}
+
+pub fn sprs_i128_to_zp(sprs: &Mat<i128>) -> Mat<ZpElement> {
+   
+    let data_zp = sprs.data.iter()
+        .map(|&(row, col, val)|{
+        (row, col, ZpElement::from(val))
+    }).collect::<Vec<(usize, usize, ZpElement)>>();
+    
+    Mat::new_from_data_vec(
+        &format!("{}_zp", sprs.id),
+        sprs.shape,
+        data_zp
+    )
+}
+
+pub fn sprs_i64_to_zp(sprs: &Mat<i64>) -> Mat<ZpElement> {
+   
+    let data_zp = sprs.data.iter()
+        .map(|&(row, col, val)|{
+        (row, col, ZpElement::from(val))
+    }).collect::<Vec<(usize, usize, ZpElement)>>();
+    
+    Mat::new_from_data_vec(
+        &format!("{}_zp", sprs.id),
+        sprs.shape,
+        data_zp
+    )
+}
+
+pub fn gen_matrices_sparse_zp(sqrt_dim: usize) 
     -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
     
     let dim = sqrt_dim * sqrt_dim;
@@ -197,19 +286,19 @@ pub fn gen_matrices_sparse(sqrt_dim: usize)
     let c_right = mat_mul_dense_i64_to_i64(&a_right, &b_right);
 
     let a = Mat::new_from_data_vec(
-        &format!("a_sprs_2e{:?}", log_dim),
+        &format!("a_sprs_zp_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
         diag_kronecker_dense_from_i64_to_zp(&a_left, &a_right)
     );
 
     let b = Mat::new_from_data_vec(
-        &format!("b_sprs_2e{:?}", log_dim),
+        &format!("b_sprs_zp_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
         diag_kronecker_dense_from_i64_to_zp(&b_left, &b_right)
     );
 
     let c = Mat::new_from_data_vec(
-        &format!("c_sprs_2e{:?}", log_dim),
+        &format!("c_sprs_zp_2e{:?}", log_dim),
         (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
         diag_kronecker_dense_from_i64_to_zp(&c_left, &c_right)
     );
@@ -298,7 +387,7 @@ mod tests{
     #[test]
     fn test_experiment_data(){
         let (_c, _a, _b) = 
-            gen_matrices_sparse(SQRT_MATRIX_DIM_TEST);
+            gen_matrices_sparse_zp(SQRT_MATRIX_DIM_TEST);
 
         let (_c_d, _a_d, _b_d) = 
             gen_matrices_dense(SQRT_MATRIX_DIM_TEST);
