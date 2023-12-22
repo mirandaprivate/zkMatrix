@@ -1,4 +1,4 @@
-pub const NUM_THREADS: usize = 64;
+pub const NUM_THREADS: usize = 8;
 
 pub const LOG_DIM: usize = 12;
 

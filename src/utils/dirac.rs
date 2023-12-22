@@ -19,11 +19,7 @@ where
     U: 'static + Clone + Copy + Send + Sync,
     V: 'static + Clone + Copy + Send + Sync + Add + Zero,
 {
-    let length = vec_a.len();
-
-    if length != vec_b.len() {
-        panic!("Length of two vectors are not equal!");
-    }
+    let length = std::cmp::min(vec_a.len(), vec_b.len());
 
     if length <= NUM_THREADS {
         return vec_a.iter()
@@ -64,10 +60,10 @@ where
     V: 'static + Clone + Copy + Send + Sync + Debug + Add + AddAssign + Zero,
 {
     let a_data  = &mat_a.data;
-    let v_base_arc = Arc::new(v_base.clone());
-    let v_len = v_base.len();
+    let n_row = mat_a.shape.0;
+    let v_base_arc = Arc::new(v_base[..n_row].to_vec());
 
-    let result = Arc::new(Mutex::new(vec![V::zero(); v_len]));
+    let result = Arc::new(Mutex::new(vec![V::zero(); n_row]));
 
     let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS).collect();
 
@@ -77,7 +73,7 @@ where
         let v_base_clone = Arc::clone(&v_base_arc);
         let handle = thread::spawn(
             move || {
-                let mut local_result = vec![V::zero(); v_len];
+                let mut local_result = vec![V::zero(); n_row];
                 for &(row, col, val) in &chunk {
                     local_result[col] += v_base_clone[row] * val;
                 }
@@ -89,7 +85,7 @@ where
     for handle in handles {
         let thread_result = handle.join().unwrap();
         let mut result = result.lock().unwrap();
-        for i in 0..v_len {
+        for i in 0..n_row {
             result[i] += thread_result[i];
         }
     }
@@ -135,10 +131,10 @@ where
     V: 'static + Clone + Copy + Send + Sync + Debug + Add + AddAssign + Zero,
 {
     let a_data  = &mat_a.data;
-    let v_base_arc = Arc::new(v_base.clone());
-    let v_len = v_base.len();
+    let n_col = mat_a.shape.1;
+    let v_base_arc = Arc::new(v_base[..n_col].to_vec());
 
-    let result = Arc::new(Mutex::new(vec![V::zero(); v_len]));
+    let result = Arc::new(Mutex::new(vec![V::zero(); n_col]));
 
     let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS).collect();
 
@@ -148,7 +144,7 @@ where
         let v_base_clone = Arc::clone(&v_base_arc);
         let handle = thread::spawn(
             move || {
-                let mut local_result = vec![V::zero(); v_len];
+                let mut local_result = vec![V::zero(); n_col];
                 for &(row, col, val) in &chunk {
                     local_result[row] += v_base_clone[col] * val;
                 }
@@ -160,7 +156,7 @@ where
     for handle in handles {
         let thread_result = handle.join().unwrap();
         let mut result = result.lock().unwrap();
-        for i in 0..v_len {
+        for i in 0..n_col {
             result[i] += thread_result[i];
         }
     }
@@ -182,7 +178,8 @@ where
     W: 'static + Clone + Copy + Send + Sync + Add + Zero,
 {
     let proj_left = proj_left(mat_a, g_base);
-    let result = inner_product(&proj_left, &h_base);
+    let n_col = mat_a.shape.1;
+    let result = inner_product(&proj_left, &h_base[..n_col].to_vec());
     
     result
 }

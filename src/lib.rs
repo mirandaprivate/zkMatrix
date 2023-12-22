@@ -15,7 +15,6 @@ pub mod experiment_data;
 pub mod test_data;
 
 pub mod config;
-pub mod experiment;
 
 pub mod utils;
 

@@ -1,15 +1,14 @@
-#![allow(dead_code)]
-
 use std::time::Instant;
 
-use crate::utils::curve::{ZpElement, G1Element, G2Element, GtElement};
-use crate::utils::to_file::FileIO;
-use crate::commit_mat::CommitMat;
-use crate::setup::SRS;
-use crate::mat::Mat;
 
-use crate::experiment_data;
-use crate::config::{Q, LOG_DIM, SQRT_MATRIX_DIM};
+use zkMatrix::utils::curve::{ZpElement, G1Element, G2Element, GtElement};
+use zkMatrix::utils::to_file::FileIO;
+use zkMatrix::commit_mat::CommitMat;
+use zkMatrix::setup::SRS;
+use zkMatrix::mat::Mat;
+
+use zkMatrix::experiment_data;
+use zkMatrix::config::{Q, LOG_DIM, SQRT_MATRIX_DIM};
 
 
 fn experiment_srs_gen(){
@@ -83,13 +82,9 @@ fn experiment_commit_matrices(){
 
 }
 
-mod test{
-    use super::*;
- 
-    #[test]
-    fn run_experiment(){
-        experiment_srs_gen();
-        experiment_gen_matrices();
-        experiment_commit_matrices();
-    }
+
+fn main(){
+    experiment_srs_gen();
+    experiment_gen_matrices();
+    experiment_commit_matrices();
 }

@@ -1,5 +1,5 @@
 [package]
-name = "zkmatrix"
+name = "zkMatrix"
 version = "0.1.0"
 authors = [
     "Miranda CONG <minsheu.cong@gmail.com>", 
