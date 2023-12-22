@@ -1,9 +1,7 @@
-use serde::ser::Serializer;
-use serde::de::Deserializer;
 use serde::{Serialize, Deserialize};
 use sha2::{Sha256, Digest};
 
-use crate::utils::curve::{ZpElement, G1Element, G2Element, GtElement};
+use crate::utils::curve::{ZpElement, G1Element, G2Element, GtElement, Zero};
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -17,6 +15,7 @@ pub enum TranElem{
 
 
 pub struct TranSeq {
+    pub hasher: Sha256,
     pub data: Vec<TranElem>,
 
 }
@@ -25,7 +24,10 @@ pub struct TranSeq {
 impl TranSeq{
  
     pub fn new() -> Self {
-        Self { data: Vec::new::<TranElem>() }
+        Self { 
+            hasher: Sha256::new(),
+            data: Vec::new(),
+        }
     }
 
     pub fn push(&mut self, elem: TranElem) {
@@ -41,33 +43,31 @@ impl TranSeq{
 
 }
 
-
-pub fn adaptive_fiat_shamir(trans_seq: &TranSeq) -> TranSeq
+pub fn adaptive_fiat_shamir(trans_seq: &mut TranSeq) -> TranSeq
 {
-    let mut hasher = Sha256::new();
-
     let n = trans_seq.len();
-    let output_seq = TranSeq::new();
+    let mut output_seq = TranSeq::new();
+    let mut hasher = Sha256::new();
 
     for _ in 0..n {
         let current = trans_seq.pop_begining();
 
         match current{
-            TranElem::G1(_) | TranElem::G2(_) | TranElem::Gt(_) | TranElement::Zp(_) 
+            TranElem::G1(_) | TranElem::G2(_) | TranElem::Gt(_) | TranElem::Zp(_) 
             => {
-                let mut bytes = Vec::new();
-                current.serialize(&mut Serializer::new(&mut bytes)).unwrap();
+                let bytes 
+                    = bincode::serialize(&current).unwrap();
                 hasher.update(bytes);
                 output_seq.push(current);
             },
 
             TranElem::Coin(_) => {
                 let mut challenge = ZpElement::from_bytes(
-                    &hasher.clone().finalize());
+                    &hasher.clone().finalize().into());
                 while challenge == ZpElement::zero() {
                     hasher.update(b"0");
                     challenge = ZpElement::from_bytes(
-                        &hasher.clone().finalize());
+                        &hasher.clone().finalize().into());
                 }
                 output_seq.push(TranElem::Coin(challenge));
             },

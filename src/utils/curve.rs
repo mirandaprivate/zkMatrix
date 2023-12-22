@@ -283,6 +283,10 @@ impl ZpElement {
         ZpElement { value: scal }
     }
 
+    pub fn from_bytes(bytes: &[u8; 32]) -> Self {
+        ZpElement { value: Scalar::from_bytes(bytes).unwrap()}
+    }
+
     pub fn pow(&self, exponent: u64) -> Self {
         let exponent_256bits:[u64;4] = [exponent.clone(), 0, 0, 0]; 
         ZpElement { value: self.value.pow(&exponent_256bits)}
