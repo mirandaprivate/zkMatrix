@@ -13,9 +13,8 @@ use std::io::Write;
 
 use bincode;
 use bls12_381::{Scalar, G1Projective, G2Projective, Gt, G1Affine, G2Affine};
-use curv::BigInt;
-use curv::arithmetic::Samplable;
-use curv::arithmetic::traits::Converter;
+
+use rand::Rng;
 use serde::ser::Serializer;
 use serde::de::Deserializer;
 use serde::{Serialize, Deserialize};
@@ -256,24 +255,31 @@ fn u128_to_raw(input_integer: u128) -> [u64; 4] {
     [low, high, 0, 0]
 }
 
-fn bigint_to_scalar(input_integer: &BigInt) -> Scalar {
-    let mut hex_string = input_integer.to_str_radix(16);
-    if hex_string.len() % 2 != 0 {
-        // Add a leading zero if the string length is odd.
-        hex_string.insert(0, '0'); 
-    }
-    let bytes = hex::decode(hex_string).unwrap();
-    let mut result = [0u8; 64];
-    result[64 - bytes.len()..].copy_from_slice(&bytes);
-    result.reverse();
-    // println!("Result: {:?}", result);
-    return Scalar::from_bytes_wide(&result);
-}
+// fn bigint_to_scalar(input_integer: &BigInt) -> Scalar {
+//     let mut hex_string = input_integer.to_str_radix(16);
+//     if hex_string.len() % 2 != 0 {
+//         // Add a leading zero if the string length is odd.
+//         hex_string.insert(0, '0'); 
+//     }
+//     let bytes = hex::decode(hex_string).unwrap();
+//     let mut result = [0u8; 64];
+//     result[64 - bytes.len()..].copy_from_slice(&bytes);
+//     result.reverse();
+//     // println!("Result: {:?}", result);
+//     return Scalar::from_bytes_wide(&result);
+// }
 
 impl ZpElement {
-    pub fn rand(&self) -> Self {
-        let rand_in_256bits: BigInt = BigInt::strict_sample(256);
-        let scal: Scalar = bigint_to_scalar(&rand_in_256bits);
+    pub fn rand() -> Self {
+        let rand_raw: [u64; 4] 
+            = [
+                rand::thread_rng().gen::<u64>(),
+                rand::thread_rng().gen::<u64>(),
+                rand::thread_rng().gen::<u64>(),
+                rand::thread_rng().gen::<u64>()
+            ];
+           
+        let scal: Scalar = Scalar::from_raw(rand_raw);
         ZpElement { value: scal }
     }
 
@@ -347,12 +353,6 @@ impl Zero for GtElement{
     }
 }
 
-
-impl From<BigInt> for ZpElement {
-    fn from(input_integer: BigInt) -> Self {
-        ZpElement { value: bigint_to_scalar(&input_integer) }
-    }
-}
 
 impl From<u64> for ZpElement {
     fn from(input_integer: u64) -> Self {
@@ -761,7 +761,7 @@ impl Mul<ZpElement> for u64 {
 
     fn mul(self, rhs: ZpElement) -> Self::Output {
         ZpElement { 
-            value: bigint_to_scalar(&BigInt::from(self)) * &rhs.value 
+            value: Scalar::from(self) * &rhs.value 
         }
     }
 }
@@ -771,7 +771,7 @@ impl Mul<G1Element> for u64 {
 
     fn mul(self, rhs: G1Element) -> Self::Output {
         G1Element { 
-            value: bigint_to_scalar(&BigInt::from(self)) * &rhs.value 
+            value: Scalar::from(self) * &rhs.value 
         }
     }
 }
@@ -781,7 +781,7 @@ impl Mul<G2Element> for u64 {
 
     fn mul(self, rhs: G2Element) -> Self::Output {
         G2Element { 
-            value: bigint_to_scalar(&BigInt::from(self)) * &rhs.value 
+            value: Scalar::from(self) * &rhs.value 
         }
     }
 }
@@ -791,7 +791,7 @@ impl Mul<GtElement> for u64 {
 
     fn mul(self, rhs: GtElement) -> Self::Output {
         GtElement { 
-            value: &rhs.value * bigint_to_scalar(&BigInt::from(self))  
+            value: &rhs.value * Scalar::from(self)  
         }
     }
 }

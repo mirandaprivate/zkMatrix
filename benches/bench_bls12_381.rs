@@ -11,7 +11,7 @@ use rand::Rng;
 use zkmatrix::utils::curve::{ZpElement, G1Element, G2Element, GtElement, Double};
 use zkmatrix::mat::Mat;
 use zkmatrix::commit_mat::CommitMat;
-use zkmatrix::test_data::*;
+use zkmatrix::utils::test_data::*;
 
 use test::Bencher;
 
