@@ -120,7 +120,7 @@ impl CommitMat for Mat<i128> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::*;
+    use crate::utils::test_data::*;
 
     use crate::utils::curve::{G1Element, G2Element, GtElement};
 

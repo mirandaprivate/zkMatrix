@@ -12,7 +12,6 @@ pub mod setup;
 pub mod protocols;
 
 pub mod experiment_data;
-pub mod test_data;
 
 pub mod config;
 
