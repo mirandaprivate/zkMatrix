@@ -476,7 +476,7 @@ impl From<i64> for G2Element{
         if input_integer.signum() == -1 {
             G2Element { 
                 value: G2Projective::generator() 
-                * Scalar::from(input_integer.abs() as u64)
+                *(- Scalar::from(input_integer.abs() as u64))
             }
         } else {
             G2Element { 
@@ -492,7 +492,7 @@ impl From<i64> for GtElement{
         if input_integer.signum() == -1 {
             let g1_value = G1Affine::from(
                 G1Projective::generator()
-                *Scalar::from(input_integer.abs() as u64)
+                *( -Scalar::from(input_integer.abs() as u64))
             );
             let g2_gen = G2Affine::from(G2Projective::generator());
             GtElement { 
@@ -1003,6 +1003,12 @@ mod tests {
         let g1_value = G1Element::from(-2 as i64);
         let g2_value = G2Element::from(-3 as i64);
         let gt_value = GtElement::from(6 as i64);
+
+        assert_eq!(g1_value * g2_value, gt_value);
+
+        let g1_value = G1Element::from(-2 as i128);
+        let g2_value = G2Element::from(-3 as i128);
+        let gt_value = GtElement::from(6 as i128);
 
         assert_eq!(g1_value * g2_value, gt_value);
 
