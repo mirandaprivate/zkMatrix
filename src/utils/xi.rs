@@ -65,6 +65,23 @@ pub fn phi_s(
     product
 }
 
+pub fn psi_from_xi(xi: &Vec<ZpElement>, s: ZpElement) -> Vec<ZpElement> {
+    
+    let length = xi.len();
+
+    let mut psi_rev: Vec<ZpElement> = Vec::with_capacity(length);
+
+    psi_rev.push(xi[length-1]);
+
+    for i in 1..length {
+        psi_rev.push(psi_rev[i-1] * s + xi[length-1-i]);
+    }
+
+    psi_rev.reverse();
+    
+    psi_rev
+}
+
 
 #[cfg(test)]
 fn phi_s_direct(
@@ -214,6 +231,37 @@ mod tests{
         assert_eq!(g1_reduce_direct, g1_reduce);
 
         println!(" * Assert Equal between two methods ");
+
+        let s_hat = ZpElement::rand();
+
+        let s_hat_vec: Vec<ZpElement> = std::iter::successors(
+            Some(ZpElement::from(1 as u64)), 
+            |&x| Some(x * s_hat)
+        ).take(n).collect();
+
+
+        let s_vec: Vec<ZpElement> = std::iter::successors(
+            Some(s), 
+            |&x| Some(x * s)
+        ).take(n).collect();
+
+        let s_hat_vec_1: Vec<ZpElement> = std::iter::successors(
+            Some(s_hat), 
+            |&x| Some(x * s_hat)
+        ).take(n).collect();
+
+        let xi = xi_from_challenges(&challenges);
+        let psi = psi_from_xi(&xi, s);
+
+        let xi_s = dirac::inner_product(
+            &xi,&s_vec);
+        let xi_s_hat = dirac::inner_product(
+            &xi, &s_hat_vec_1);
+        let psi_s_hat = dirac::inner_product(
+            &psi, &s_hat_vec);
+        assert_eq!((s-s_hat) * psi_s_hat, xi_s - xi_s_hat );
+  
+        println!(" * Assert correct computation of psi ");
 
     }
 
