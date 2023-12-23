@@ -102,20 +102,20 @@ mod tests {
         
         assert_eq!(mat_1, mat_2);
 
-        mat_1.to_file("mat_test".to_string(), true)
+        mat_1.to_file("mat_test.dat".to_string(), true)
         .unwrap();
         let mat_1_read: Mat<GtElement> = Mat::from_file(
-                "mat_test".to_string(), true
+                "mat_test.dat".to_string(), true
             ).unwrap();
         assert_eq!(mat_1, mat_1_read);
 
         let vec_1: Vec<GtElement> = 
             vec![GtElement::from(1 as i64), GtElement::from(2 as i64)];
         vec_1.to_file(
-            "vec_test".to_string(), false
+            "vec_test.dat".to_string(), false
         ).unwrap();
         let vec_1_read: Vec<GtElement> = Vec::from_file(
-             "vec_test".to_string(), false
+             "vec_test.dat".to_string(), false
         ).unwrap();
         assert_eq!(vec_1, vec_1_read);
     }

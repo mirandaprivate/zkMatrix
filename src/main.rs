@@ -32,7 +32,7 @@ fn experiment_srs_gen(){
 
     println!(" ** SRS generation time: {:?}", srs_duration);
 
-    srs.to_file(String::from("srs"), true).unwrap();
+    srs.to_file(String::from("srs.srs"), true).unwrap();
 
 }
 
@@ -46,19 +46,19 @@ fn experiment_gen_matrices(){
 
     println!(" ** Matrix generation time: {:?}", mat_duration);
 
-    c.to_file(c.id.to_string(), false).unwrap();
-    a.to_file(a.id.to_string(), false).unwrap();
-    b.to_file(b.id.to_string(), false).unwrap();
+    c.to_file(format!("{}.dat", c.id), false).unwrap();
+    a.to_file(format!("{}.dat", a.id), false).unwrap();
+    b.to_file(format!("{}.dat", b.id), false).unwrap();
 
 }
 
 
 fn experiment_commit_matrices(){
 
-    let srs = SRS::from_file(String::from("srs"), true).unwrap();
+    let srs = SRS::from_file(String::from("srs.srs"), true).unwrap();
 
     let a_read: Mat<i64> = Mat::<i64>::from_file(
-        format!("a_sprs_i64_2e{:?}", LOG_DIM), false
+        format!("a_sprs_i64_2e{:?}.dat", LOG_DIM), false
         ).unwrap();
     
     let commit_a_timer = Instant::now();
@@ -70,7 +70,7 @@ fn experiment_commit_matrices(){
     println!(" ** Commit matrix a time: {:?}", commit_a_duration);
 
     let c_read: Mat<i64> = Mat::<i64>::from_file(
-        format!("b_sprs_i64_2e{:?}", LOG_DIM), false
+        format!("b_sprs_i64_2e{:?}.dat", LOG_DIM), false
         ).unwrap();
     
     let commit_b_timer = Instant::now();
@@ -82,7 +82,7 @@ fn experiment_commit_matrices(){
     println!(" ** Commit matrix b time: {:?}", commit_b_duration);
 
     let c_read: Mat<i128> = Mat::<i128>::from_file(
-        format!("c_sprs_i128_2e{:?}", LOG_DIM), false
+        format!("c_sprs_i128_2e{:?}.dat", LOG_DIM), false
         ).unwrap();
     
     let commit_c_timer = Instant::now();

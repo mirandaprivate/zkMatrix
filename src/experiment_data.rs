@@ -583,23 +583,29 @@ mod tests{
 
         let log_dim = (SQRT_MATRIX_DIM_TEST as u64).ilog2() as usize;
 
-        _a_d.to_file(_a_d.id.to_string(), false).unwrap();
-        _b_d.to_file(_b_d.id.to_string(), false).unwrap();
-        _c_d.to_file(_c_d.id.to_string(), false).unwrap();
+        _a_d.to_file(format!("{}.dat", _a_d.id), false)
+            .unwrap();
+        _b_d.to_file(format!("{}.dat", _b_d.id), false)
+            .unwrap();
+        _c_d.to_file(format!("{}.dat", _c_d.id), false)
+            .unwrap();
 
         let a_read: Mat<i64> = Mat::<i64>::from_file(
-            format!("a_dense_i64_2e{:?}", log_dim), false
+            format!("a_dense_i64_2e{:?}.dat", log_dim), false
             ).unwrap();
         let b_read = Mat::<i64>::from_file(
-            format!("b_dense_i64_2e{:?}", log_dim), false
+            format!("b_dense_i64_2e{:?}.dat", log_dim), false
             ).unwrap();
         let c_read = Mat::<i128>::from_file(
-            format!("c_dense_i128_2e{:?}", log_dim), false
+            format!("c_dense_i128_2e{:?}.dat", log_dim), false
             ).unwrap();
         
-        let a_read_dense = sprs_to_dense_from_i64_to_zp(&a_read);
-        let b_read_dense = sprs_to_dense_from_i64_to_zp(&b_read);
-        let c_read_dense = sprs_to_dense_from_i128_to_zp(&c_read);
+        let a_read_dense = sprs_to_dense_from_i64_to_zp(
+            &a_read);
+        let b_read_dense = sprs_to_dense_from_i64_to_zp(
+            &b_read);
+        let c_read_dense = sprs_to_dense_from_i128_to_zp(
+            &c_read);
 
         assert_eq!(
             mat_mul_dense_zp_to_zp(&a_read_dense, &b_read_dense), c_read_dense

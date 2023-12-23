@@ -40,7 +40,7 @@ impl CommitMat for Mat<u64> {
     ) -> GtElement {
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
-            format!("{}_right_cache", self.id), false)
+            format!("{}_rp.cache", self.id), false)
         .unwrap();
 
         let result = dirac::inner_product(
@@ -53,7 +53,7 @@ impl CommitMat for Mat<u64> {
     ) -> GtElement {
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
-            format!("{}_left_cache", self.id), false)
+            format!("{}_lp.cache", self.id), false)
         .unwrap();
         
         let result = dirac::inner_product(
@@ -69,7 +69,7 @@ impl CommitMat for Mat<i64> {
 
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
-            format!("{}_right_cache", self.id), false)
+            format!("{}_rp.cache", self.id), false)
         .unwrap();
 
         let result = dirac::inner_product(
@@ -83,7 +83,7 @@ impl CommitMat for Mat<i64> {
 
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
-            format!("{}_left_cache", self.id), false)
+            format!("{}_lp.cache", self.id), false)
         .unwrap();
         
         let result = dirac::inner_product(
@@ -99,7 +99,7 @@ impl CommitMat for Mat<i128> {
 
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
-            format!("{}_right_cache", self.id), false)
+            format!("{}_rp.cache", self.id), false)
         .unwrap();
 
         let result = dirac::inner_product(
@@ -113,7 +113,7 @@ impl CommitMat for Mat<i128> {
 
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
-            format!("{}_left_cache", self.id), false)
+            format!("{}_lp.cache", self.id), false)
         .unwrap();
         
         let result = dirac::inner_product(
@@ -133,13 +133,13 @@ mod tests {
     fn test_commit() {
         let mat_a: Mat<u64> = {
             match FileIO::from_file(
-                "a_test".to_string(), false)
+                "a_test.dat".to_string(), false)
             {
                 Ok(mat) => mat,
                 Err(_) => {
                     let mat_a: Mat<u64> = gen_mat_a_u64_direct_test();
                     mat_a.to_file(
-                        mat_a.id.to_string(), false)
+                        format!("{}.dat", mat_a.id), false)
                     .unwrap();
                     mat_a
                 }
@@ -148,13 +148,13 @@ mod tests {
 
         let vec_g = {
             match FileIO::from_file(
-                "vec_g_test".to_string(), true)
+                "vec_g_test.dat".to_string(), true)
             {
                 Ok(vec) => vec,
                 Err(_) => {
                     let vec_g: Vec<G1Element> = gen_vec_v_g1_direct_test();
                     vec_g.to_file(
-                        "vec_g_test".to_string(), true)
+                        "vec_g_test.dat".to_string(), true)
                     .unwrap();
                     vec_g
                 }
@@ -163,13 +163,13 @@ mod tests {
 
         let vec_h = {
             match FileIO::from_file(
-                "vec_h_test".to_string(), true)
+                "vec_h_test.dat".to_string(), true)
             {
                 Ok(vec) => vec,
                 Err(_) => {
                     let vec_h: Vec<G2Element> = gen_vec_v_g2_direct_test();
                     vec_h.to_file(
-                        "vec_h_test".to_string(), true)
+                        "vec_h_test.dat".to_string(), true)
                     .unwrap();
                     vec_h
                 }
@@ -178,13 +178,13 @@ mod tests {
         
         let right_proj = {
             match FileIO::from_file(
-                format!("{}_right_test", mat_a.id).to_string(), false)
+                format!("{}_right_test.dat", mat_a.id).to_string(), false)
             {
                 Ok(vec) => vec,
                 Err(_) => {
                     let right_proj: Vec<G2Element> = gen_vec_va_g2_from_kronecker_test();
                     right_proj.to_file(
-                        format!("{}_right_test", mat_a.id).to_string(), false)
+                        format!("{}_right_test.dat", mat_a.id).to_string(), false)
                     .unwrap();
                     right_proj
                 }
@@ -193,14 +193,14 @@ mod tests {
 
         let left_proj = {
             match FileIO::from_file(
-                format!("{}_left_test", mat_a.id).to_string(), false)
+                format!("{}_left_test.dat", mat_a.id).to_string(), false)
             {
                 Ok(vec) => vec,
                 Err(_) => {
                     let left_proj: Vec<G1Element> 
                         = gen_vec_va_g1_from_kronecker_test();
                     left_proj.to_file(
-                        format!("{}_left_test", mat_a.id).to_string(),
+                        format!("{}_left_test.dat", mat_a.id).to_string(),
                         false,
                     ).unwrap();
                     left_proj
@@ -216,11 +216,11 @@ mod tests {
             .commit_col_major(&vec_g, &vec_h);
 
         let right_cache: Vec<G2Element> = FileIO::from_file(
-                format!("{}_right_cache", mat_a.id).to_string(),
+                format!("{}_rp.cache", mat_a.id).to_string(),
                 false,
             ).unwrap();
         let left_cache: Vec<G1Element> = FileIO::from_file(
-               format!("{}_left_cache", mat_a.id).to_string(), 
+               format!("{}_lp.cache", mat_a.id).to_string(), 
                false,
             ).unwrap();
 

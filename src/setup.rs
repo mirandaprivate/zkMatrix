@@ -105,7 +105,7 @@ impl SRS {
             h_hat_prime_vec,
         };
 
-        srs.to_file("srs".to_string(), true).unwrap();
+        srs.to_file("srs.srs".to_string(), true).unwrap();
 
         srs
 
@@ -127,7 +127,7 @@ mod tests {
     fn test_srs() {
         let srs = SRS::new(Q_TEST);
         let srs_read = FileIO::from_file(
-            String::from("srs"), true
+            String::from("srs.srs"), true
         ).unwrap();
         println!("srs: {:?}", srs);
         assert_eq!(srs, srs_read);

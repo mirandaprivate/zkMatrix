@@ -1,5 +1,8 @@
 /target
 /data/**/*.dat
+/data/**/*.cache
+/data/**/*.tr
+/data/**/*.srs
 /Cargo.lock
 /.vscode
 # !/data/public/srs.dat
