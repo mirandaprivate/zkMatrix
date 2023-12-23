@@ -7,7 +7,7 @@ use crate::utils::curve::{ZpElement, G1Element, G2Element, GtElement, Zero};
 use crate::utils::to_file::FileIO;
 
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TranElem{
     G1(G1Element),
     G2(G2Element),
@@ -16,9 +16,11 @@ pub enum TranElem{
     Coin(ZpElement),
 }
 
+#[derive(Debug, Clone)]
 pub struct TranSeq {
     pub hasher: Sha256,
     pub data: Vec<TranElem>,
+    pub pointer: usize,
 
 }
 
@@ -29,6 +31,7 @@ impl TranSeq{
         Self { 
             hasher: Sha256::new(),
             data: Vec::new(),
+            pointer: 0,
         }
     }
 
@@ -43,7 +46,7 @@ impl TranSeq{
         self.data.len()
     }
 
-    pub fn gen_challenge(&mut self) {
+    pub fn gen_challenge(&mut self) -> ZpElement {
         let mut challenge = ZpElement::from_bytes(
             &self.hasher.clone().finalize().into());
         while challenge == ZpElement::zero() {
@@ -53,6 +56,8 @@ impl TranSeq{
         }
 
         self.data.push(TranElem::Coin(challenge));
+
+        challenge
     }
 
     pub fn check_fiat_shamir(&self) -> bool {
@@ -100,6 +105,7 @@ impl TranSeq{
         Self { 
             hasher: Sha256::new(),
             data: data_read,
+            pointer: 0,
         }
     }
 
