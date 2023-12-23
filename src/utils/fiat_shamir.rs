@@ -1,3 +1,7 @@
+//! Utility functions for the adaptive Fiat-Shamir transformation
+//! 
+use std::hash::Hasher;
+
 use serde::{Serialize, Deserialize};
 use sha2::{Sha256, Digest};
 
@@ -23,9 +27,9 @@ pub struct TranSeq {
 
 impl TranSeq{
  
-    pub fn new() -> Self {
+    pub fn new(hash: Sha256) -> Self {
         Self { 
-            hasher: Sha256::new(),
+            hasher: hash.clone(),
             data: Vec::new(),
         }
     }
@@ -46,7 +50,7 @@ impl TranSeq{
 pub fn adaptive_fiat_shamir(trans_seq: &mut TranSeq) -> TranSeq
 {
     let n = trans_seq.len();
-    let mut output_seq = TranSeq::new();
+    let mut output_seq = TranSeq::new(Sha256::new());
     let mut hasher = Sha256::new();
 
     for _ in 0..n {
@@ -74,4 +78,26 @@ pub fn adaptive_fiat_shamir(trans_seq: &mut TranSeq) -> TranSeq
         }
     }
     output_seq
+}
+
+
+mod tests {
+    use std::ptr::hash;
+
+    use super::*;
+
+    #[test]
+    fn test_fiat_shamir(){
+        let mut hasher_1 = Sha256::new();
+        let mut hasher_2 = Sha256::new();
+        
+
+        hasher_1.update(b"0");
+
+        hasher_2 = hasher_1.clone();
+
+        println!("Hasher 1: {:x}", hasher_1.finalize());
+        println!("Hasher 2: {:x}", hasher_2.finalize());
+
+    }
 }

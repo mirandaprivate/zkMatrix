@@ -1,12 +1,14 @@
 //! Compute the n-vector xi by using log_2 n random challenges.
 //! 
-//! 
+//! Compute the n-vector psi by using the n-vector xi and a random s.
 //!  
 //! 
 use crate::utils::curve::ZpElement;
 use crate::utils::dirac;
 use crate::utils::curve::{Add, Mul, Zero};
 
+/// Compute the n-vector xi by using log_2 n random challenges.
+/// 
 pub fn xi_from_challenges(challenges: &Vec<ZpElement>) -> Vec<ZpElement> {
     
     let log_n = challenges.len() as usize;
@@ -26,8 +28,11 @@ pub fn xi_from_challenges(challenges: &Vec<ZpElement>) -> Vec<ZpElement> {
     xi 
 }
 
-pub fn reduce_from_challenges<T>(challenges: &Vec<ZpElement>, vector: &Vec<T>) 
-    -> T 
+/// Reduce a n-vector to a scalar by using log_2 n random challenges.
+/// 
+pub fn reduce_from_challenges<T>(
+    challenges: &Vec<ZpElement>, vector: &Vec<T>
+) -> T 
     where
     T: 'static + Clone + Copy + Send + Sync 
         + Mul<ZpElement, Output =T> + Add + Zero,
@@ -38,6 +43,8 @@ pub fn reduce_from_challenges<T>(challenges: &Vec<ZpElement>, vector: &Vec<T>)
     dirac::inner_product(&vector, &xi) 
 }
 
+/// Compute phi(s) in logarithmic time.
+/// 
 pub fn phi_s(
     s: ZpElement,
     challenges: &Vec<ZpElement>,
@@ -65,6 +72,10 @@ pub fn phi_s(
     product
 }
 
+/// Compute the n-vector psi by using the n-vector xi and a random s.
+/// 
+/// Psi is used for the verification accelleration.
+/// 
 pub fn psi_from_xi(xi: &Vec<ZpElement>, s: ZpElement) -> Vec<ZpElement> {
     
     let length = xi.len();
@@ -82,7 +93,8 @@ pub fn psi_from_xi(xi: &Vec<ZpElement>, s: ZpElement) -> Vec<ZpElement> {
     psi_rev
 }
 
-
+/// Compute phi(s) directly. For unit test purpose only.
+/// 
 #[cfg(test)]
 fn phi_s_direct(
     s: ZpElement, 
@@ -105,6 +117,8 @@ fn phi_s_direct(
     reduce_from_challenges(&challenges, &s_vec)
 }
 
+/// Compute phi(s) by using the reduce method. For unit test purpose only.
+/// 
 #[cfg(test)]
 fn phi_s_reduce(
     s: ZpElement, 
@@ -191,17 +205,23 @@ mod tests{
         let timer_direct = Instant::now();
         let phi_s_direct = phi_s_direct(
             s, &challenges, 3, 2);
-        println!(" ** Compute phi_s direct time: {:?}", timer_direct.elapsed());
+        println!(
+            " ** Compute phi_s direct time: {:?}", timer_direct.elapsed()
+        );
         
         let timer_opt = Instant::now();
         let phi_s_opt = phi_s(
             s, &challenges, 3, 2);
-        println!(" ** Compute phi_s opt time: {:?}", timer_opt.elapsed());
+        println!(
+            " ** Compute phi_s opt time: {:?}", timer_opt.elapsed()
+        );
         
         let timer_reduce = Instant::now();
         let phi_s_reduce = phi_s_reduce(
             s, &challenges, 3, 2);
-        println!(" ** Compute phi_s reduce time: {:?}", timer_reduce.elapsed());
+        println!(
+            " ** Compute phi_s reduce time: {:?}", timer_reduce.elapsed()
+        );
 
         assert_eq!(phi_s_direct, phi_s_reduce);
         assert_eq!(phi_s_reduce, phi_s_opt);
@@ -240,23 +260,13 @@ mod tests{
         ).take(n).collect();
 
 
-        let s_vec: Vec<ZpElement> = std::iter::successors(
-            Some(s), 
-            |&x| Some(x * s)
-        ).take(n).collect();
-
-        let s_hat_vec_1: Vec<ZpElement> = std::iter::successors(
-            Some(s_hat), 
-            |&x| Some(x * s_hat)
-        ).take(n).collect();
-
         let xi = xi_from_challenges(&challenges);
         let psi = psi_from_xi(&xi, s);
 
-        let xi_s = dirac::inner_product(
-            &xi,&s_vec);
-        let xi_s_hat = dirac::inner_product(
-            &xi, &s_hat_vec_1);
+        let xi_s = phi_s(
+            s, &challenges, 1, 1);
+        let xi_s_hat = phi_s(
+            s_hat, &challenges, 1, 1);
         let psi_s_hat = dirac::inner_product(
             &psi, &s_hat_vec);
         assert_eq!((s-s_hat) * psi_s_hat, xi_s - xi_s_hat );

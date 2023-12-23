@@ -1,4 +1,5 @@
-//! Define the type of the witness matrices.
+//! Define the struct of the witness matrices.
+//! 
 //! The witness matrices are represented as sparse matrices.
 //!  
 use core::convert::From;
@@ -51,11 +52,23 @@ impl<T: PartialEq + Clone> PartialEq for Mat<T> {
         let mut self_data = self.data.clone();
         let mut other_data = other.data.clone();
 
-        self_data.sort_by(|a, b| a.0.cmp(&b.0));
-        self_data.sort_by(|a, b| a.1.cmp(&b.1));
+        self_data.sort_by(
+            |a, b| 
+            a.0.cmp(&b.0)
+        );
+        self_data.sort_by(
+            |a, b|
+            a.1.cmp(&b.1)
+        );
 
-        other_data.sort_by(|a, b| a.0.cmp(&b.0));
-        other_data.sort_by(|a, b| a.1.cmp(&b.1));
+        other_data.sort_by(
+            |a, b|
+            a.0.cmp(&b.0)
+        );
+        other_data.sort_by(
+            |a, b|
+            a.1.cmp(&b.1)
+        );
 
         self_data == other_data
     }
@@ -81,23 +94,29 @@ mod tests {
 
         assert_eq!(mat_1.data[1], (1, 2, GtElement::from(1 as i64)));
 
-        let mut mat_2:Mat<GtElement>  = Mat::new("test_mat_2", (2, 2));
+        let mut mat_2:Mat<GtElement>  = Mat::new(
+            "test_mat_2", (2, 2)
+        );
         mat_2.push(1, 2, GtElement::from(1 as i64));
         mat_2.push(1, 1, GtElement::from(3 as i64));
         
         assert_eq!(mat_1, mat_2);
 
-        mat_1.to_file("mat_test".to_string(), true).unwrap();
-        let mat_1_read: Mat<GtElement> = Mat::from_file(
-            "mat_test".to_string(), true)
+        mat_1.to_file("mat_test".to_string(), true)
         .unwrap();
+        let mat_1_read: Mat<GtElement> = Mat::from_file(
+                "mat_test".to_string(), true
+            ).unwrap();
         assert_eq!(mat_1, mat_1_read);
 
-        let vec_1: Vec<GtElement> = vec![GtElement::from(1 as i64), GtElement::from(2 as i64)];
-        vec_1.to_file("vec_test".to_string(), false).unwrap();
+        let vec_1: Vec<GtElement> = 
+            vec![GtElement::from(1 as i64), GtElement::from(2 as i64)];
+        vec_1.to_file(
+            "vec_test".to_string(), false
+        ).unwrap();
         let vec_1_read: Vec<GtElement> = Vec::from_file(
-             "vec_test".to_string(), false)
-        .unwrap();
+             "vec_test".to_string(), false
+        ).unwrap();
         assert_eq!(vec_1, vec_1_read);
     }
 }

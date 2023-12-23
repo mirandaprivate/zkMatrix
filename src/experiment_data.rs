@@ -1,10 +1,21 @@
-//! Test data for unit tests and integration tests.
+//! Matrices for experiments.
 //! 
-//! We use kronecker product of a sparse matrix and a dense matrix to generate
-//!  the sparse matrices.
+//! We use kronecker product of a random diagonal sparse (26bits for each element)
+//! matrix and a random dense matrix (26bits for each element) to generate
+//! the random sparse matrices (52bits for each element).
 //!
 //! The dimension of the resulting matrix is:
 //!     (SQRT_MATRIX_DIM * SQRT_MATRIX_DIM, SQRT_MATRIX_DIM * SQRT_MATRIX_DIM)
+//! 
+//! The product matrix is also a sparse matrix (each element be a i128 number).
+//! 
+//! To generate random dense matrices, we generate two random i64 random matrices
+//! (52 bits for each element) and multiply them to get the product matrix
+//! (each element is a i128 number).
+//! 
+//! We constrain the number to be 52 bits because this is the length of 
+//! the mantissa for double-precision floating-point numbers
+//! according to the IEEE 754 standard.
 //! 
 
 #![allow(dead_code)]
@@ -21,7 +32,8 @@ use crate::utils::curve::ZpElement;
 
 
 
-
+/// Generate a random dense i64 matrix
+/// 
 pub fn gen_mat_rand_dense_i64(sqrt_dim: usize, max_bit: u32) -> Vec<Vec<i64>>{
     (0..sqrt_dim).map(|_| {
         (0..sqrt_dim).map(|_| {
@@ -31,6 +43,8 @@ pub fn gen_mat_rand_dense_i64(sqrt_dim: usize, max_bit: u32) -> Vec<Vec<i64>>{
     }).collect::<Vec<Vec<i64>>>()
 }
 
+/// Generate a random diagonal i64 matrix
+/// 
 pub fn gen_mat_rand_diag_i64(sqrt_dim: usize, max_bit: u32) -> Vec<i64>{
     (0..sqrt_dim).map(|_| {
         rand::thread_rng()
@@ -38,6 +52,8 @@ pub fn gen_mat_rand_diag_i64(sqrt_dim: usize, max_bit: u32) -> Vec<i64>{
     }).collect::<Vec<i64>>()  
 }
 
+/// Compute the multiplication of two i64 dense matrices
+/// 
 fn mat_mul_dense_i64_to_zp(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>) 
     -> Vec<Vec<ZpElement>> {
     let a_rows = a.len();
@@ -53,20 +69,24 @@ fn mat_mul_dense_i64_to_zp(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>)
         .unwrap();
 
     pool.install(|| {
-        result.par_iter_mut().enumerate().for_each(|(i, row)| {
+        result.par_iter_mut().enumerate().for_each(
+            |(i, row)| {
             for j in 0..b_cols {
                 for k in 0..a_cols {
                     row[j] += ZpElement::from(a[i][k]) * ZpElement::from(b[k][j]);
                 }
             }
-        });
+            }
+        );
     });
 
     result
 }
 
-fn mat_mul_dense_i64_to_i64(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>) 
-    -> Vec<Vec<i64>> {
+/// Compute the multiplication of two i64 dense matrices
+/// 
+fn mat_mul_dense_i64_to_i64(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
+) -> Vec<Vec<i64>> {
     let a_rows = a.len();
     let a_cols = a[0].len();
     let b_cols = b[0].len();
@@ -80,7 +100,8 @@ fn mat_mul_dense_i64_to_i64(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>)
         .unwrap();
 
     pool.install(|| {
-        result.par_iter_mut().enumerate().for_each(|(i, row)| {
+        result.par_iter_mut().enumerate().for_each(
+            |(i, row)| {
             for j in 0..b_cols {
                 for k in 0..a_cols {
                     row[j] += a[i][k] * b[k][j];
@@ -92,13 +113,49 @@ fn mat_mul_dense_i64_to_i64(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>)
     result
 }
 
-fn mat_mul_dense_zp_to_zp(a: &Vec<Vec<ZpElement>>, b: &Vec<Vec<ZpElement>>) 
-    -> Vec<Vec<ZpElement>> {
+
+/// Compute the multiplication of two i64 dense matrices
+/// 
+/// The result is a i128 dense matrix
+/// 
+fn mat_mul_dense_i64_to_i128(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
+) -> Vec<Vec<i128>> {
     let a_rows = a.len();
     let a_cols = a[0].len();
     let b_cols = b[0].len();
 
-    let mut result = vec![vec![ZpElement::zero(); b_cols]; a_rows];
+    let mut result = 
+        vec![vec![0 as i128; b_cols]; a_rows];
+
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        result.par_iter_mut().enumerate().for_each(
+            |(i, row)| {
+            for j in 0..b_cols {
+                for k in 0..a_cols {
+                    row[j] += (a[i][k] as i128) * (b[k][j] as i128);
+                }
+            }
+        });
+    });
+
+    result
+}
+
+/// Compute the multiplication of two Zp dense matrices
+/// 
+fn mat_mul_dense_zp_to_zp(a: &Vec<Vec<ZpElement>>, b: &Vec<Vec<ZpElement>>
+) -> Vec<Vec<ZpElement>> {
+    let a_rows = a.len();
+    let a_cols = a[0].len();
+    let b_cols = b[0].len();
+
+    let mut result = 
+        vec![vec![ZpElement::zero(); b_cols]; a_rows];
 
     for i in 0..a_rows {
         for j in 0..b_cols {
@@ -112,7 +169,8 @@ fn mat_mul_dense_zp_to_zp(a: &Vec<Vec<ZpElement>>, b: &Vec<Vec<ZpElement>>)
     result
 }
 
-
+/// Compute the multiplication of two diagonal matrices
+/// 
 fn mat_mul_diag_i64_to_zp(a: &Vec<i64>, b: &Vec<i64>) -> Vec<ZpElement> {
     
     a.iter().zip(b.iter()).map(|(left, right)| {
@@ -120,6 +178,8 @@ fn mat_mul_diag_i64_to_zp(a: &Vec<i64>, b: &Vec<i64>) -> Vec<ZpElement> {
     }).collect()
 }
 
+/// Compute the multiplication of two diagonal matrices
+/// 
 fn mat_mul_diag_i64_to_i64(a: &Vec<i64>, b: &Vec<i64>) -> Vec<i64> {
     
     a.iter().zip(b.iter()).map(|(left, right)| {
@@ -127,8 +187,10 @@ fn mat_mul_diag_i64_to_i64(a: &Vec<i64>, b: &Vec<i64>) -> Vec<i64> {
     }).collect()
 }
 
-pub fn diag_kronecker_dense_from_i64_to_zp(a: &Vec<i64>, b: &Vec<Vec<i64>>) 
-    -> Vec<(usize, usize, ZpElement)> {
+/// Compute the kronecker product between a diagonal matrix and a dense matrix
+/// 
+pub fn diag_kronecker_dense_from_i64_to_zp(a: &Vec<i64>, b: &Vec<Vec<i64>>
+) -> Vec<(usize, usize, ZpElement)> {
     
     let sqrt_dim = a.len();
 
@@ -144,7 +206,9 @@ pub fn diag_kronecker_dense_from_i64_to_zp(a: &Vec<i64>, b: &Vec<Vec<i64>>)
                     (
                         left_ij * sqrt_dim + right_i,
                         left_ij * sqrt_dim + right_j,
-                        ZpElement::from(a[left_ij]) * ZpElement::from(b[right_i][right_j]) 
+                        ZpElement::from(a[left_ij]) * ZpElement::from(
+                            b[right_i][right_j]
+                        ) 
                     )
                 })
             }).collect::<Vec<(usize, usize, ZpElement)>>()
@@ -154,8 +218,10 @@ pub fn diag_kronecker_dense_from_i64_to_zp(a: &Vec<i64>, b: &Vec<Vec<i64>>)
 }
 
 
-pub fn diag_kronecker_dense_from_i64_to_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>) 
-    -> Vec<(usize, usize, i64)> {
+/// Compute the kronecker product between a diagonal matrix and a dense matrix
+/// 
+pub fn diag_kronecker_dense_from_i64_to_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>
+) -> Vec<(usize, usize, i64)> {
     
     let sqrt_dim = a.len();
 
@@ -179,8 +245,10 @@ pub fn diag_kronecker_dense_from_i64_to_i64(a: &Vec<i64>, b: &Vec<Vec<i64>>)
     })
 }
 
-pub fn diag_kronecker_dense_from_i64_to_i128(a: &Vec<i64>, b: &Vec<Vec<i64>>) 
-    -> Vec<(usize, usize, i128)> {
+/// Compute the kronecker product between a diagonal matrix and a dense matrix
+/// 
+pub fn diag_kronecker_dense_from_i64_to_i128(a: &Vec<i64>, b: &Vec<Vec<i64>>
+) -> Vec<(usize, usize, i128)> {
     
     let sqrt_dim = a.len();
 
@@ -196,7 +264,9 @@ pub fn diag_kronecker_dense_from_i64_to_i128(a: &Vec<i64>, b: &Vec<Vec<i64>>)
                     (
                         left_ij * sqrt_dim + right_i,
                         left_ij * sqrt_dim + right_j,
-                        (a[left_ij] as i128) * (b[right_i][right_j] as i128) 
+                        (a[left_ij] as i128) * (
+                            b[right_i][right_j] as i128
+                        ) 
                     )
                 })
             }).collect::<Vec<(usize, usize, i128)>>()
@@ -204,6 +274,13 @@ pub fn diag_kronecker_dense_from_i64_to_i128(a: &Vec<i64>, b: &Vec<Vec<i64>>)
     })
 }
 
+/// Generate the sparse matrices used for experiments
+/// 
+/// The dimension of the resulting matrix is:
+///     (SQRT_MATRIX_DIM * SQRT_MATRIX_DIM, SQRT_MATRIX_DIM * SQRT_MATRIX_DIM)
+/// 
+/// The elements of the matrices are i128, i64, i64 respectively.
+/// 
 pub fn gen_matrices_sparse(sqrt_dim: usize) 
     -> (Mat<i128>, Mat<i64>, Mat<i64>) {
     
@@ -211,14 +288,26 @@ pub fn gen_matrices_sparse(sqrt_dim: usize)
     let log_dim = (dim as u64).ilog2() as usize;
 
 
-    let a_left = gen_mat_rand_diag_i64(sqrt_dim,26);
-    let a_right = gen_mat_rand_dense_i64(sqrt_dim, 26);
+    let a_left = gen_mat_rand_diag_i64(
+        sqrt_dim,26
+    );
+    let a_right = gen_mat_rand_dense_i64(
+        sqrt_dim, 26
+    );
 
-    let b_left = gen_mat_rand_diag_i64(sqrt_dim, 26);
-    let b_right = gen_mat_rand_dense_i64(sqrt_dim, 26);
+    let b_left = gen_mat_rand_diag_i64(
+        sqrt_dim, 26
+    );
+    let b_right = gen_mat_rand_dense_i64(
+        sqrt_dim, 26
+    );
 
-    let c_left = mat_mul_diag_i64_to_i64(&a_left, &b_left);
-    let c_right = mat_mul_dense_i64_to_i64(&a_right, &b_right);
+    let c_left = mat_mul_diag_i64_to_i64(
+        &a_left, &b_left
+    );
+    let c_right = mat_mul_dense_i64_to_i64(
+        &a_right, &b_right
+    );
 
     let a = Mat::new_from_data_vec(
         &format!("a_sprs_i64_2e{:?}", log_dim),
@@ -241,36 +330,45 @@ pub fn gen_matrices_sparse(sqrt_dim: usize)
     (c, a, b)
 }
 
+/// Convert the i128 sparse matrix to Zp sparse matrix
+/// 
 pub fn sprs_i128_to_zp(sprs: &Mat<i128>) -> Mat<ZpElement> {
    
-    let data_zp = sprs.data.iter()
+    let data_zp = sprs.data
+        .iter()
         .map(|&(row, col, val)|{
-        (row, col, ZpElement::from(val))
-    }).collect::<Vec<(usize, usize, ZpElement)>>();
+            (row, col, ZpElement::from(val))
+        }).collect::<Vec<(usize, usize, ZpElement)>>();
     
     Mat::new_from_data_vec(
         &format!("{}_zp", sprs.id),
         sprs.shape,
-        data_zp
+        data_zp,
     )
 }
 
+/// Convert the i64 sparse matrix to Zp sparse matrix
+/// 
 pub fn sprs_i64_to_zp(sprs: &Mat<i64>) -> Mat<ZpElement> {
    
     let data_zp = sprs.data.iter()
         .map(|&(row, col, val)|{
-        (row, col, ZpElement::from(val))
-    }).collect::<Vec<(usize, usize, ZpElement)>>();
+            (row, col, ZpElement::from(val))
+       }).collect::<Vec<(usize, usize, ZpElement)>>();
     
     Mat::new_from_data_vec(
         &format!("{}_zp", sprs.id),
         sprs.shape,
-        data_zp
+        data_zp,
     )
 }
 
-pub fn gen_matrices_sparse_zp(sqrt_dim: usize) 
-    -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
+/// Generate the sparse matrices in Zp.
+/// 
+/// 
+#[cfg(test)]
+pub fn gen_matrices_sparse_zp(sqrt_dim: usize
+) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
     
     let dim = sqrt_dim * sqrt_dim;
     let log_dim = (dim as u64).ilog2() as usize;
@@ -306,6 +404,8 @@ pub fn gen_matrices_sparse_zp(sqrt_dim: usize)
     (c, a, b)
 }
 
+/// Convert a sparse matrix to a dense matrix in Zp
+/// 
 fn sprs_to_dense_zp(sprs: &Mat<ZpElement>) -> Vec<Vec<ZpElement>> {
     let mut dense = 
         vec![vec![ZpElement::zero(); sprs.shape.1]; sprs.shape.0];
@@ -317,7 +417,36 @@ fn sprs_to_dense_zp(sprs: &Mat<ZpElement>) -> Vec<Vec<ZpElement>> {
     dense
 }
 
-fn dense_to_sprs_zp(id: &str, dense: &Vec<Vec<ZpElement>>) -> Mat<ZpElement> {
+/// Convert a sparse matrix to a dense matrix in Zp
+/// 
+fn sprs_to_dense_from_i64_to_zp(sprs: &Mat<i64>) -> Vec<Vec<ZpElement>> {
+    let mut dense = 
+        vec![vec![ZpElement::zero(); sprs.shape.1]; sprs.shape.0];
+
+    for &(row, col, ref val) in &sprs.data {
+        dense[row][col] = ZpElement::from(*val);
+    }
+
+    dense
+}
+
+/// Convert a sparse matrix to a dense matrix in Zp
+/// 
+fn sprs_to_dense_from_i128_to_zp(sprs: &Mat<i128>) -> Vec<Vec<ZpElement>> {
+    let mut dense = 
+        vec![vec![ZpElement::zero(); sprs.shape.1]; sprs.shape.0];
+
+    for &(row, col, ref val) in &sprs.data {
+        dense[row][col] = ZpElement::from(*val);
+    }
+
+    dense
+}
+
+/// Convert a dense matrix to a sparse matrix in Zp
+/// 
+fn dense_to_sprs_zp(id: &str, dense: &Vec<Vec<ZpElement>>
+) -> Mat<ZpElement> {
     let mut sprs = Mat::new(
         id,
         (dense.len(), dense[0].len())
@@ -334,7 +463,10 @@ fn dense_to_sprs_zp(id: &str, dense: &Vec<Vec<ZpElement>>) -> Mat<ZpElement> {
     sprs
 }
 
-fn dense_to_sprs_zp_from_i64(id: &str, dense: &Vec<Vec<i64>>) -> Mat<ZpElement> {
+/// Convert a dense matrix to a sparse matrix in Zp
+/// 
+fn dense_to_sprs_from_i64_to_zp(id: &str, dense: &Vec<Vec<i64>>
+) -> Mat<ZpElement> {
     let mut sprs = Mat::new(
         id,
         (dense.len(), dense[0].len())
@@ -351,7 +483,52 @@ fn dense_to_sprs_zp_from_i64(id: &str, dense: &Vec<Vec<i64>>) -> Mat<ZpElement> 
     sprs
 }
 
-pub fn gen_matrices_dense(dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
+/// Convert a dense matrix to a sparse matrix in i64
+/// 
+fn dense_to_sprs_from_i64_to_i64(id: &str, dense: &Vec<Vec<i64>>
+) -> Mat<i64> {
+    let mut sprs = Mat::new(
+        id,
+        (dense.len(), dense[0].len())
+    );
+
+    for i in 0..dense.len() {
+        for j in 0..dense[0].len() {
+            if dense[i][j] != 0 {
+                sprs.push(i, j, dense[i][j]);
+            }
+        }
+    }
+
+    sprs
+}
+
+/// Convert a dense matrix to a sparse matrix in i128
+/// 
+fn dense_to_sprs_from_i128_to_i128(id: &str, dense: &Vec<Vec<i128>>
+) -> Mat<i128> {
+    let mut sprs = Mat::new(
+        id,
+        (dense.len(), dense[0].len())
+    );
+
+    for i in 0..dense.len() {
+        for j in 0..dense[0].len() {
+            if dense[i][j] != 0 {
+                sprs.push(i, j, dense[i][j] as i128);
+            }
+        }
+    }
+
+    sprs
+}
+
+/// Generate the random dense matrices for experiments.
+/// 
+/// The elements of the matrices are i128, i64, i64 respectively.
+/// 
+pub fn gen_matrices_dense(dim: usize
+) -> (Mat<i128>, Mat<i64>, Mat<i64>) {
     
     let log_dim = (dim as u64).ilog2() as usize;
 
@@ -359,16 +536,16 @@ pub fn gen_matrices_dense(dim: usize) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<Zp
 
     let b_u64 = gen_mat_rand_dense_i64(dim, 52);
 
-    let c_zp = mat_mul_dense_i64_to_zp(&a_u64, &b_u64);
+    let c_zp = mat_mul_dense_i64_to_i128(&a_u64, &b_u64);
 
-    let a = dense_to_sprs_zp_from_i64(
-        &format!("a_dense_2e{:?}", log_dim), &a_u64);
+    let a = dense_to_sprs_from_i64_to_i64(
+        &format!("a_dense_i64_2e{:?}", log_dim), &a_u64);
 
-    let b = dense_to_sprs_zp_from_i64(
-        &format!("b_dense_2e{:?}", log_dim), &b_u64);
+    let b = dense_to_sprs_from_i64_to_i64(
+        &format!("b_dense_i64_2e{:?}", log_dim), &b_u64);
 
-    let c = dense_to_sprs_zp(
-        &format!("c_dense_2e{:?}", log_dim), &c_zp);
+    let c = dense_to_sprs_from_i128_to_i128(
+        &format!("c_dense_i128_2e{:?}", log_dim), &c_zp);
 
 
     (c, a, b)
@@ -392,9 +569,15 @@ mod tests{
         let (_c_d, _a_d, _b_d) = 
             gen_matrices_dense(SQRT_MATRIX_DIM_TEST);
 
-        let a_d_dense = sprs_to_dense_zp(&_a_d);
-        let b_d_dense = sprs_to_dense_zp(&_b_d);
-        let c_d_dense = sprs_to_dense_zp(&_c_d);
+        let a_d_dense = sprs_to_dense_from_i64_to_zp(
+            &_a_d
+        );
+        let b_d_dense = sprs_to_dense_from_i64_to_zp(
+            &_b_d
+        );
+        let c_d_dense = sprs_to_dense_from_i128_to_zp(
+            &_c_d
+        );
 
         assert_eq!(mat_mul_dense_zp_to_zp(&a_d_dense, &b_d_dense), c_d_dense);
 
@@ -404,21 +587,23 @@ mod tests{
         _b_d.to_file(_b_d.id.to_string(), false).unwrap();
         _c_d.to_file(_c_d.id.to_string(), false).unwrap();
 
-        let a_read: Mat<ZpElement> = Mat::<ZpElement>::from_file(
-            format!("a_dense_2e{:?}", log_dim), false
+        let a_read: Mat<i64> = Mat::<i64>::from_file(
+            format!("a_dense_i64_2e{:?}", log_dim), false
             ).unwrap();
-        let b_read = Mat::<ZpElement>::from_file(
-            format!("b_dense_2e{:?}", log_dim), false
+        let b_read = Mat::<i64>::from_file(
+            format!("b_dense_i64_2e{:?}", log_dim), false
             ).unwrap();
-        let c_read = Mat::<ZpElement>::from_file(
-            format!("c_dense_2e{:?}", log_dim), false
+        let c_read = Mat::<i128>::from_file(
+            format!("c_dense_i128_2e{:?}", log_dim), false
             ).unwrap();
         
-        let a_read_dense = sprs_to_dense_zp(&a_read);
-        let b_read_dense = sprs_to_dense_zp(&b_read);
-        let c_read_dense = sprs_to_dense_zp(&c_read);
+        let a_read_dense = sprs_to_dense_from_i64_to_zp(&a_read);
+        let b_read_dense = sprs_to_dense_from_i64_to_zp(&b_read);
+        let c_read_dense = sprs_to_dense_from_i128_to_zp(&c_read);
 
-        assert_eq!(mat_mul_dense_zp_to_zp(&a_read_dense, &b_read_dense), c_read_dense);
+        assert_eq!(
+            mat_mul_dense_zp_to_zp(&a_read_dense, &b_read_dense), c_read_dense
+        );
     
         // let a_dense = sprs_to_dense_zp(&_a);
         // let b_dense = sprs_to_dense_zp(&_b);

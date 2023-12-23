@@ -6,22 +6,25 @@
 //! The dimension of the resulting matrix is:
 //!     (SQRT_MATRIX_DIM * SQRT_MATRIX_DIM, SQRT_MATRIX_DIM * SQRT_MATRIX_DIM)
 //! 
+//! The product of the test matrices are manually computed for testing.
+//! 
 
 #![allow(dead_code)]
 
-
 use crate::mat::Mat;
-use crate::config::{SQRT_MATRIX_DIM_TEST, MATRIX_DIM_TEST};
-use crate::experiment_data::gen_matrices_dense;
+use crate::config::SQRT_MATRIX_DIM_TEST;
 
 use crate::utils::curve::{ZpElement, G1Element, G2Element, GtElement};
 use crate::utils::kronecker::{kronecker, kronecker_vec};
 
-
-pub fn gen_test_matrices() -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>){
-    gen_matrices_dense(MATRIX_DIM_TEST)
+#[cfg(test)]
+pub fn gen_test_matrices() -> (Mat<i128>, Mat<i64>, Mat<i64>){
+    crate::experiment_data::gen_matrices_dense(
+        crate::config::MATRIX_DIM_TEST
+    )
 }
 
+#[cfg(test)]
 pub fn gen_vec_v_from_kronecker_test() -> Vec<ZpElement>{
 
     let vec_v_part: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
@@ -31,6 +34,7 @@ pub fn gen_vec_v_from_kronecker_test() -> Vec<ZpElement>{
     kronecker_vec(&vec_v_part, &vec_v_part)
 } 
 
+#[cfg(test)]
 pub fn gen_vec_v_direct_test() -> Vec<ZpElement> {
     let vec_v: Vec<ZpElement> = 
         (0..SQRT_MATRIX_DIM_TEST).flat_map(|i|{
@@ -42,6 +46,7 @@ pub fn gen_vec_v_direct_test() -> Vec<ZpElement> {
     vec_v
 }
 
+#[cfg(test)]
 pub fn gen_mat_a_zp_from_kronecker_test() -> Mat<ZpElement>{
     
     let mat_a_left: Mat<ZpElement> = Mat::new_from_data_vec(
@@ -68,6 +73,7 @@ pub fn gen_mat_a_zp_from_kronecker_test() -> Mat<ZpElement>{
     mat_a
 }
 
+#[cfg(test)]
 pub fn gen_mat_a_zp_direct_test() -> Mat<ZpElement>{
     let m: Vec<(usize, usize, ZpElement)> =
     (0..SQRT_MATRIX_DIM_TEST).flat_map(|left_ij|{
@@ -75,16 +81,19 @@ pub fn gen_mat_a_zp_direct_test() -> Mat<ZpElement>{
             (0..SQRT_MATRIX_DIM_TEST).map(move|right_j|(
                 left_ij * SQRT_MATRIX_DIM_TEST + right_i,
                 left_ij * SQRT_MATRIX_DIM_TEST + right_j,
-                ZpElement::from((left_ij as u64 + 1) * (right_i as u64 + 1) * (right_j as u64 + 1))
+                ZpElement::from(
+                    (left_ij as u64 + 1) * (right_i as u64 + 1) * (right_j as u64 + 1)
+                )
             ))
         })
     }).collect();
 
-    let mat_dim = MATRIX_DIM_TEST;
+    let mat_dim = SQRT_MATRIX_DIM_TEST * SQRT_MATRIX_DIM_TEST;
 
     Mat::new_from_data_vec("a", (mat_dim, mat_dim), m)
 }
 
+#[cfg(test)]
 pub fn gen_mat_a_u64_direct_test() -> Mat<u64>{
     let m: Vec<(usize, usize, u64)> =
     (0..SQRT_MATRIX_DIM_TEST).flat_map(|left_ij|{
@@ -103,15 +112,18 @@ pub fn gen_mat_a_u64_direct_test() -> Mat<u64>{
 }
 
 pub fn gen_vec_va_from_kronecker_test() -> Vec<ZpElement>{
-    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i).sum();
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i).sum();
 
-    let vec_va_left: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
+    let vec_va_left: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
         ZpElement::from(((i+1)*(i+1)) as u64)
-    ).collect();
+        ).collect();
 
-    let vec_va_right: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
+    let vec_va_right: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
          ZpElement::from( (sum_n_square * (i+1)) as u64)
-    ).collect();
+        ).collect();
 
     kronecker_vec(&vec_va_left, &vec_va_right)
 }
@@ -135,11 +147,13 @@ fn gen_mat_a_gt_from_kronecker_test() -> Mat<GtElement>{
         ).collect()
     );
 
-    let mat_a: Mat<GtElement> = kronecker(&mat_a_left, &mat_a_right);
+    let mat_a: Mat<GtElement> = 
+        kronecker(&mat_a_left, &mat_a_right);
 
     mat_a
 }
 
+#[cfg(test)]
 fn gen_mat_a_gt_direct_test() -> Mat<GtElement>{
     let m: Vec<(usize, usize, u64)> =
     (0..SQRT_MATRIX_DIM_TEST).flat_map(|left_ij|{
@@ -147,33 +161,39 @@ fn gen_mat_a_gt_direct_test() -> Mat<GtElement>{
             (0..SQRT_MATRIX_DIM_TEST).map(move|right_j|(
                 left_ij * SQRT_MATRIX_DIM_TEST + right_i,
                 left_ij * SQRT_MATRIX_DIM_TEST + right_j,
-                ((left_ij as u64 + 1) * (right_i as u64 + 1) * (right_j as u64 + 1))
+                ((left_ij as u64 + 1) * (right_i as u64 + 1) * (
+                    right_j as u64 + 1))
             ))
         })
     }).collect();
 
-    let m_gt = m.into_iter().map(|(row, col, val)|{
+    let m_gt = m.into_iter()
+        .map(|(row, col, val)|{
         (row, col, GtElement::from(val))
-    }).collect();
+        }).collect();
 
     let mat_dim = SQRT_MATRIX_DIM_TEST * SQRT_MATRIX_DIM_TEST;
 
     Mat::new_from_data_vec("a_test", (mat_dim, mat_dim), m_gt)
 }
 
+#[cfg(test)]
 fn gen_vec_v_gt_from_kronecker_test()-> Vec<GtElement>{
 
-    let vec_v_left: Vec<G1Element> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-        G1Element::from((i+1) as u64)
-    ).collect();
+    let vec_v_left: Vec<G1Element> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+            G1Element::from((i+1) as u64)
+        ).collect();
 
-    let vec_v_right: Vec<G2Element> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-        G2Element::from((i+1) as u64)
-    ).collect();
+    let vec_v_right: Vec<G2Element> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+            G2Element::from((i+1) as u64)
+        ).collect();
 
     kronecker_vec(&vec_v_left, &vec_v_right)
 } 
 
+#[cfg(test)]
 pub fn gen_vec_v_gt_direct_test() -> Vec<GtElement> {
     let vec_v: Vec<GtElement> = 
         (0..SQRT_MATRIX_DIM_TEST).flat_map(|i|{
@@ -185,17 +205,19 @@ pub fn gen_vec_v_gt_direct_test() -> Vec<GtElement> {
     vec_v
 }
 
+#[cfg(test)]
 pub fn gen_vec_v_g1_direct_test() -> Vec<G1Element> {
     let vec_v: Vec<G1Element> = 
         (0..SQRT_MATRIX_DIM_TEST).flat_map(|i|{
             (0..SQRT_MATRIX_DIM_TEST).map(move|j|{
                     G1Element::from(((i+1)*(j+1)) as u64)
-                })
+            })
         }).collect();
     
     vec_v
 }
 
+#[cfg(test)]
 pub fn gen_vec_v_g2_direct_test() -> Vec<G2Element> {
     let vec_v: Vec<G2Element> = 
         (0..SQRT_MATRIX_DIM_TEST).flat_map(|i|{
@@ -207,58 +229,76 @@ pub fn gen_vec_v_g2_direct_test() -> Vec<G2Element> {
     vec_v
 }
 
+#[cfg(test)]
 pub fn gen_vec_va_gt_from_kronecker_test() -> Vec<GtElement>{
-    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i).sum();
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i).sum();
 
-    let vec_va_left: Vec<G1Element> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-        G1Element::from(((i+1)*(i+1)) as u64)
-    ).collect();
+    let vec_va_left: Vec<G1Element> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+            G1Element::from(((i+1)*(i+1)) as u64)
+        ).collect();
 
-    let vec_va_right: Vec<G2Element> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-         G2Element::from( (sum_n_square * (i+1)) as u64)
-    ).collect();
+    let vec_va_right: Vec<G2Element> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+             G2Element::from( (sum_n_square * (i+1)) as u64)
+        ).collect();
 
     kronecker_vec(&vec_va_left, &vec_va_right)
 }
 
+#[cfg(test)]
 pub fn gen_vec_va_g1_from_kronecker_test() -> Vec<G1Element>{
-    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i).sum();
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i).sum();
 
-    let vec_va_left: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-        ZpElement::from(((i+1)*(i+1)) as u64)
-    ).collect();
+    let vec_va_left: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+            ZpElement::from(((i+1)*(i+1)) as u64)
+        ).collect();
 
-    let vec_va_right: Vec<G1Element> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-         G1Element::from( (sum_n_square * (i+1)) as u64)
-    ).collect();
+    let vec_va_right: Vec<G1Element> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+             G1Element::from( (sum_n_square * (i+1)) as u64)
+        ).collect();
 
     kronecker_vec(&vec_va_left, &vec_va_right)
 }
 
+#[cfg(test)]
 pub fn gen_vec_va_g2_from_kronecker_test() -> Vec<G2Element>{
-    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i).sum();
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i).sum();
 
-    let vec_va_left: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-        ZpElement::from(((i+1)*(i+1)) as u64)
-    ).collect();
+    let vec_va_left: Vec<ZpElement> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+            ZpElement::from(((i+1)*(i+1)) as u64)
+        ).collect();
 
-    let vec_va_right: Vec<G2Element> = (0..SQRT_MATRIX_DIM_TEST).map(|i|
-         G2Element::from( (sum_n_square * (i+1)) as u64)
-    ).collect();
+    let vec_va_right: Vec<G2Element> = (0..SQRT_MATRIX_DIM_TEST)
+        .map(|i|
+             G2Element::from( (sum_n_square * (i+1)) as u64)
+        ).collect();
 
     kronecker_vec(&vec_va_left, &vec_va_right)
 }
 
+#[cfg(test)]
 pub fn gen_vav_direct_test() -> ZpElement {
-    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i).sum();
-    let sum_n_cubic: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i*i).sum();
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i).sum();
+    let sum_n_cubic: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i*i).sum();
 
     ZpElement::from((sum_n_cubic * sum_n_square * sum_n_square) as u64)
 }
 
+#[cfg(test)]
 pub fn gen_vav_gt_direct_test() -> GtElement{
-    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i).sum();
-    let sum_n_cubic: usize = (1..=SQRT_MATRIX_DIM_TEST).map(|i| i*i*i).sum();
+    let sum_n_square: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i).sum();
+    let sum_n_cubic: usize = (1..=SQRT_MATRIX_DIM_TEST)
+        .map(|i| i*i*i).sum();
 
     GtElement::from((sum_n_cubic * sum_n_square * sum_n_square) as u64)
 }
@@ -270,9 +310,17 @@ mod tests{
 
     #[test]
     fn test_gen_mat(){
-        assert_eq!(gen_mat_a_zp_from_kronecker_test(), gen_mat_a_zp_direct_test());
-        assert_eq!(gen_vec_v_from_kronecker_test(), gen_vec_v_direct_test());
-        assert_eq!(gen_mat_a_gt_from_kronecker_test(), gen_mat_a_gt_direct_test());
-        assert_eq!(gen_vec_v_gt_from_kronecker_test(), gen_vec_v_gt_direct_test());
+        assert_eq!(
+            gen_mat_a_zp_from_kronecker_test(), gen_mat_a_zp_direct_test()
+        );
+        assert_eq!(
+            gen_vec_v_from_kronecker_test(), gen_vec_v_direct_test()
+        );
+        assert_eq!(
+            gen_mat_a_gt_from_kronecker_test(), gen_mat_a_gt_direct_test()
+        );
+        assert_eq!(
+            gen_vec_v_gt_from_kronecker_test(), gen_vec_v_gt_direct_test()
+        );
     }
 }

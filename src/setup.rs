@@ -1,5 +1,7 @@
-//! Define the SRS used in the library.
+//! Generate the SRS required by the protocols.
 //! 
+//! Here, s_hat is the toxic waste which should be discarded securely
+//! in real applications.
 //! 
 use rand::Rng;
 use serde::{Serialize, Deserialize};
@@ -60,7 +62,7 @@ impl SRS {
             .unwrap();
 
         let g_hat_vec = 
-            pool.install(||{
+            pool.install(|| {
                 s_vec.par_iter()
                 .map(|&x| x * g_hat)
                 .collect()
@@ -68,7 +70,7 @@ impl SRS {
             );
 
         let g_hat_prime_vec = 
-            pool.install(||{
+            pool.install(|| {
                 s_prime_vec.par_iter()
                 .map(|&x| x * g_hat)
                 .collect()
@@ -76,7 +78,7 @@ impl SRS {
             );
 
         let h_hat_vec = 
-            pool.install(||{
+            pool.install(|| {
                 s_prime_vec.par_iter()
                 .map(|&x| x * h_hat)
                 .collect()
@@ -84,7 +86,7 @@ impl SRS {
             );
 
         let h_hat_prime_vec = 
-            pool.install(||{
+            pool.install(|| {
                 s_vec.iter()
             .map(|&x| x * h_hat)
                 .collect()
@@ -124,7 +126,9 @@ mod tests {
     #[test]
     fn test_srs() {
         let srs = SRS::new(Q_TEST);
-        let srs_read = FileIO::from_file(String::from("srs"), true).unwrap();
+        let srs_read = FileIO::from_file(
+            String::from("srs"), true
+        ).unwrap();
         println!("srs: {:?}", srs);
         assert_eq!(srs, srs_read);
     }

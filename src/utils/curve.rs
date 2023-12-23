@@ -76,7 +76,8 @@ impl<'de> Deserialize<'de> for ZpElement{
     {
         let bytes = <&[u8]>::deserialize(deserializer)?;
         let bytes_32: &[u8; 32] = &bytes[..32].try_into().unwrap();
-        let deserialized_scaler = Scalar::from_bytes(bytes_32).unwrap();
+        let deserialized_scaler = 
+            Scalar::from_bytes(bytes_32).unwrap();
         Ok(ZpElement { value: deserialized_scaler })
     }
 }
@@ -107,7 +108,8 @@ impl<'de> Deserialize<'de> for G1Element{
         let bytes = <Vec<u8>>::deserialize(deserializer).unwrap();
         // println!("deserialized_G2Element: {:?}", bytes);
         // println!("deserialized_G2Element: {:?}", bytes.len());
-        let bytes_48: &[u8; 48] = &bytes[bytes.len() - 48..].try_into().unwrap();
+        let bytes_48: &[u8; 48] = 
+            &bytes[bytes.len() - 48..].try_into().unwrap();
         let deserialized_g1 = G1Projective::from(
             G1Affine::from_compressed(&bytes_48).unwrap()
         );
@@ -124,7 +126,7 @@ impl Serialize for G2Element {
 
         let bytes = g2_affine_value.to_compressed().to_vec();
         let serialized = bincode::serialize(&bytes)
-        .map_err(serde::ser::Error::custom)?;
+            .map_err(serde::ser::Error::custom)?;
         // println!("serialized_G2Element: {:?}", serialized);
         serializer.serialize_bytes(&serialized)
     }
@@ -160,7 +162,8 @@ impl Serialize for GtElementPack {
         let bytes_1 = bytes.to_vec();
         // println!("deserialized_G2Element: {:?}", bytes);
         // println!("deserialized_G2Element: {:?}", bytes.len());
-        let bytes_576: &[u8; 576] = &bytes_1[bytes_1.len() - 576..].try_into().unwrap();
+        let bytes_576: &[u8; 576] = &bytes_1[bytes_1.len() - 576..]
+            .try_into().unwrap();
         // println!("deserialized_G2Element: {:?}", bytes_576);
 
         let gt_value_1: &Gt = unsafe {
@@ -173,7 +176,7 @@ impl Serialize for GtElementPack {
         assert_eq!(gt_value, *gt_value_1);
 
         let serialized = bincode::serialize(&bytes_1)
-        .map_err(serde::ser::Error::custom)?;
+            .map_err(serde::ser::Error::custom)?;
         serializer.serialize_bytes(&serialized)
     }
 }
@@ -186,7 +189,8 @@ impl<'de> Deserialize<'de> for GtElementPack{
         let bytes = <Vec<u8>>::deserialize(deserializer).unwrap();
         // println!("deserialized_G2Element: {:?}", bytes);
         // println!("deserialized_G2Element: {:?}", bytes.len());
-        let bytes_576: &[u8; 576] = &bytes[bytes.len() - 576..].try_into().unwrap();
+        let bytes_576: &[u8; 576] = &bytes[bytes.len() - 576..]
+            .try_into().unwrap();
         // println!("deserialized_GtElement: {:?}", bytes_576);
 
         let deserialized_gt: &Gt = unsafe {
@@ -217,20 +221,26 @@ impl<'de> Deserialize<'de> for GtElement{
         D: Deserializer<'de>, 
     {
         let gt_pack = GtElementPack::deserialize(deserializer)
-        .unwrap();
+            .unwrap();
         Ok(GtElement { value: gt_pack.value })
     }
 }
 
 trait ToFile {
-    fn to_file(&self, file_name: String, public_data: bool) -> std::io::Result<()>;
-    fn from_file(file_name: String, public_data:bool) -> std::io::Result<Self> 
+    fn to_file(
+        &self, file_name: String, public_data: bool
+    ) -> std::io::Result<()>;
+    fn from_file(
+        file_name: String, public_data:bool
+    ) -> std::io::Result<Self> 
     where
         Self: Sized;
 }  
 
 impl ToFile for GtElement {
-    fn to_file(&self, file_name: String, public_data: bool) -> std::io::Result<()> {
+    fn to_file(
+        &self, file_name: String, public_data: bool
+    ) -> std::io::Result<()> {
         
         let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
         let mut file = File::create(format!("{}{}", dir, file_name))?;
@@ -240,7 +250,10 @@ impl ToFile for GtElement {
         Ok(())
     }
 
-    fn from_file(file_name: String, public_data: bool) -> std::io::Result<Self> {
+    fn from_file(
+        file_name: String, public_data: bool
+    ) -> std::io::Result<Self> {
+        
         let dir = if public_data {DATA_DIR_PUBLIC} else {DATA_DIR_PRIVATE};
         let file = File::open(format!("{}{}", dir, file_name))?;
         let decoded: Self = bincode::deserialize_from(file).unwrap();

@@ -1,3 +1,6 @@
+//! Compute the Kronecker products between two sparse matrices or
+//! between two vectors
+//! 
 use std::ops::{Add, Mul};
 
 use crate::mat::Mat;
@@ -10,7 +13,9 @@ where
 {
 
     let result_id = format!("{}{}{}", mat_a.id, "_kronecker_", mat_b.id);
-    let result_shape = (mat_a.shape.0 * mat_b.shape.0, mat_a.shape.1 * mat_b.shape.1);
+    let result_shape = (
+        mat_a.shape.0 * mat_b.shape.0, mat_a.shape.1 * mat_b.shape.1
+    );
     let mut result = Mat::new(&result_id, result_shape);
 
     for &(row_a, col_a, ref val_a) in &mat_a.data {
@@ -32,11 +37,11 @@ where
     V: Clone + Add + From<u64>,
 {
     let result: Vec<V> =
-    (0..vec_a.len()).flat_map(|i|{
-        (0..vec_b.len()).map(move|j|{
-            vec_a[i].clone() * vec_b[j].clone()
-        })
-    }).collect();
+        (0..vec_a.len()).flat_map(|i|{
+            (0..vec_b.len()).map(move|j|{
+                vec_a[i].clone() * vec_b[j].clone()
+            })
+        }).collect();
 
     result
 }

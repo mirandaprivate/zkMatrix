@@ -1,3 +1,7 @@
+//! Utility functions for the braket operation
+//! 
+//! Parallelized whenever possible
+//! 
 use core::fmt::Debug;
 use std::marker::{Send, Sync};
 use std::sync::{Arc, Mutex};
@@ -19,7 +23,9 @@ pub trait BraKet{
     
     fn ket(&self, v_base: &Vec<G2Element>) -> Vec<G2Element>;
     
-    fn braket(&self, g_base: &Vec<G1Element>, h_base: &Vec<G2Element>) -> GtElement{
+    fn braket(
+        &self, g_base: &Vec<G1Element>, h_base: &Vec<G2Element>
+    ) -> GtElement {
         let left_proj = self.bra(g_base);
         inner_product(&left_proj, h_base)
     }
@@ -28,7 +34,9 @@ pub trait BraKet{
 pub trait BraKetZp {
     fn bra_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement>;
     fn ket_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement>;
-    fn braket_zp(&self, g_base: &Vec<ZpElement>, h_base: &Vec<ZpElement>) -> ZpElement{
+    fn braket_zp(
+        &self, g_base: &Vec<ZpElement>, h_base: &Vec<ZpElement>
+    ) -> ZpElement {
         let left_proj = self.bra_zp(g_base);
         inner_product(&left_proj, h_base)
     }
@@ -127,18 +135,20 @@ where
         .build()
         .unwrap();
 
-    let inner_product = pool.install(|| {
-        vec_a.par_iter()
-        .zip(vec_b.par_iter())
-        .fold(
-            || V::zero(),
-            |acc, (&a_val, &b_val)| acc + a_val * b_val,
-        )
-        .reduce(
-            || V::zero(),
-            |acc, val| acc + val,
-        )
-    });
+    let inner_product = pool.install(|| 
+        {
+            vec_a.par_iter()
+            .zip(vec_b.par_iter())
+            .fold(
+                || V::zero(),
+                |acc, (&a_val, &b_val)| acc + a_val * b_val,
+            )
+            .reduce(
+                || V::zero(),
+                |acc, val| acc + val,
+            )
+        }
+    );
 
     return inner_product;
 
@@ -155,9 +165,11 @@ where
     let n_row = mat_a.shape.0;
     let v_base_arc = Arc::new(v_base[..n_row].to_vec());
 
-    let result = Arc::new(Mutex::new(vec![V::zero(); n_row]));
+    let result = Arc::new(
+        Mutex::new(vec![V::zero(); n_row]));
 
-    let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS).collect();
+    let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS)
+        .collect();
 
     let mut handles = Vec::new();
     for chunk in chunks {
@@ -228,7 +240,8 @@ where
 
     let result = Arc::new(Mutex::new(vec![V::zero(); n_col]));
 
-    let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS).collect();
+    let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS)
+        .collect();
 
     let mut handles = Vec::new();
     for chunk in chunks {
@@ -342,7 +355,7 @@ pub fn ket_opt_u64(mat_a: &Mat<u64>, v_base: &Vec<G2Element>) -> Vec<G2Element> 
 
     let result_mutexes: Vec<Mutex<G2Element>> = (0..n_row).map(
         |_| Mutex::new(G2Element::zero())
-        ).collect();
+    ).collect();
     
     let pool = ThreadPoolBuilder::new()
         .num_threads(NUM_THREADS)
@@ -400,17 +413,15 @@ pub fn bra_opt_i64(mat_a: &Mat<i64>, v_base: &Vec<G1Element>) -> Vec<G1Element> 
 
     let a_abs_sign: Vec<(usize, usize, u64, bool)> =  pool.install(
             || {
-                mat_a.data.par_iter().map(|&(row, col, val)| 
-                    (
+                mat_a.data.par_iter().map(|&(row, col, val)| (
                         row, col, val.abs() as u64, val < 0,
-                    )
-                ).collect()
+                )).collect()
             }
-        );
+    );
 
     let result_mutexes: Vec<Mutex<G1Element>> = (0..n_col).map(
         |_| Mutex::new(G1Element::zero())
-        ).collect();
+    ).collect();
     
     
     for j_bit in 0..64{
@@ -459,18 +470,17 @@ pub fn ket_opt_i64(mat_a: &Mat<i64>, v_base: &Vec<G2Element>) -> Vec<G2Element> 
         .unwrap();
 
     let a_abs_sign: Vec<(usize, usize, u64, bool)> =  pool.install(
-            || {
-                mat_a.data.par_iter().map(|&(row, col, val)| 
-                    (
-                        row, col, val.abs() as u64, val < 0,
-                    )
-                ).collect()
-            }
-        );
+        || {
+            mat_a.data.par_iter().map(|&(row, col, val)| (
+                    row, col, val.abs() as u64, val < 0,
+                )
+            ).collect()
+        }
+    );
 
     let result_mutexes: Vec<Mutex<G2Element>> = (0..n_row).map(
         |_| Mutex::new(G2Element::zero())
-        ).collect();
+    ).collect();
     
     
     for j_bit in 0..64{
@@ -581,17 +591,15 @@ pub fn ket_opt_i128(mat_a: &Mat<i128>, v_base: &Vec<G2Element>) -> Vec<G2Element
 
     let a_abs_sign: Vec<(usize, usize, u128, bool)> =  pool.install(
             || {
-                mat_a.data.par_iter().map(|&(row, col, val)| 
-                    (
+                mat_a.data.par_iter().map(|&(row, col, val)| (
                         row, col, val.abs() as u128, val < 0,
-                    )
-                ).collect()
+                )).collect()
             }
-        );
+    );
 
     let result_mutexes: Vec<Mutex<G2Element>> = (0..n_row).map(
         |_| Mutex::new(G2Element::zero())
-        ).collect();
+    ).collect();
     
     
     for j_bit in 0..128{

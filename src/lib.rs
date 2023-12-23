@@ -1,7 +1,8 @@
-// Entry point for the zkMatrix library
-//
+//! Entry point for the zkMatrix library
+//!
 //! Zero-knowledge proof for linear algebra 
 //!
+//! 
 #![doc = include_str!("../README.md")]
 // extern crate sprs;
 

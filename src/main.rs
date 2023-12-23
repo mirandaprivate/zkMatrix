@@ -1,3 +1,14 @@
+//! # Main
+//! 
+//! Run experiment for the zkMatrix protocol.
+//! 
+//! The experiment parameters are configured in config.rs
+//! 
+//! Use the following command to run the experiment:
+//! ''' cargo run --release '''
+//! 
+//! Note using the release mode is important for the performance.
+//! 
 #![allow(dead_code)]
 
 use std::time::Instant;

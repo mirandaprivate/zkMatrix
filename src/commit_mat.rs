@@ -1,8 +1,9 @@
-//! Commit the matrices for experiments.
+//! Two-tier commitments to the matrices.
 //! 
-//! Store the commitments in data/public.
-//! 
+//! These matrices are stored in data/private.
 //! Cache the first-tier commitments in data/private.
+//! 
+//! The commitments are published to data/public.
 //! 
 
 use crate::mat::Mat;
@@ -15,12 +16,12 @@ use crate::utils::to_file::FileIO;
 
 pub trait CommitMat {
     fn commit_row_major(
-        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
-    -> GtElement;
+        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement;
 
     fn commit_col_major(
-        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>)
-    -> GtElement;
+        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement;
 
     fn commit_rm(&self, srs: &SRS) -> GtElement {
         self.commit_row_major(
@@ -35,8 +36,8 @@ pub trait CommitMat {
 
 impl CommitMat for Mat<u64> {
     fn commit_row_major(
-        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
-    -> GtElement {
+        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement {
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
             format!("{}_right_cache", self.id), false)
@@ -48,8 +49,8 @@ impl CommitMat for Mat<u64> {
     }
 
     fn commit_col_major(
-            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
-    -> GtElement {
+            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement {
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
             format!("{}_left_cache", self.id), false)
@@ -63,8 +64,9 @@ impl CommitMat for Mat<u64> {
 
 impl CommitMat for Mat<i64> {
     fn commit_row_major(
-        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
-    -> GtElement {
+        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement {
+
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
             format!("{}_right_cache", self.id), false)
@@ -76,8 +78,9 @@ impl CommitMat for Mat<i64> {
     }
 
     fn commit_col_major(
-            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
-    -> GtElement {
+            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement {
+
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
             format!("{}_left_cache", self.id), false)
@@ -91,8 +94,9 @@ impl CommitMat for Mat<i64> {
 
 impl CommitMat for Mat<i128> {
     fn commit_row_major(
-        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
-    -> GtElement {
+        &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement {
+
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
             format!("{}_right_cache", self.id), false)
@@ -104,8 +108,9 @@ impl CommitMat for Mat<i128> {
     }
 
     fn commit_col_major(
-            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>) 
-    -> GtElement {
+            &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
+    ) -> GtElement {
+
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
             format!("{}_left_cache", self.id), false)
@@ -205,15 +210,19 @@ mod tests {
 
         let gah: GtElement = gen_vav_gt_direct_test();
 
-        let gah_test_1 = mat_a.commit_row_major(&vec_g, &vec_h);
-        let gah_test_2= mat_a.commit_col_major(&vec_g, &vec_h);
+        let gah_test_1 = mat_a
+            .commit_row_major(&vec_g, &vec_h);
+        let gah_test_2= mat_a
+            .commit_col_major(&vec_g, &vec_h);
 
         let right_cache: Vec<G2Element> = FileIO::from_file(
-            format!("{}_right_cache", mat_a.id).to_string(), false)
-        .unwrap();
+                format!("{}_right_cache", mat_a.id).to_string(),
+                false,
+            ).unwrap();
         let left_cache: Vec<G1Element> = FileIO::from_file(
-            format!("{}_left_cache", mat_a.id).to_string(), false)
-        .unwrap();
+               format!("{}_left_cache", mat_a.id).to_string(), 
+               false,
+            ).unwrap();
 
         assert_eq!(gah_test_1, gah);
         assert_eq!(gah_test_2, gah);
