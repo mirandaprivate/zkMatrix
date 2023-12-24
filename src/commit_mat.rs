@@ -17,27 +17,29 @@ use crate::utils::to_file::FileIO;
 pub trait CommitMat {
     fn commit_row_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement;
+    ) -> (GtElement, Vec<G2Element>);
 
     fn commit_col_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement;
+    ) -> (GtElement, Vec<G1Element>);
 
     fn commit_rm(&self, srs: &SRS) -> GtElement {
-        self.commit_row_major(
-            &srs.g_hat_vec, &srs.h_hat_vec)
+        let (com, _) = self.commit_row_major(
+            &srs.g_hat_vec, &srs.h_hat_vec);
+        com
     }
 
     fn commit_cm(&self, srs: &SRS) -> GtElement {
-        self.commit_col_major(
-            &srs.g_hat_vec, &srs.h_hat_vec)
+        let (com, _) = self.commit_col_major(
+            &srs.g_hat_vec, &srs.h_hat_vec);
+        com
     }
 }
 
 impl CommitMat for Mat<u64> {
     fn commit_row_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement {
+    ) -> (GtElement, Vec<G2Element>) {
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
             format!("{}_rp.cache", self.id), false)
@@ -45,12 +47,12 @@ impl CommitMat for Mat<u64> {
 
         let result = dirac::inner_product(
             &g_base_vec, &right_cache);
-        result
+        (result, right_cache.clone())
     }
 
     fn commit_col_major(
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement {
+    ) -> (GtElement, Vec<G1Element>) {
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
             format!("{}_lp.cache", self.id), false)
@@ -58,14 +60,14 @@ impl CommitMat for Mat<u64> {
         
         let result = dirac::inner_product(
             &left_cache, &h_base_vec);
-        result
+        (result, left_cache.clone())
     }
 }
 
 impl CommitMat for Mat<i64> {
     fn commit_row_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement {
+    ) -> (GtElement, Vec<G2Element>) {
 
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
@@ -74,12 +76,12 @@ impl CommitMat for Mat<i64> {
 
         let result = dirac::inner_product(
             &g_base_vec, &right_cache);
-        result
+        (result, right_cache.clone())
     }
 
     fn commit_col_major(
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement {
+    ) -> (GtElement, Vec<G1Element>) {
 
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
@@ -88,14 +90,15 @@ impl CommitMat for Mat<i64> {
         
         let result = dirac::inner_product(
             &left_cache, &h_base_vec);
-        result
+        
+        (result, left_cache.clone())
     }
 }
 
 impl CommitMat for Mat<i128> {
     fn commit_row_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement {
+    ) -> (GtElement, Vec<G2Element>) {
 
         let right_cache = self.ket(&h_base_vec);
         right_cache.to_file(
@@ -104,12 +107,12 @@ impl CommitMat for Mat<i128> {
 
         let result = dirac::inner_product(
             &g_base_vec, &right_cache);
-        result
+        (result, right_cache.clone())
     }
 
     fn commit_col_major(
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
-    ) -> GtElement {
+    ) -> (GtElement, Vec<G1Element>) {
 
         let left_cache = self.bra(&g_base_vec);
         left_cache.to_file(
@@ -118,7 +121,8 @@ impl CommitMat for Mat<i128> {
         
         let result = dirac::inner_product(
             &left_cache, &h_base_vec);
-        result
+        
+        (result, left_cache.clone())
     }
 }
 
@@ -210,9 +214,9 @@ mod tests {
 
         let gah: GtElement = gen_vav_gt_direct_test();
 
-        let gah_test_1 = mat_a
+        let (gah_test_1, _) = mat_a
             .commit_row_major(&vec_g, &vec_h);
-        let gah_test_2= mat_a
+        let (gah_test_2, _)= mat_a
             .commit_col_major(&vec_g, &vec_h);
 
         let right_cache: Vec<G2Element> = FileIO::from_file(

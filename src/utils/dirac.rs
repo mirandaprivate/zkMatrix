@@ -7,7 +7,7 @@ use std::marker::{Send, Sync};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use rayon::{ThreadPoolBuilder, prelude::*};
+use rayon::{ThreadPoolBuilder, prelude::*, result};
 
 
 use crate::utils::curve::{
@@ -38,6 +38,7 @@ pub trait BraKet{
 pub trait BraKetZp {
     fn bra_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement>;
     fn ket_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement>;
+
     fn braket_zp(
         &self, g_base: &Vec<ZpElement>, h_base: &Vec<ZpElement>
     ) -> ZpElement {
@@ -54,6 +55,7 @@ impl BraKet for Mat<u64> {
     fn ket(&self, v_base: &Vec<G2Element>) -> Vec<G2Element> {
         ket_opt_u64(&self, v_base)
     }
+
 }
 
 impl BraKet for Mat<i64> {
@@ -236,10 +238,11 @@ where
 {
     let a_data  = &mat_a.data;
     let n_row = mat_a.shape.0;
+    let n_col = mat_a.shape.1;
     let v_base_arc = Arc::new(v_base[..n_row].to_vec());
 
     let result = Arc::new(
-        Mutex::new(vec![V::zero(); n_row]));
+        Mutex::new(vec![V::zero(); n_col]));
 
     let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS)
         .collect();
@@ -250,7 +253,7 @@ where
         let v_base_clone = Arc::clone(&v_base_arc);
         let handle = thread::spawn(
             move || {
-                let mut local_result = vec![V::zero(); n_row];
+                let mut local_result = vec![V::zero(); n_col];
                 for &(row, col, val) in &chunk {
                     local_result[col] += v_base_clone[row] * val;
                 }
@@ -262,7 +265,7 @@ where
     for handle in handles {
         let thread_result = handle.join().unwrap();
         let mut result = result.lock().unwrap();
-        for i in 0..n_row {
+        for i in 0..n_col {
             result[i] += thread_result[i];
         }
     }
@@ -308,10 +311,11 @@ where
     V: 'static + Clone + Copy + Send + Sync + Debug + Add + AddAssign + Zero,
 {
     let a_data  = &mat_a.data;
+    let n_row = mat_a.shape.0;
     let n_col = mat_a.shape.1;
     let v_base_arc = Arc::new(v_base[..n_col].to_vec());
 
-    let result = Arc::new(Mutex::new(vec![V::zero(); n_col]));
+    let result = Arc::new(Mutex::new(vec![V::zero(); n_row]));
 
     let chunks: Vec<_> = a_data.chunks(a_data.len() / NUM_THREADS)
         .collect();
@@ -322,7 +326,7 @@ where
         let v_base_clone = Arc::clone(&v_base_arc);
         let handle = thread::spawn(
             move || {
-                let mut local_result = vec![V::zero(); n_col];
+                let mut local_result = vec![V::zero(); n_row];
                 for &(row, col, val) in &chunk {
                     local_result[row] += v_base_clone[col] * val;
                 }
@@ -334,7 +338,7 @@ where
     for handle in handles {
         let thread_result = handle.join().unwrap();
         let mut result = result.lock().unwrap();
-        for i in 0..n_col {
+        for i in 0..n_row {
             result[i] += thread_result[i];
         }
     }

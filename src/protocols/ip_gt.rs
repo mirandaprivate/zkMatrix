@@ -40,7 +40,7 @@ impl IpGt {
         trans_seq.push(TranElem::Size(self.length));
 
         if (self.length & (self.length - 1)) != 0 {
-            panic!("Length is not a power of 2 when proving VecCom");
+            panic!("Length is not a power of 2 when proving IpGt");
         }
 
         let n = self.length;
@@ -166,7 +166,7 @@ impl IpGt {
             trans_seq.data[pointer_old],
             trans_seq.data[pointer_old + 1],
         ) {
-            println!("!! Invalid public input when verifying VecCom");
+            println!("!! Invalid public input when verifying IpGt");
             return false;
         } 
 
@@ -199,7 +199,7 @@ impl IpGt {
                 challenges_inv.push(x_j_inv);
 
             } else {
-                println!("!! Invalid transcript when verifying VecCom");
+                println!("!! Invalid transcript when verifying IpGt");
                 return false;
             }
 
@@ -237,11 +237,11 @@ impl IpGt {
 
             }
         } else {
-            println!("!! Invalid transcript when verifying VecCom");
+            println!("!! Invalid transcript when verifying IpGt");
             return false;
         }
     
-        println!("!! Verification of VecCom failed");
+        println!("!! Verification of IpGt failed");
         return false;
         
     }
@@ -250,7 +250,7 @@ impl IpGt {
     ) -> bool {
 
         if trans_seq.check_fiat_shamir() == false {
-            println!("!! Fiat shamir check failed when verifying VecCom");
+            println!("!! Fiat shamir check failed when verifying IpGt");
             return false;
         }
 
