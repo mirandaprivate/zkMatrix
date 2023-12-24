@@ -3,7 +3,6 @@
 //! Here, s_hat is the toxic waste which should be discarded securely
 //! in real applications.
 //! 
-use rand::Rng;
 use serde::{Serialize, Deserialize};
 use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
@@ -30,13 +29,10 @@ pub struct SRS {
 impl SRS {
     pub fn new(q: usize) -> Self {
         
-        let s_hat = ZpElement::from(
-            rand::thread_rng().gen::<u64>());
-        // let nu = ZpElement::from(
-        //     rand::thread_rng().gen::<u64>());
-
-        let g_hat = G1Element::generator();
-        let h_hat = G2Element::generator();
+        let s_hat = ZpElement::rand();
+        
+        let g_hat = G1Element::generator().clone();
+        let h_hat = G2Element::generator().clone();
 
         let s_vec: Vec<ZpElement> = std::iter::successors(
             Some(s_hat), 

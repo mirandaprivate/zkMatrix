@@ -28,3 +28,4 @@ fn bench_dirac(b: &mut Bencher){
         a.braket(&srs.g_hat_vec, &srs.h_hat_vec) 
     );
 }
+

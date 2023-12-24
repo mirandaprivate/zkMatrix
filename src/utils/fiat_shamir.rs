@@ -13,6 +13,7 @@ pub enum TranElem{
     G2(G2Element),
     Gt(GtElement),
     Zp(ZpElement),
+    Size(usize),
     Coin(ZpElement),
 }
 
@@ -28,11 +29,22 @@ pub struct TranSeq {
 impl TranSeq{
  
     pub fn new() -> Self {
+        let mut hasher_val = Sha256::new();
+        hasher_val.update(b"0");
+
         Self { 
-            hasher: Sha256::new(),
+            hasher: hasher_val,
             data: Vec::new(),
             pointer: 0,
         }
+    }
+
+    pub fn reset_hash(&mut self) {
+        let mut hasher_val = Sha256::new();
+        hasher_val.update(b"0");
+
+        self.hasher = hasher_val.clone();
+        self.pointer = 0;
     }
 
     pub fn push(&mut self, elem: TranElem) {
@@ -47,12 +59,19 @@ impl TranSeq{
     }
 
     pub fn gen_challenge(&mut self) -> ZpElement {
-        let mut challenge = ZpElement::from_bytes(
-            &self.hasher.clone().finalize().into());
+        // println!("Gen challenge");
+        // println!("{:?}", &self.hasher.clone().finalize());
+        let hash_value: [u8; 32] = self.hasher.clone().finalize().into();
+        // println!("Hash value: {:?}", hash_value);
+        let mut challenge = ZpElement::from_u8(
+            &hash_value);
+        // println!("Challenge: {:?}", challenge);
+
         while challenge == ZpElement::zero() {
             self.hasher.update(b"0");
-            challenge = ZpElement::from_bytes(
-                &self.hasher.clone().finalize().into());
+            let hash_value: [u8; 32] = self.hasher.clone().finalize().into();
+            challenge = ZpElement::from_u8(
+                &hash_value);
         }
 
         self.data.push(TranElem::Coin(challenge));
@@ -63,30 +82,35 @@ impl TranSeq{
     pub fn check_fiat_shamir(&self) -> bool {
         let n = self.data.len();
         let mut new_hasher = Sha256::new();
+        new_hasher.update(b"0");
 
         for i in 0..n {
             let current = self.data[i].clone();
     
             match current{
-                TranElem::G1(_) | TranElem::G2(_) | TranElem::Gt(_) | TranElem::Zp(_) 
+                TranElem::G1(_) | TranElem::G2(_) | TranElem::Gt(_) | 
+                    TranElem::Zp(_) | TranElem::Size(_)
                 => {
                     let bytes 
                         = bincode::serialize(&current).unwrap();
                     new_hasher.update(bytes);
                 },
     
-                TranElem::Coin(_) => {
-                    let mut challenge = ZpElement::from_bytes(
-                        &new_hasher.clone().finalize().into());
+                TranElem::Coin(coin_value) => {
+                    let hash_value: [u8; 32] = new_hasher.clone().finalize().into();
+                    let mut challenge = ZpElement::from_u8(
+                        &hash_value);
                     while challenge == ZpElement::zero() {
                         new_hasher.update(b"0");
-                        challenge = ZpElement::from_bytes(
-                            &new_hasher.clone().finalize().into());
+                        let hash_value: [u8; 32] = new_hasher.clone().finalize().into();
+                        challenge = ZpElement::from_u8(
+                            &hash_value);
                     }
-                    if TranElem::Coin(challenge) != self.data[i]{
+                    if challenge != coin_value{
                         return false;
                     }
                 },
+
             }
         }
         return true;
@@ -102,8 +126,11 @@ impl TranSeq{
             FileIO::from_file(format!("{}.tr", file_name), true)
                 .unwrap();
 
+        let mut hasher_val = Sha256::new();
+        hasher_val.update(b"0");
+        
         Self { 
-            hasher: Sha256::new(),
+            hasher: hasher_val,
             data: data_read,
             pointer: 0,
         }
@@ -138,6 +165,7 @@ mod tests {
 
         assert_eq!(trans_read.data.len(), 4);
         assert_eq!(trans_read.check_fiat_shamir(), true);
+
 
     }
 }

@@ -10,7 +10,11 @@ use std::thread;
 use rayon::{ThreadPoolBuilder, prelude::*};
 
 
-use crate::utils::curve::{Add, Mul, AddAssign, Zero, ZpElement, G1Element, G2Element, GtElement};
+use crate::utils::curve::{
+    Add, Mul, AddAssign, Zero, 
+    ZpElement, G1Element, G2Element, GtElement,
+    ConvertToZp,
+};
 
 use crate::mat::Mat;
 
@@ -113,11 +117,11 @@ impl BraKetZp for Mat<ZpElement> {
     }
 }
 
-pub fn inner_product<T, U, V>(vec_a: &Vec<T>, vec_b: &Vec<U>) -> V
+pub fn inner_product<'a, T, U, V>(vec_a: &Vec<T>, vec_b: &Vec<U>) -> V
 where
-    T: 'static + Clone + Copy + Send + Sync + Mul<U, Output =V>,
-    U: 'static + Clone + Copy + Send + Sync,
-    V: 'static + Clone + Copy + Send + Sync + Add + Zero,
+    T: 'a + Clone + Copy + Send + Sync + Mul<U, Output =V>,
+    U: 'a + Clone + Copy + Send + Sync,
+    V: 'a + Clone + Copy + Send + Sync + Add + Zero,
 {
     let length = std::cmp::min(vec_a.len(), vec_b.len());
 
@@ -154,6 +158,75 @@ where
 
 }
 
+pub fn vec_scalar_mul<T> (vector: &Vec<T>, scalar: ZpElement) -> Vec<T>
+where
+    T: 'static + Clone + Copy + Send + Sync + Mul<ZpElement, Output = T>,
+{
+
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(NUM_THREADS)
+        .build()
+        .unwrap();
+
+    let result = pool.install(|| 
+        {
+            vector.par_iter()
+            .map(|&val| val * scalar)
+            .collect()
+        }
+    );
+
+    return result;
+
+}
+
+
+
+pub fn vec_addition<T> (vec_a: &Vec<T>, vec_b: &Vec<T>) -> Vec<T>
+where
+    T: 'static + Clone + Copy + Send + Sync + Add<Output = T>, 
+{
+
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(NUM_THREADS)
+        .build()
+        .unwrap();
+
+    let result = pool.install(|| 
+        {
+            vec_a.par_iter()
+            .zip(vec_b.par_iter())
+            .map(|(&a, &b)| a + b)
+            .collect()
+        }
+    );
+
+    return result;
+
+}
+
+
+pub fn vec_convert_to_zp_vec<T> (vec_a: &Vec<T>) -> Vec<ZpElement> 
+where 
+    T: 'static + ConvertToZp, 
+{
+
+    let pool = ThreadPoolBuilder::new()
+        .num_threads(NUM_THREADS)
+        .build()
+        .unwrap();
+
+    let result = pool.install(|| 
+        {
+            vec_a.par_iter()
+            .map(|&a| a.to_zp())
+            .collect()
+        }
+    );
+
+    return result;
+
+}
 
 pub fn proj_left<T, U, V>(mat_a: &Mat<T>, v_base: &Vec<U>) -> Vec<V>
 where

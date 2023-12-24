@@ -41,6 +41,36 @@ pub struct GtElement { pub value: Gt }
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct GtElementPack { pub value: Gt }
 
+
+
+
+pub trait ConvertToZp: Copy + Clone + Send + Sync {
+    fn to_zp(&self) -> ZpElement;
+}
+
+impl ConvertToZp for i64 {
+    fn to_zp(&self) -> ZpElement {
+        ZpElement ::from(*self)
+    }
+}
+impl ConvertToZp for i128 {
+    fn to_zp(&self) -> ZpElement {
+        ZpElement ::from(*self)
+    }
+}
+impl ConvertToZp for u64 {
+    fn to_zp(&self) -> ZpElement {
+        ZpElement ::from(*self)
+    }
+}
+
+impl ConvertToZp for ZpElement {
+    fn to_zp(&self) -> ZpElement {
+        self.clone()
+    }
+}
+
+
 unsafe impl Send for ZpElement {}
 unsafe impl Sync for ZpElement {}
 
@@ -296,8 +326,19 @@ impl ZpElement {
         ZpElement { value: scal }
     }
 
-    pub fn from_bytes(bytes: &[u8; 32]) -> Self {
-        ZpElement { value: Scalar::from_bytes(bytes).unwrap()}
+    pub fn from_u8(bytes: &[u8; 32]) -> Self {
+
+        let mut u64s = [0u64; 4];
+
+        for (i, chunk) in bytes.chunks(8).enumerate() {
+            let mut num = 0u64;
+            for &byte in chunk {
+                num = num << 8 | byte as u64;
+            }
+            u64s[i] = num;
+        }
+
+        ZpElement { value: Scalar::from_raw(u64s)}
     }
 
     pub fn pow(&self, exponent: u64) -> Self {
@@ -809,6 +850,87 @@ impl Mul<GtElement> for u64 {
     fn mul(self, rhs: GtElement) -> Self::Output {
         GtElement { 
             value: &rhs.value * Scalar::from(self)  
+        }
+    }
+}
+
+impl Mul<ZpElement> for i64 {
+    type Output = ZpElement;
+
+    fn mul(self, rhs: ZpElement) -> Self::Output {
+        ZpElement { 
+            value: ZpElement::from(self).value * &rhs.value 
+        }
+    }
+}
+
+impl Mul<G1Element> for i64 {
+    type Output = G1Element;
+
+    fn mul(self, rhs: G1Element) -> Self::Output {
+        G1Element { 
+            value: ZpElement::from(self).value * &rhs.value 
+        }
+    }
+}
+
+impl Mul<G2Element> for i64 {
+    type Output = G2Element;
+
+    fn mul(self, rhs: G2Element) -> Self::Output {
+        G2Element { 
+            value: ZpElement::from(self).value * &rhs.value 
+        }
+    }
+}
+
+impl Mul<GtElement> for i64 {
+    type Output = GtElement;
+
+    fn mul(self, rhs: GtElement) -> Self::Output {
+        GtElement { 
+            value: &rhs.value * ZpElement::from(self).value  
+        }
+    }
+}
+
+
+impl Mul<ZpElement> for i128 {
+    type Output = ZpElement;
+
+    fn mul(self, rhs: ZpElement) -> Self::Output {
+        ZpElement { 
+            value: ZpElement::from(self).value * &rhs.value 
+        }
+    }
+}
+
+impl Mul<G1Element> for i128 {
+    type Output = G1Element;
+
+    fn mul(self, rhs: G1Element) -> Self::Output {
+        G1Element { 
+            value: ZpElement::from(self).value * &rhs.value 
+        }
+    }
+}
+
+impl Mul<G2Element> for i128 {
+    type Output = G2Element;
+
+    fn mul(self, rhs: G2Element) -> Self::Output {
+        G2Element { 
+            value: ZpElement::from(self).value * &rhs.value 
+        }
+    }
+}
+
+impl Mul<GtElement> for i128 {
+    type Output = GtElement;
+
+    fn mul(self, rhs: GtElement) -> Self::Output {
+        GtElement { 
+            value: &rhs.value * ZpElement::from(self).value  
         }
     }
 }

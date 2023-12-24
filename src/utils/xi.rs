@@ -40,7 +40,13 @@ pub fn reduce_from_challenges<T>(
 
     let xi = xi_from_challenges(challenges);
 
-    dirac::inner_product(&vector, &xi) 
+    if xi.len() > vector.len() {
+        panic!("Vector length is too short when reducing from challenges.");
+    }
+
+    let vector_slice = vector[0..xi.len()].to_vec();
+
+    dirac::inner_product(&vector_slice, &xi) 
 }
 
 /// Compute phi(s) in logarithmic time.
