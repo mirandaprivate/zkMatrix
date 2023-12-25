@@ -40,8 +40,6 @@ impl<T> Mat<T> {
 
 impl<T: Serialize + for<'de> Deserialize<'de> > FileIO for Mat<T> {}
 
-impl<T: Serialize + for<'de> Deserialize<'de> > FileIO for Vec<T> {}
-
 impl<T: PartialEq + Clone> PartialEq for Mat<T> {
 
     fn eq(&self, other: &Self) -> bool {

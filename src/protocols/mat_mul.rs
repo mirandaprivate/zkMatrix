@@ -270,10 +270,10 @@ impl MatMul {
         let check3 = ip3.verify_as_subprotocol(srs, trans_seq);
         let check4 = ip4.verify_as_subprotocol(srs, trans_seq);
 
-        println!("check 1: {:?}", check1);
-        println!("check 2: {:?}", check2);
-        println!("check 3: {:?}", check3);
-        println!("check 4: {:?}", check4);
+        println!("Check of Ip1 in MatMul: {:?}", check1);
+        println!("Check of Ip2 in MatMul: {:?}", check2);
+        println!("Check of Ip3 in MatMul: {:?}", check3);
+        println!("Check of Ip4 in MatMul: {:?}", check4);
 
         return  check1 && check2 && check3 && check4;
         

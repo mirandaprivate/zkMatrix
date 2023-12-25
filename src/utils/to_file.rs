@@ -83,3 +83,6 @@ pub trait FileIO {
         Ok(decoded)
     }
 }  
+
+
+impl<T: Serialize + for<'de> Deserialize<'de> > FileIO for Vec<T> {}
