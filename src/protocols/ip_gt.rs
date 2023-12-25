@@ -231,8 +231,8 @@ impl IpGt {
                     h_reduce, &challenges
                 );
 
-                let check_1 = pip_g1.verify(srs, trans_seq);
-                let check_2 = pip_g2.verify(srs, trans_seq);
+                let check_1 = pip_g1.verify_as_subprotocol(srs, trans_seq);
+                let check_2 = pip_g2.verify_as_subprotocol(srs, trans_seq);
                 return check_1 && check_2;
 
             }

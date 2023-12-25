@@ -1,6 +1,5 @@
-///! This file contains all the parameters used in the experiment. 
-///!
-/// 
+//! This file contains all the parameters used in the experiment. 
+//!
 pub const NUM_THREADS: usize = 8;
 
 pub const LOG_DIM: usize = 10;

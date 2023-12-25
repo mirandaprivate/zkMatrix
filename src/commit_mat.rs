@@ -135,82 +135,15 @@ mod tests {
 
     #[test]
     fn test_commit() {
-        let mat_a: Mat<u64> = {
-            match FileIO::from_file(
-                "a_test.dat".to_string(), false)
-            {
-                Ok(mat) => mat,
-                Err(_) => {
-                    let mat_a: Mat<u64> = gen_mat_a_u64_direct_test();
-                    mat_a.to_file(
-                        format!("{}.dat", mat_a.id), false)
-                    .unwrap();
-                    mat_a
-                }
-            }
-        };
+        let mat_a: Mat<u64> = gen_mat_a_u64_direct_test();
+        let vec_g: Vec<G1Element> = gen_vec_v_g1_direct_test();
+        let vec_h: Vec<G2Element> = gen_vec_v_g2_direct_test();
 
-        let vec_g = {
-            match FileIO::from_file(
-                "vec_g_test.dat".to_string(), true)
-            {
-                Ok(vec) => vec,
-                Err(_) => {
-                    let vec_g: Vec<G1Element> = gen_vec_v_g1_direct_test();
-                    vec_g.to_file(
-                        "vec_g_test.dat".to_string(), true)
-                    .unwrap();
-                    vec_g
-                }
-            }
-        };
-
-        let vec_h = {
-            match FileIO::from_file(
-                "vec_h_test.dat".to_string(), true)
-            {
-                Ok(vec) => vec,
-                Err(_) => {
-                    let vec_h: Vec<G2Element> = gen_vec_v_g2_direct_test();
-                    vec_h.to_file(
-                        "vec_h_test.dat".to_string(), true)
-                    .unwrap();
-                    vec_h
-                }
-            }
-        };
+        let right_proj: Vec<G2Element> = 
+            gen_vec_va_g2_from_kronecker_test();
+        let left_proj: Vec<G1Element> = 
+            gen_vec_va_g1_from_kronecker_test();
         
-        let right_proj = {
-            match FileIO::from_file(
-                format!("{}_right_test.dat", mat_a.id).to_string(), false)
-            {
-                Ok(vec) => vec,
-                Err(_) => {
-                    let right_proj: Vec<G2Element> = gen_vec_va_g2_from_kronecker_test();
-                    right_proj.to_file(
-                        format!("{}_right_test.dat", mat_a.id).to_string(), false)
-                    .unwrap();
-                    right_proj
-                }
-            }
-        };
-
-        let left_proj = {
-            match FileIO::from_file(
-                format!("{}_left_test.dat", mat_a.id).to_string(), false)
-            {
-                Ok(vec) => vec,
-                Err(_) => {
-                    let left_proj: Vec<G1Element> 
-                        = gen_vec_va_g1_from_kronecker_test();
-                    left_proj.to_file(
-                        format!("{}_left_test.dat", mat_a.id).to_string(),
-                        false,
-                    ).unwrap();
-                    left_proj
-                }
-            }
-        };
 
         let gah: GtElement = gen_vav_gt_direct_test();
 

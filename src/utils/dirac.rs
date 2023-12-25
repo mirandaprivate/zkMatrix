@@ -7,7 +7,7 @@ use std::marker::{Send, Sync};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use rayon::{ThreadPoolBuilder, prelude::*, result};
+use rayon::{ThreadPoolBuilder, prelude::*};
 
 
 use crate::utils::curve::{
