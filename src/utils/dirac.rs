@@ -1045,10 +1045,15 @@ mod tests {
         assert_eq!(result_bra_opt, result_bra_no_opt);
         println!(" * Assert Equal between opt Bra and no opt Bra");
         
+        let result_ket_no_opt = proj_right(
+            &a, &srs.h_hat_vec);
+
         let timer_ket_opt = Instant::now();
         
         let result_ket_opt = ket_opt_i64(
             &a, &srs.h_hat_vec);
+
+        assert_eq!(result_ket_opt, result_ket_no_opt);
         
         println!(" ** Ket i64 opt time: {:?}", timer_ket_opt.elapsed());
     
@@ -1056,7 +1061,7 @@ mod tests {
     
         let result_ket_no_opt = proj_right(
             &a_zp, &srs.h_hat_vec);
-    
+
         println!(" ** Ket i64 no opt time: {:?}", timer_ket_no_opt.elapsed());
     
         assert_eq!(result_ket_opt, result_ket_no_opt);

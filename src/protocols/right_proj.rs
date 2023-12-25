@@ -1,12 +1,12 @@
-///! Implementation of the Scalar Projection protocol
-///!
-///! Details of this protocol can be found in the DualMatrix paper 
-///!
-///! To prove that holding a secret matrix \bm{a} such that
-///! 
-///! C_a = < \vec{G}, \bm{a}, \vec{H} >
-///! C_c = (l^T \bm{a} r) e(\hat{G}, \hat{H})
-/// 
+//! Implementation of the Scalar Projection protocol
+//!
+//! Details of this protocol can be found in the DualMatrix paper 
+//!
+//! To prove that holding a secret matrix \bm{a} such that
+//! 
+//! C_a = < \vec{G}, \bm{a}, \vec{H} >
+//! C_c = e (< \vec{G}, \bm{a} r >, \hat{H})
+// 
 use crate::mat::Mat;
 use crate::setup::SRS;
 
@@ -21,7 +21,7 @@ use crate::utils::xi;
 use crate::protocols::pip::{PipG1, PipG2};
 
 
-
+/// Interface when r_vec is an arbitrary public vector
 pub struct RightProj {
     pub c_com: GtElement,
     pub a_com: GtElement,
@@ -29,11 +29,14 @@ pub struct RightProj {
     pub r_vec: Vec<ZpElement>,
 }
 
+/// Interface when y_r is a vector generated from a random y
+/// In this case, the number of field operations can be optimized
 pub struct RightProjPoly {
     pub c_com: GtElement,
     pub a_com: GtElement,
     pub shape: (usize, usize),
     pub y: ZpElement, 
+    pub step_pow: usize, 
 }
 
 pub trait RightProjInterface {
@@ -70,22 +73,28 @@ impl RightProjInterface for RightProj {
 
 impl RightProjInterface for RightProjPoly {
     fn reduce_r(&self, challenges: &Vec<ZpElement>) -> ZpElement {
+ 
         xi::phi_s(
-            self.y, challenges,
+            self.y, 
+            challenges,
             0 as usize, 
-            1 as usize,
+            self.step_pow as usize,
         )
+
     }
 
     fn get_r_vec(&self) -> Vec<ZpElement> {
         let y = self.y;
         let n = self.get_shape().1;
+        let step = y.pow(self.step_pow as u64);
+        
         
         std::iter::successors(
-            Some(ZpElement::from(1 as u64)),
-            |&x| Some(y * x),
+            Some(ZpElement::from(1 as u64)), 
+            |&x| Some(x * step)
         ).take(n).collect::<Vec<ZpElement>>()
     }
+
     fn get_c_com(&self) -> GtElement {
         self.c_com
     }
@@ -122,12 +131,14 @@ impl RightProjPoly {
         a_com_value: GtElement,  
         shape_value: (usize, usize),
         y_value: ZpElement,
+        step_pow_value: usize,
     ) -> Self {
         Self {
             c_com: c_com_value,
             a_com: a_com_value,
             shape: shape_value,
             y: y_value,
+            step_pow: step_pow_value,
         }
     }
 }
@@ -238,7 +249,7 @@ pub trait RightProjProof: RightProjInterface {
         }
 
         let xi_n_inv = xi::xi_from_challenges(&challenges_inv_n);
-        let a_xi_inv = mat_a.bra_zp(&xi_n_inv);
+        let a_xi_inv = mat_a.ket_zp(&xi_n_inv);
 
 
         let h_reduce = h_vec_current[0];
@@ -421,7 +432,7 @@ pub trait RightProjProof: RightProjInterface {
 
 
         let xi_r = self.reduce_r(&challenges_n);
-        
+
 
         if let (
             TranElem::Zp(a_reduce),
@@ -437,7 +448,7 @@ pub trait RightProjProof: RightProjInterface {
                 a_reduce * x * xi_r * srs.h_hat * g_reduce
                 + a_reduce * g_reduce * h_reduce;
             if lhs == rhs {
-                
+
                 let pip_g1 = PipG1::new(
                     g_reduce, &challenges_m
                 );
@@ -557,12 +568,13 @@ mod tests {
             a_com, 
             (m, n), 
             y,
+            1,
         );
 
-        let y_l = right_proj_poly.get_r_vec();
+        let y_r = right_proj_poly.get_r_vec();
 
 
-        let ay = a.ket_zp(&y_l);
+        let ay = a.ket_zp(&y_r);
         let ay_com =
             srs.h_hat 
             * dirac::inner_product(&ay, &srs.g_hat_vec);
@@ -579,11 +591,11 @@ mod tests {
             &a,
             &a_cache_cm);
 
-        let result_cm = right_proj_poly.verify(
+        let result_cm_poly = right_proj_poly.verify(
             &srs, &mut trans_seq_cm
         );
 
-        assert_eq!(result_cm, true);
+        assert_eq!(result_cm_poly, true);
 
         println!(" * Verification of RightProjPoly passed");
 

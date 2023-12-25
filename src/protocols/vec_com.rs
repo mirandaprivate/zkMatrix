@@ -1,10 +1,9 @@
-///! Implementation of the Inner Product protocol
-///!
-///! Details of this protocol can be found in the zkMatrix paper 
-///!
-///! To prove that holding a vector vec{a} such that
-///! <vec{a}, vec{G}> = vec_com,
-
+//! Implementation of the Inner Product protocol
+//!
+//! Details of this protocol can be found in the zkMatrix paper 
+//!
+//! To prove that holding a vector vec{a} such that
+//! <vec{a}, vec{G}> = vec_com,
 use crate::setup::SRS;
 
 use crate::utils::curve::{ZpElement, G1Element, ConvertToZp};

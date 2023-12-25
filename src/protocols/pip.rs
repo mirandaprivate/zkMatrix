@@ -1,7 +1,7 @@
-///! Implementation of the Public Inner Product protocol
-///!
-///! Details of this protocol can be found in the DualMatrix paper 
-/// 
+//! Implementation of the Public Inner Product protocol
+//!
+//! Details of this protocol can be found in the DualMatrix paper 
+// 
 use crate::setup::SRS;
 
 use crate::utils::curve::{ZpElement, G1Element, G2Element};

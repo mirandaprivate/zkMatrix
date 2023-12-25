@@ -118,7 +118,7 @@ fn mat_mul_dense_i64_to_i64(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
 /// 
 /// The result is a i128 dense matrix
 /// 
-fn mat_mul_dense_i64_to_i128(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
+pub fn mat_mul_dense_i64_to_i128(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
 ) -> Vec<Vec<i128>> {
     let a_rows = a.len();
     let a_cols = a[0].len();

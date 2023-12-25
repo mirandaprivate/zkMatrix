@@ -1,12 +1,12 @@
-///! Implementation of the Scalar Projection protocol
-///!
-///! Details of this protocol can be found in the DualMatrix paper 
-///!
-///! To prove that holding a secret matrix \bm{a} such that
-///! 
-///! C_a = < \vec{G}, \bm{a}, \vec{H} >
-///! C_c = (l^T \bm{a} r) e(\hat{G}, \hat{H})
-/// 
+//! Implementation of the Scalar Projection protocol
+//!
+//! Details of this protocol can be found in the DualMatrix paper 
+//!
+//! To prove that holding a secret matrix \bm{a} such that
+//! 
+//! C_a = < \vec{G}, \bm{a}, \vec{H} >
+//! C_c = e( <l^T \bm{a}, \vec{G}>, \hat{H})
+// 
 use crate::mat::Mat;
 use crate::setup::SRS;
 
@@ -22,6 +22,7 @@ use crate::protocols::pip::{PipG1, PipG2};
 
 
 
+/// Interface when l_vec is an arbitrary public vector
 pub struct LeftProj {
     pub c_com: GtElement,
     pub a_com: GtElement,
@@ -29,11 +30,14 @@ pub struct LeftProj {
     pub l_vec: Vec<ZpElement>,
 }
 
+/// Interface when y_l is a vector generated from a random y
+/// In this case, the number of field operations can be optimized
 pub struct LeftProjPoly {
     pub c_com: GtElement,
     pub a_com: GtElement,
     pub shape: (usize, usize),
-    pub y: ZpElement, 
+    pub y: ZpElement,
+    pub step_pow: usize, 
 }
 
 pub trait LeftProjInterface {
@@ -69,13 +73,12 @@ impl LeftProjInterface for LeftProj {
 
 impl LeftProjInterface for LeftProjPoly {
     fn reduce_l(&self, challenges: &Vec<ZpElement>) -> ZpElement {
-        let n = self.get_shape().1;
-
+ 
         xi::phi_s(
             self.y, 
             challenges,
             0 as usize, 
-            n as usize,
+            self.step_pow as usize,
         )
 
     }
@@ -83,8 +86,7 @@ impl LeftProjInterface for LeftProjPoly {
     fn get_l_vec(&self) -> Vec<ZpElement> {
         let y = self.y;
         let m = self.get_shape().0;
-        let n = self.get_shape().1;
-        let step = y.pow(n as u64);
+        let step = y.pow(self.step_pow as u64);
         
         
         std::iter::successors(
@@ -129,12 +131,14 @@ impl LeftProjPoly {
         a_com_value: GtElement,  
         shape_value: (usize, usize),
         y_value: ZpElement,
+        step_pow_value: usize,
     ) -> Self {
         Self {
             c_com: c_com_value,
             a_com: a_com_value,
             shape: shape_value,
             y: y_value,
+            step_pow: step_pow_value,
         }
     }
 }
@@ -564,6 +568,7 @@ mod tests {
             a_com, 
             (m, n), 
             y,
+            n,
         );
 
         let y_l = left_proj_poly.get_l_vec();

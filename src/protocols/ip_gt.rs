@@ -1,10 +1,10 @@
-///! Implementation of the Inner Product protocol in Gt
-///!
-///! Details of this protocol can be found in the DualMatrix paper 
-///!
-///! To prove that holding two vectors vec{a} and vec{b} such that
-///! gt_com = <vec{a}, vec{b}> e(\hat{G}, \hat{H}) 
-///         + e(\hat{G}, <vec{a}, vec{H}>) + e(<vec{b}, \hat{G}>, \hat{H})
+//! Implementation of the Inner Product protocol in Gt
+//!
+//! Details of this protocol can be found in the DualMatrix paper 
+//!
+//! To prove that holding two vectors vec{a} and vec{b} such that
+//! gt_com = <vec{a}, vec{b}> e(\hat{G}, \hat{H}) 
+//         + e(\hat{G}, <vec{a}, vec{H}>) + e(<vec{b}, \hat{G}>, \hat{H})
 
 use crate::setup::SRS;
 

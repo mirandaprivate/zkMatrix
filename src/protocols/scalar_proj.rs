@@ -1,12 +1,12 @@
-///! Implementation of the Scalar Projection protocol
-///!
-///! Details of this protocol can be found in the DualMatrix paper 
-///!
-///! To prove that holding a secret matrix \bm{a} such that
-///! 
-///! C_a = < \vec{G}, \bm{a}, \vec{H} >
-///! C_c = (l^T \bm{a} r) e(\hat{G}, \hat{H})
-/// 
+//! Implementation of the Scalar Projection protocol
+//!
+//! Details of this protocol can be found in the DualMatrix paper 
+//!
+//! To prove that holding a secret matrix \bm{a} such that
+//! 
+//! C_a = < \vec{G}, \bm{a}, \vec{H} >
+//! C_c = (l^T \bm{a} r) e(\hat{G}, \hat{H})
+// 
 use crate::mat::Mat;
 use crate::setup::SRS;
 
@@ -21,7 +21,7 @@ use crate::utils::xi;
 use crate::protocols::pip::{PipG1, PipG2};
 
 
-
+/// Interface when l_vec and r_vec are arbitrary public vectors
 pub struct ScalarProj {
     pub c_com: GtElement,
     pub a_com: GtElement,
@@ -30,6 +30,8 @@ pub struct ScalarProj {
     pub r_vec: Vec<ZpElement>,
 }
 
+/// Interface when y_l and y_r are vectors generated from a random y
+/// In this case, the number of field operations can be optimized
 pub struct ScalarProjPoly {
     pub c_com: GtElement,
     pub a_com: GtElement,
