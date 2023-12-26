@@ -297,9 +297,9 @@ impl MatMul {
 mod tests {
     
     use super::*;
-
     use crate::commit_mat::CommitMat;
-    use crate::experiment_data;
+
+    use crate::utils::test_data;
    
     #[test]
     fn test_matmul() {
@@ -307,7 +307,7 @@ mod tests {
         let srs = SRS::new(64);
 
         let (c, a, b) = 
-            experiment_data::gen_matrices_dense(32);
+            test_data::gen_test_matrices_not_square();
 
         let (c_com, c_cache_cm) =
             c.commit_col_major(
@@ -329,9 +329,9 @@ mod tests {
             c_com,
             a_com,
             b_com, 
-            32,
-            32,
-            32,
+            c.shape.0,
+            c.shape.1,
+            a.shape.1,
         );
 
 

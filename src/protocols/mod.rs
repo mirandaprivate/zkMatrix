@@ -6,6 +6,5 @@ pub mod left_proj;
 pub mod right_proj;
 pub mod pip;
 pub mod scalar_proj;
-pub mod zk_scalar;
 
 pub mod mat_mul;

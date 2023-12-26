@@ -10,6 +10,7 @@
 //! 
 
 #![allow(dead_code)]
+use rand::Rng;
 
 use crate::mat::Mat;
 use crate::config::SQRT_MATRIX_DIM_TEST;
@@ -22,6 +23,69 @@ pub fn gen_test_matrices() -> (Mat<i128>, Mat<i64>, Mat<i64>){
     crate::experiment_data::gen_matrices_dense(
         crate::config::MATRIX_DIM_TEST
     )
+}
+
+pub fn dense_to_sprs_i64(a: &Vec<Vec<i64>>) -> Vec<(usize, usize, i64)> {
+    let mut sprs = Vec::new();
+
+    for i in 0..a.len() {
+        for j in 0..a[0].len() {
+            if a[i][j] != 0 {
+                sprs.push((i, j, a[i][j]));
+            }
+        }
+    }
+
+    sprs
+}
+
+pub fn dense_to_sprs_i128(a: &Vec<Vec<i128>>) -> Vec<(usize, usize, i128)> {
+    let mut sprs = Vec::new();
+
+    for i in 0..a.len() {
+        for j in 0..a[0].len() {
+            if a[i][j] != 0 {
+                sprs.push((i, j, a[i][j]));
+            }
+        }
+    }
+
+    sprs
+}
+
+pub fn gen_test_matrices_not_square() -> (Mat<i128>, Mat<i64>, Mat<i64>){
+
+    let a_data = (0..32).map(|_| {
+        (0..16).map(|_| {
+            rand::thread_rng()
+            .gen_range(-2i64.pow(52)..2i64.pow(52)) as i64
+        }).collect::<Vec<i64>>()  
+    }).collect::<Vec<Vec<i64>>>();
+
+    let b_data = (0..16).map(|_| {
+        (0..8).map(|_| {
+            rand::thread_rng()
+            .gen_range(-2i64.pow(52)..2i64.pow(52)) as i64
+        }).collect::<Vec<i64>>()  
+    }).collect::<Vec<Vec<i64>>>();
+
+    let c_data = 
+        crate::experiment_data::mat_mul_dense_i64_to_i128(&a_data, &b_data);
+
+    let a = Mat::new_from_data_vec(
+        "a_no_square", (32, 16), dense_to_sprs_i64(&a_data)
+    );
+
+    let b = Mat::new_from_data_vec(
+        "b_no_square", (16, 8), dense_to_sprs_i64(&b_data)
+    );
+
+    let c = Mat::new_from_data_vec(
+        "c_no_square", (32, 8), dense_to_sprs_i128(&c_data)
+    );
+
+    (c, a, b)
+
 }
 
 #[cfg(test)]
