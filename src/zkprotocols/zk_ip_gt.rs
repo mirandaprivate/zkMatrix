@@ -10,7 +10,10 @@
 //!
 use crate::setup::SRS;
 
-use crate::utils::curve::{ZpElement, GtElement, ConvertToZp, G2Element, G1Element};
+use crate::utils::curve::{
+    ZpElement, GtElement, G1Element, G2Element, 
+    ConvertToZp,
+};
 use crate::utils::dirac;
 use crate::utils::fiat_shamir::{TranElem, TranSeq};
 

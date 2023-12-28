@@ -1,3 +1,9 @@
+//! Define the transcript sequence for zero-knowledge protocols
+//! 
+//! In essence, in the prover algorithm of a zero-knowledge protocol,
+//! the prover can hide each transcript element by accompanying it with
+//! a blinding factor.
+//!
 use crate::setup::SRS;
 
 use crate::utils::curve::{ZpElement, G1Element, G2Element, GtElement};

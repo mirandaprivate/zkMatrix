@@ -1,6 +1,6 @@
 //! # Main
 //! 
-//! Run experiment for the zkMatrix protocol.
+//! Run experiments for the zkMatrix protocol.
 //! 
 //! The experiment parameters are configured in config.rs
 //! 
