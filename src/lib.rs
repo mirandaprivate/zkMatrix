@@ -11,13 +11,13 @@ pub mod commit_mat;
 pub mod mat;
 pub mod setup;
 
-
-pub mod experiment_data;
+pub mod utils;
+pub mod protocols;
+pub mod zkprotocols;
 
 pub mod config;
+pub mod experiment_data;
 
-pub mod protocols;
-pub mod utils;
-pub mod zkprotocols;
+
 
 

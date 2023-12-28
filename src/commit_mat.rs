@@ -23,16 +23,14 @@ pub trait CommitMat {
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
     ) -> (GtElement, Vec<G1Element>);
 
-    fn commit_rm(&self, srs: &SRS) -> GtElement {
-        let (com, _) = self.commit_row_major(
-            &srs.g_hat_vec, &srs.h_hat_vec);
-        com
+    fn commit_rm(&self, srs: &SRS) -> (GtElement, Vec<G2Element>) {
+        self.commit_row_major(
+            &srs.g_hat_vec, &srs.h_hat_vec)
     }
 
-    fn commit_cm(&self, srs: &SRS) -> GtElement {
-        let (com, _) = self.commit_col_major(
-            &srs.g_hat_vec, &srs.h_hat_vec);
-        com
+    fn commit_cm(&self, srs: &SRS) -> (GtElement, Vec<G1Element>) {
+        self.commit_col_major(
+            &srs.g_hat_vec, &srs.h_hat_vec)
     }
 }
 

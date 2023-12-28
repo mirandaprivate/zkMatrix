@@ -79,7 +79,9 @@ fn experiment(log_file: &mut File) {
     let commit_a_timer = Instant::now();
 
     let a_tilde = ZpElement::rand();
-    let a_commit = a.commit_rm(&srs) + a_tilde * srs.blind_base;
+    let (a_com, a_cache) = 
+        a.commit_rm(&srs);
+    let a_blind = a_com + a_tilde * srs.blind_base;
 
     let commit_a_duration = commit_a_timer.elapsed();
 
@@ -89,7 +91,8 @@ fn experiment(log_file: &mut File) {
     let commit_b_timer = Instant::now();
 
     let b_tilde = ZpElement::rand();
-    let b_commit = b.commit_cm(&srs) + b_tilde * srs.blind_base;
+    let (b_com, b_cache) = b.commit_cm(&srs);
+    let b_blind = b_com + b_tilde * srs.blind_base;
 
     let commit_b_duration = commit_b_timer.elapsed();
 
@@ -99,27 +102,15 @@ fn experiment(log_file: &mut File) {
     let commit_c_timer = Instant::now();
 
     let c_tilde = ZpElement::rand();
-    let c_commit = c.commit_cm(&srs) + c_tilde * srs.blind_base;
+    let (c_com, c_cache) = c.commit_cm(&srs);
+    let c_blind = c_com + c_tilde * srs.blind_base;
 
     let commit_c_duration = commit_c_timer.elapsed();
 
     println!(" ** Commit matrix c time: {:?}", commit_c_duration);
     writeln!(log_file, " ** Commit matrix c time: {:?}", commit_c_duration).unwrap();
 
-
-    let a_chache_read: Vec<G2Element> = FileIO::from_file(
-        format!("{}_rp.cache", a.id), false
-        ).unwrap();
-
-    let b_chache_read: Vec<G1Element> = FileIO::from_file(
-        format!("{}_lp.cache", b.id), false
-        ).unwrap();
-    
-    let c_chache_read: Vec<G1Element> = FileIO::from_file(
-        format!("{}_lp.cache", c.id), false
-        ).unwrap();
-
-    let commit_cab: Vec<GtElement> = [c_commit, a_commit, b_commit].to_vec();
+    let commit_cab: Vec<GtElement> = [c_blind, a_blind, b_blind].to_vec();
 
     let timer_prove = Instant::now();
     
@@ -138,14 +129,16 @@ fn experiment(log_file: &mut File) {
         &srs,
         &mut zk_trans,
         &c, &a, &b,
-        &c_chache_read, &a_chache_read, &b_chache_read, 
+        &c_cache, &a_cache, &b_cache, 
         c_tilde, a_tilde, b_tilde,
     );
 
     let trans = zk_trans.publish_trans();
 
     println!(" ** Prover time of zkMatMul: {:?}", timer_prove.elapsed());
-    writeln!(log_file, " ** Prover time of zkMatMul: {:?}", timer_prove.elapsed()).unwrap();
+    writeln!(log_file, " ** Prover time of zkMatMul: {:?}", 
+        timer_prove.elapsed()
+    ).unwrap();
 
     trans.save_to_file(
         format!("tr_2e{:?}", LOG_DIM)
@@ -162,7 +155,9 @@ fn experiment(log_file: &mut File) {
     println!(" * Verification of zkMatMul result: {:?}", result);
 
     println!(" ** Verifier time of zkMatMul : {:?}", timer_verify.elapsed());
-    writeln!(log_file, " ** Verifier time of zkMatMul : {:?}", timer_verify.elapsed()).unwrap();
+    writeln!(log_file, " ** Verifier time of zkMatMul : {:?}", 
+        timer_verify.elapsed())
+    .unwrap();
 
 }
 
@@ -214,7 +209,7 @@ fn experiment_commit_matrices(log_file: &mut File){
     
     let commit_a_timer = Instant::now();
 
-    let a_commit = a_read.commit_rm(&srs);
+    let (a_commit,_) = a_read.commit_rm(&srs);
 
     let commit_a_duration = commit_a_timer.elapsed();
 
@@ -227,7 +222,7 @@ fn experiment_commit_matrices(log_file: &mut File){
     
     let commit_b_timer = Instant::now();
 
-    let b_commit = b_read.commit_cm(&srs);
+    let (b_commit,_) = b_read.commit_cm(&srs);
 
     let commit_b_duration = commit_b_timer.elapsed();
 
@@ -240,7 +235,7 @@ fn experiment_commit_matrices(log_file: &mut File){
     
     let commit_c_timer = Instant::now();
 
-    let c_commit = c_read.commit_cm(&srs);
+    let (c_commit,_) = c_read.commit_cm(&srs);
 
     let commit_c_duration = commit_c_timer.elapsed();
 
@@ -277,15 +272,15 @@ fn experiment_matmul(log_file: &mut File) {
         format!("c_sprs_i128_2e{:?}.dat", LOG_DIM), false
         ).unwrap();
 
-    let a_chache_read: Vec<G2Element> = FileIO::from_file(
+    let a_cache_read: Vec<G2Element> = FileIO::from_file(
         format!("{}_rp.cache", a_read.id), false
         ).unwrap();
 
-    let b_chache_read: Vec<G1Element> = FileIO::from_file(
+    let b_cache_read: Vec<G1Element> = FileIO::from_file(
         format!("{}_lp.cache", b_read.id), false
         ).unwrap();
     
-    let c_chache_read: Vec<G1Element> = FileIO::from_file(
+    let c_cache_read: Vec<G1Element> = FileIO::from_file(
         format!("{}_lp.cache", c_read.id), false
         ).unwrap();
 
@@ -311,7 +306,7 @@ fn experiment_matmul(log_file: &mut File) {
         &srs,
         &mut trans,
         &c_read, &a_read, &b_read,
-        &c_chache_read, &a_chache_read, &b_chache_read, 
+        &c_cache_read, &a_cache_read, &b_cache_read, 
     );
 
 
