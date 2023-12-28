@@ -2,9 +2,11 @@
 //!
 //! Details of this protocol can be found in the DualMatrix paper 
 //!
-//! To prove that holding two vectors vec{a} and vec{b} such that
+//! To prove that holding two vectors vec{a} and vec{b}
+//! and c_tilde such that
 //! gt_com = <vec{a}, vec{b}> e(\hat{G}, \hat{H}) 
 //!         + e(\hat{G}, <vec{a}, vec{H}>) + e(<vec{b}, \hat{G}>, \hat{H})
+//!         + c_tilde * blind_base
 //!
 use crate::setup::SRS;
 
@@ -189,7 +191,7 @@ impl ZkIpGt {
         }
 
         let eq_tilde = lhs_tilde - rhs_tilde;
-        let blind_base = srs.g_hat_minus * srs.h_hat_minus;
+        let blind_base = srs.blind_base;
         let eq_tilde_com = eq_tilde * blind_base;
 
         let zk_semi_mul_1 = ZkSemiMulScalar::new(
@@ -339,7 +341,7 @@ impl ZkIpGt {
             // ///////////////////////////////////////////////////////////
             // Add zk from now on
             // /////////////////////////////////////////////////////////////
-            let blind_base = srs.g_hat_minus * srs.h_hat_minus;
+            let blind_base = srs.blind_base;
 
             let zk_semi_mul_1 = ZkSemiMulScalar::new(
                 a_h_blind,
@@ -435,7 +437,7 @@ mod tests {
 
         let c = dirac::inner_product(&a_vec, &b_vec);
 
-        let blind_base = srs.g_hat_minus * srs.h_hat_minus;
+        let blind_base = srs.blind_base;
 
         let c_tilde = ZpElement::rand();
 

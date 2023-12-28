@@ -7,7 +7,7 @@ use serde::{Serialize, Deserialize};
 use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
 
-use crate::utils::curve::{G1Element, G2Element, ZpElement};
+use crate::utils::curve::{G1Element, G2Element, ZpElement, GtElement};
 
 use crate::utils::to_file::FileIO;
 
@@ -18,8 +18,7 @@ pub struct SRS {
     pub q: usize,
     pub g_hat: G1Element,
     pub h_hat: G2Element,
-    pub g_hat_minus: G1Element,
-    pub h_hat_minus: G2Element,
+    pub blind_base: GtElement,
     pub g_hat_vec: Vec<G1Element>,
     pub h_hat_vec: Vec<G2Element>,
     pub g_hat_prime_vec: Vec<G1Element>,
@@ -49,8 +48,7 @@ impl SRS {
         let s_hat_pow_q_squre = 
             s_hat_pow_q * (*s_prime_vec.last().unwrap());
         
-        let g_hat_minus = s_hat_pow_q_squre * g_hat;
-        let h_hat_minus = s_hat_pow_q_squre * h_hat;
+        let blind_base = s_hat_pow_q_squre * g_hat * h_hat;
 
         let pool = ThreadPoolBuilder::new()
             .num_threads(NUM_THREADS)
@@ -93,8 +91,7 @@ impl SRS {
             q,
             g_hat,
             h_hat,
-            g_hat_minus,
-            h_hat_minus,
+            blind_base,
             g_hat_vec,
             h_hat_vec,
             g_hat_prime_vec,

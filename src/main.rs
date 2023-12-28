@@ -21,15 +21,19 @@ use zkmatrix::commit_mat::CommitMat;
 use zkmatrix::mat::Mat;
 use zkmatrix::setup::SRS;
 
+use zkmatrix::utils::curve::ZpElement;
 use zkmatrix::utils::curve::{G1Element, G2Element, GtElement};
 use zkmatrix::utils::fiat_shamir::TranSeq;
 use zkmatrix::utils::to_file::FileIO;
 
 use zkmatrix::protocols::mat_mul::MatMul;
 
+use zkmatrix::zkprotocols::zk_matmul::ZkMatMul;
+
 use zkmatrix::experiment_data;
 use zkmatrix::config::{Q, LOG_DIM, SQRT_MATRIX_DIM};
 
+use zkmatrix::zkprotocols::zk_trans::ZkTranSeqProver;
 
 fn main(){
     let mut log_file = OpenOptions::new()
@@ -44,12 +48,123 @@ fn main(){
                 LOG_DIM,
                 LOG_DIM / 2 * 3,
          );
-    experiment_srs_gen(&mut log_file);
-    experiment_gen_matrices(&mut log_file);
-    experiment_commit_matrices(&mut log_file);
-    experiment_matmul(&mut log_file);
+    // experiment_srs_gen(&mut log_file);
+    // experiment_gen_matrices(&mut log_file);
+    // experiment_commit_matrices(&mut log_file);
+    // experiment_matmul(&mut log_file);
+    experiment(&mut log_file);
 }
 
+
+fn experiment(log_file: &mut File) {
+    let srs_timer = Instant::now();
+
+    let srs = SRS::new(Q);
+
+    let srs_duration = srs_timer.elapsed();
+
+    println!(" ** SRS generation time: {:?}", srs_duration);
+    writeln!(log_file, " ** SRS generation time: {:?}", srs_duration).unwrap();
+
+    let mat_timer = Instant::now();
+
+    let (c, a, b) = 
+        experiment_data::gen_matrices_sparse(SQRT_MATRIX_DIM);
+
+    let mat_duration = mat_timer.elapsed();
+
+    println!(" ** Matrix generation time: {:?}", mat_duration);
+    writeln!(log_file, " ** Matrix generation time: {:?}", mat_duration).unwrap();
+
+    let commit_a_timer = Instant::now();
+
+    let a_tilde = ZpElement::rand();
+    let a_commit = a.commit_rm(&srs) + a_tilde * srs.blind_base;
+
+    let commit_a_duration = commit_a_timer.elapsed();
+
+    println!(" ** Commit matrix a time: {:?}", commit_a_duration);
+    writeln!(log_file, " ** Commit matrix a time: {:?}", commit_a_duration).unwrap();
+    
+    let commit_b_timer = Instant::now();
+
+    let b_tilde = ZpElement::rand();
+    let b_commit = b.commit_cm(&srs) + b_tilde * srs.blind_base;
+
+    let commit_b_duration = commit_b_timer.elapsed();
+
+    println!(" ** Commit matrix b time: {:?}", commit_b_duration);
+    writeln!(log_file, " ** Commit matrix b time: {:?}", commit_b_duration).unwrap();
+
+    let commit_c_timer = Instant::now();
+
+    let c_tilde = ZpElement::rand();
+    let c_commit = c.commit_cm(&srs) + c_tilde * srs.blind_base;
+
+    let commit_c_duration = commit_c_timer.elapsed();
+
+    println!(" ** Commit matrix c time: {:?}", commit_c_duration);
+    writeln!(log_file, " ** Commit matrix c time: {:?}", commit_c_duration).unwrap();
+
+
+    let a_chache_read: Vec<G2Element> = FileIO::from_file(
+        format!("{}_rp.cache", a.id), false
+        ).unwrap();
+
+    let b_chache_read: Vec<G1Element> = FileIO::from_file(
+        format!("{}_lp.cache", b.id), false
+        ).unwrap();
+    
+    let c_chache_read: Vec<G1Element> = FileIO::from_file(
+        format!("{}_lp.cache", c.id), false
+        ).unwrap();
+
+    let commit_cab: Vec<GtElement> = [c_commit, a_commit, b_commit].to_vec();
+
+    let timer_prove = Instant::now();
+    
+    let matmul_protocol = ZkMatMul::new(
+        commit_cab[0],
+        commit_cab[1],
+        commit_cab[2], 
+        SQRT_MATRIX_DIM * SQRT_MATRIX_DIM,
+        SQRT_MATRIX_DIM * SQRT_MATRIX_DIM,
+        SQRT_MATRIX_DIM * SQRT_MATRIX_DIM,
+    );
+    
+    let mut zk_trans = ZkTranSeqProver::new(&srs);
+
+    matmul_protocol.prove::<i128, i64, i64>(
+        &srs,
+        &mut zk_trans,
+        &c, &a, &b,
+        &c_chache_read, &a_chache_read, &b_chache_read, 
+        c_tilde, a_tilde, b_tilde,
+    );
+
+    let trans = zk_trans.publish_trans();
+
+    println!(" ** Prover time of zkMatMul: {:?}", timer_prove.elapsed());
+    writeln!(log_file, " ** Prover time of zkMatMul: {:?}", timer_prove.elapsed()).unwrap();
+
+    trans.save_to_file(
+        format!("tr_2e{:?}", LOG_DIM)
+    ).unwrap();
+
+    let mut trans_read = TranSeq::read_from_file(
+        format!("tr_2e{:?}", LOG_DIM)
+    );
+
+    let timer_verify = Instant::now();
+
+    let result = matmul_protocol.verify(&srs, &mut trans_read);
+
+    println!(" * Verification of zkMatMul result: {:?}", result);
+
+    println!(" ** Verifier time of zkMatMul : {:?}", timer_verify.elapsed());
+    writeln!(log_file, " ** Verifier time of zkMatMul : {:?}", timer_verify.elapsed()).unwrap();
+
+}
 
 fn experiment_srs_gen(log_file: &mut File){
     let srs_timer = Instant::now();
@@ -89,7 +204,9 @@ fn experiment_gen_matrices(log_file: &mut File){
 
 fn experiment_commit_matrices(log_file: &mut File){
 
-    let srs = SRS::from_file(String::from("srs.srs"), true).unwrap();
+    let srs = SRS::from_file(format!(
+        "srs_2e{:?}.srs", LOG_DIM), true
+    ).unwrap();
 
     let a_read: Mat<i64> = Mat::<i64>::from_file(
         format!("a_sprs_i64_2e{:?}.dat", LOG_DIM), false

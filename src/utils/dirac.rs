@@ -715,7 +715,8 @@ pub fn ket_opt_i128(mat_a: &Mat<i128>, v_base: &Vec<G2Element>) -> Vec<G2Element
 
 
 
-pub fn proj_left_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
+pub fn proj_left_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>
+) -> Vec<ZpElement> {
 
     let n_row = mat_a.shape.0;
     let n_col = mat_a.shape.1;
@@ -728,10 +729,9 @@ pub fn proj_left_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>) -> Vec
 
     let a_abs_sign: Vec<(usize, usize, u64, bool)> =  pool.install(
             || {
-                mat_a.data.par_iter().map(|&(row, col, val)| 
-                    (
-                        row, col, val.abs() as u64, val < 0,
-                    )
+                mat_a.data.par_iter().map(
+                    |&(row, col, val)| 
+                    (row, col, val.abs() as u64, val < 0,)
                 ).collect()
             }
         );
@@ -775,7 +775,8 @@ pub fn proj_left_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>) -> Vec
 }
 
 
-pub fn proj_right_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
+pub fn proj_right_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>
+) -> Vec<ZpElement> {
 
     let n_row = mat_a.shape.0;
     let n_col = mat_a.shape.1;
@@ -836,7 +837,8 @@ pub fn proj_right_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>) -> Ve
 
 
 
-pub fn proj_left_opt_i128_to_zp(mat_a: &Mat<i128>, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
+pub fn proj_left_opt_i128_to_zp(mat_a: &Mat<i128>, v_base: &Vec<ZpElement>
+) -> Vec<ZpElement> {
 
     let n_row = mat_a.shape.0;
     let n_col = mat_a.shape.1;

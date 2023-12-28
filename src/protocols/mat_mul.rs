@@ -19,14 +19,11 @@ use crate::utils::curve::{
 use crate::utils::dirac::{self, BraKetZp};
 use crate::utils::fiat_shamir::{TranElem, TranSeq};
 
-use crate::protocols::left_proj::LeftProjPoly;
-use crate::protocols::right_proj::RightProjPoly;
-use crate::protocols::scalar_proj::ScalarProjPoly;
+use crate::protocols::left_proj::{LeftProjPoly, LeftProjProof};
+use crate::protocols::right_proj::{RightProjPoly, RightProjProof};
+use crate::protocols::scalar_proj::{ScalarProjPoly, ScalarProjCmProof};
 use crate::protocols::ip_gt::IpGt;
 
-use super::left_proj::LeftProjProof;
-use super::right_proj::RightProjProof;
-use super::scalar_proj::ScalarProjCmProof;
 
 /// Interface for the matMul protocol
 pub struct MatMul {

@@ -1,0 +1,14 @@
+ ** SRS generation time: 7.506490312s
+ ** Matrix generation time: 53.236548ms
+ ** Commit matrix a time: 7.332732213s
+ ** Commit matrix b time: 5.244540733s
+ ** Commit matrix c time: 8.953975558s
+ ** Prover time of MatMul: 74.920796769s
+ ** Verifier time of MatMul : 475.489698ms
+ ** SRS generation time: 6.961427684s
+ ** Matrix generation time: 57.479945ms
+ ** Commit matrix a time: 6.871161997s
+ ** Commit matrix b time: 4.83056204s
+ ** Commit matrix c time: 8.317737384s
+ ** Prover time of zkMatMul: 68.421370692s
+ ** Verifier time of zkMatMul : 438.379159ms

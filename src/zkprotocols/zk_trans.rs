@@ -23,7 +23,7 @@ impl ZkTranSeqProver {
         Self { 
             trans_seq: trans_seq, 
             blind_seq: blind_seq, 
-            blind_base: srs.g_hat_minus * srs.h_hat_minus,
+            blind_base: srs.blind_base,
             g_hat: srs.g_hat,
             h_hat: srs.h_hat,
         }

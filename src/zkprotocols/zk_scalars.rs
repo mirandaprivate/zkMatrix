@@ -261,8 +261,7 @@ impl ZkMulScalar
         let gamma_tilde = ZpElement::rand();
         let delta_tilde = ZpElement::rand();
 
-        let blind_base = 
-            srs.h_hat_minus * srs.g_hat_minus;
+        let blind_base = srs.blind_base;
         let alpha_com 
             = alpha.to_gt(srs) + alpha_tilde * blind_base;
         let beta_com
@@ -358,9 +357,7 @@ impl ZkMulScalar
                 trans_seq.data[pointer_old + 12]
             );
 
-            let blind_base = 
-                srs.h_hat_minus * srs.g_hat_minus;
-
+            let blind_base = srs.blind_base;
             let p_a = 
                 (alpha_com + self.a_com * x + blind_base * z_a) * x;
             let p_b = 
@@ -437,8 +434,7 @@ where
         let alpha_tilde = ZpElement::rand();
         let gamma_tilde = ZpElement::rand();
      
-        let blind_base = 
-            srs.h_hat_minus * srs.g_hat_minus;
+        let blind_base = srs.blind_base;
         let alpha_com 
             = alpha.to_gt(srs) + alpha_tilde * blind_base;
         let gamma_com
@@ -511,9 +507,7 @@ where
                 trans_seq.data[pointer_old + 8]
             );
         
-            let blind_base = 
-                srs.h_hat_minus * srs.g_hat_minus;
-
+            let blind_base = srs.blind_base;
             let p_a = 
                 alpha_com + self.a_com * x + blind_base * z_a;
             let p_c = 
@@ -580,7 +574,7 @@ mod tests {
         let b_tilde = ZpElement::rand();
         let c_tilde = ZpElement::rand();
         
-        let blind_base = srs.g_hat_minus * srs.h_hat_minus;
+        let blind_base = srs.blind_base;
 
         let a_com = a.to_gt(&srs) + a_tilde * blind_base;
         let b_com = b.to_gt(&srs) + b_tilde * blind_base;

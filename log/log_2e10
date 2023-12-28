@@ -5,3 +5,24 @@
  ** Commit matrix c time: 2.573303103s
  ** Prover time of MatMul: 27.129459281s
  ** Verifier time of MatMul : 341.118443ms
+ ** SRS generation time: 1.770150652s
+ ** Matrix generation time: 14.923593ms
+ ** Commit matrix a time: 2.089288667s
+ ** Commit matrix b time: 1.389780533s
+ ** Commit matrix c time: 2.370686855s
+ ** Prover time of MatMul: 24.085687406s
+ ** Verifier time of MatMul : 74.776862ms
+ ** SRS generation time: 1.774854712s
+ ** Matrix generation time: 19.252155ms
+ ** Commit matrix a time: 2.198063778s
+ ** Commit matrix b time: 1.337714013s
+ ** Commit matrix c time: 2.416169187s
+ ** Prover time of MatMul: 23.481657564s
+ ** Verifier time of MatMul : 324.907021ms
+ ** SRS generation time: 1.762557922s
+ ** Matrix generation time: 20.067718ms
+ ** Commit matrix a time: 2.059984389s
+ ** Commit matrix b time: 1.376483045s
+ ** Commit matrix c time: 2.404096172s
+ ** Prover time of MatMul: 23.790161304s
+ ** Verifier time of MatMul : 392.404251ms
