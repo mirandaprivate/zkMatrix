@@ -61,9 +61,9 @@ impl ZkMatMul {
     pub fn prove<T, U, V>(
         &self, srs: &SRS, 
         zk_trans_seq: &mut ZkTranSeqProver, 
-        mat_c: &Mat<T>, 
-        mat_a: &Mat<U>, 
-        mat_b: &Mat<V>,
+        mat_c: Mat<T>, 
+        mat_a: Mat<U>, 
+        mat_b: Mat<V>,
         cache_c: &Vec<G1Element>,
         cache_a: &Vec<G2Element>,
         cache_b: &Vec<G1Element>,
@@ -167,21 +167,32 @@ impl ZkMatMul {
             l, 
         );
 
-        ip1.prove_cm::<T>(
-            srs, zk_trans_seq, 
-            mat_c, cache_c, 
-            d_tilde, c_tilde,
-        );
+
         ip2.prove::<U>(
             srs, zk_trans_seq, 
-            mat_a, cache_a,
+            &mat_a, cache_a,
             ay_tilde, a_tilde,
         );
+
+        std::mem::drop(mat_a);
+
         ip3.prove::<V>(
             srs, zk_trans_seq, 
-            mat_b, cache_b, 
+            &mat_b, cache_b, 
             by_tilde, b_tilde
         );
+
+        std::mem::drop(mat_b);
+
+        ip1.prove_cm::<T>(
+            srs, zk_trans_seq, 
+            &mat_c, cache_c, 
+            d_tilde, c_tilde,
+        );
+
+        std::mem::drop(mat_c);
+
+
         ip4.prove::<ZpElement>(
             srs, zk_trans_seq,
             &a_y, &b_y,
@@ -287,9 +298,9 @@ impl ZkMatMul {
             l, 
         );
 
-        let check1 = ip1.verify_as_subprotocol_cm(srs, trans_seq);
         let check2 = ip2.verify_as_subprotocol(srs, trans_seq);
         let check3 = ip3.verify_as_subprotocol(srs, trans_seq);
+        let check1 = ip1.verify_as_subprotocol_cm(srs, trans_seq);
         let check4 = ip4.verify_as_subprotocol(srs, trans_seq);
 
         println!("Check of Ip1 in MatMul: {:?}", check1);
@@ -368,7 +379,7 @@ mod tests {
         matmul_protocol.prove::<i128, i64, i64>(
             &srs,
             &mut zk_trans_seq,
-            &c, &a, &b,
+            c, a, b,
             &c_cache_cm, &a_cache_rm, &b_cache_cm, 
             c_tilde, a_tilde, b_tilde,
         );

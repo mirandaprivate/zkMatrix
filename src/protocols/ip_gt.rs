@@ -4,7 +4,7 @@
 //!
 //! To prove that holding two vectors vec{a} and vec{b} such that
 //! gt_com = <vec{a}, vec{b}> e(\hat{G}, \hat{H}) 
-//         + e(\hat{G}, <vec{a}, vec{H}>) + e(<vec{b}, \hat{G}>, \hat{H})
+//!         + e(\hat{G}, <vec{a}, vec{H}>) + e(<vec{b}, \hat{G}>, \hat{H})
 
 use crate::setup::SRS;
 

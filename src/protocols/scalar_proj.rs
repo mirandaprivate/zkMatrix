@@ -228,25 +228,25 @@ pub trait ScalarProjCmProof: ScalarProjInterface {
             let current_len = n / 2usize.pow(j as u32);
             
             let v_left = 
-                v_current[0..current_len/2].to_vec();
+                v_current[0..current_len/2].into();
             let v_right = 
-                v_current[current_len/2..current_len].to_vec();
+                v_current[current_len/2..current_len].into();
 
             let capital_a_left = 
-                capital_a_current[0..current_len/2].to_vec();
+                capital_a_current[0..current_len/2].into();
             let capital_a_right = 
-                capital_a_current[current_len/2..current_len].to_vec();
+                capital_a_current[current_len/2..current_len].into();
             
             let r_left = 
-                r_current[0..current_len/2].to_vec();
+                r_current[0..current_len/2].into();
             let r_right = 
-                r_current[current_len/2..current_len].to_vec();
+                r_current[current_len/2..current_len].into();
             
 
             let h_left = 
-                h_vec_current[0..current_len/2].to_vec();
+                h_vec_current[0..current_len/2].into();
             let h_right = 
-                h_vec_current[current_len/2..current_len].to_vec();
+                h_vec_current[current_len/2..current_len].into();
 
             let l_tr = 
                 dirac::inner_product(&capital_a_left, &h_right)
@@ -310,20 +310,20 @@ pub trait ScalarProjCmProof: ScalarProjInterface {
             let current_len = m / 2usize.pow(j as u32);
             
             let a_left = 
-                a_current[0..current_len/2].to_vec();
+                a_current[0..current_len/2].into();
             let a_right = 
-                a_current[current_len/2..current_len].to_vec();
+                a_current[current_len/2..current_len].into();
             
             let l_left = 
-                l_current[0..current_len/2].to_vec();
+                l_current[0..current_len/2].into();
             let l_right = 
-                l_current[current_len/2..current_len].to_vec();
+                l_current[current_len/2..current_len].into();
             
 
             let g_left = 
-                g_vec_current[0..current_len/2].to_vec();
+                g_vec_current[0..current_len/2].into();
             let g_right = 
-                g_vec_current[current_len/2..current_len].to_vec();
+                g_vec_current[current_len/2..current_len].into();
 
             let l_tr = 
                 h_reduce * dirac::inner_product(&a_left, &g_right)
@@ -605,25 +605,25 @@ pub trait ScalarProjRmProof: ScalarProjInterface {
             let current_len = m / 2usize.pow(j as u32);
             
             let v_left = 
-                v_current[0..current_len/2].to_vec();
+                v_current[0..current_len/2].into();
             let v_right = 
-                v_current[current_len/2..current_len].to_vec();
+                v_current[current_len/2..current_len].into();
 
             let capital_a_left = 
-                capital_a_current[0..current_len/2].to_vec();
+                capital_a_current[0..current_len/2].into();
             let capital_a_right = 
-                capital_a_current[current_len/2..current_len].to_vec();
+                capital_a_current[current_len/2..current_len].into();
             
             let l_left = 
-                l_current[0..current_len/2].to_vec();
+                l_current[0..current_len/2].into();
             let l_right = 
-                l_current[current_len/2..current_len].to_vec();
+                l_current[current_len/2..current_len].into();
             
 
             let g_left = 
-                g_vec_current[0..current_len/2].to_vec();
+                g_vec_current[0..current_len/2].into();
             let g_right = 
-                g_vec_current[current_len/2..current_len].to_vec();
+                g_vec_current[current_len/2..current_len].into();
 
             let l_tr = 
                 dirac::inner_product(&capital_a_left, &g_right)

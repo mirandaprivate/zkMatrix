@@ -98,7 +98,9 @@ impl SRS {
             h_hat_prime_vec,
         };
 
-        srs.to_file("srs.srs".to_string(), true).unwrap();
+        let log_q = (q as f64).log2() as usize;
+
+        srs.to_file(format!("srs_2e{:?}.srs", log_q), true).unwrap();
 
         srs
 

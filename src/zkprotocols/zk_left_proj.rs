@@ -2,11 +2,15 @@
 //!
 //! Details of this protocol can be found in the DualMatrix paper 
 //!
-//! To prove that holding a secret matrix \bm{a} such that
+//! To prove that holding a secret matrix \bm{a} 
+//! and two Zp elements c_tilde and a_tilde such that
 //! 
-//! C_a = < \vec{G}, \bm{a}, \vec{H} >
-//! C_c = e( <l^T \bm{a}, \vec{G}>, \hat{H})
+//! C_a = < \vec{G}, \bm{a}, \vec{H} > + a_tilde * blind_base,
+//! C_c = e( <l^T \bm{a}, \vec{G}>, \hat{H}) + c_tilde * blind_base,
 // 
+
+use std::time::Instant;
+
 use crate::mat::Mat;
 use crate::setup::SRS;
 
@@ -199,24 +203,28 @@ pub trait ZkLeftProjProof: ZkLeftProjInterface {
  
 
         for j in 0..log_m {
+
+            println!("Within left_proj proving iteration");
+
+
             let current_len = m / 2usize.pow(j as u32);
             
 
             let capital_a_left = 
-                capital_a_current[0..current_len/2].to_vec();
+                capital_a_current[0..current_len/2].into();
             let capital_a_right = 
-                capital_a_current[current_len/2..current_len].to_vec();
+                capital_a_current[current_len/2..current_len].into();
             
             let l_left = 
-                l_current[0..current_len/2].to_vec();
+                l_current[0..current_len/2].into();
             let l_right = 
-                l_current[current_len/2..current_len].to_vec();
+                l_current[current_len/2..current_len].into();
             
 
             let g_left = 
-                g_vec_current[0..current_len/2].to_vec();
+                g_vec_current[0..current_len/2].into();
             let g_right = 
-                g_vec_current[current_len/2..current_len].to_vec();
+                g_vec_current[current_len/2..current_len].into();
 
             let l_tr = 
                 dirac::inner_product(&capital_a_left, &g_right)
@@ -254,9 +262,12 @@ pub trait ZkLeftProjProof: ZkLeftProjInterface {
 
         }
 
+        let timer = Instant::now();
+
         let xi_m_inv = xi::xi_from_challenges(&challenges_inv_m);
         let a_xi_inv = mat_a.bra_zp(&xi_m_inv);
 
+        println!(" * Time for computing bra_zp: {:?}", timer.elapsed());
 
         let g_reduce = g_vec_current[0];
         let l_reduce = l_current[0];
@@ -271,18 +282,22 @@ pub trait ZkLeftProjProof: ZkLeftProjInterface {
         
 
         for j in 0..log_n {
+
+            println!("Within left_proj proving iteration");
+
+
             let current_len = n / 2usize.pow(j as u32);
             
             let a_left = 
-                a_current[0..current_len/2].to_vec();
+                a_current[0..current_len/2].into();
             let a_right = 
-                a_current[current_len/2..current_len].to_vec();
+                a_current[current_len/2..current_len].into();
             
 
             let h_left = 
-                h_vec_current[0..current_len/2].to_vec();
+                h_vec_current[0..current_len/2].into();
             let h_right = 
-                h_vec_current[current_len/2..current_len].to_vec();
+                h_vec_current[current_len/2..current_len].into();
 
             let l_tr = 
                 w * dirac::inner_product(&a_left, &h_right);
@@ -358,6 +373,8 @@ pub trait ZkLeftProjProof: ZkLeftProjInterface {
         // assert_eq!(current_index, 0);
 
         for j in 0..log_m {
+
+            
             let l_tilde = zk_trans_seq.blind_seq[current_index];
             let r_tilde = zk_trans_seq.blind_seq[current_index+1];
             let x_j = challenges_m[j];
@@ -483,6 +500,8 @@ pub trait ZkLeftProjProof: ZkLeftProjInterface {
         let mut challenges_inv_n: Vec<ZpElement> = Vec::new();
 
         for _ in 0..log_n {
+
+        
 
             if let (
                 TranElem::Gt(l_tr),

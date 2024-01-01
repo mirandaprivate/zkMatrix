@@ -19,3 +19,57 @@
  ** Commit matrix c time: 8.40002588s
  ** Prover time of zkMatMul: 70.617442371s
  ** Verifier time of zkMatMul : 462.900772ms
+ ** SRS generation time: 7.535620122s
+ ** Matrix generation time: 63.291187ms
+ ** Commit matrix a time: 7.685757048s
+ ** Commit matrix b time: 5.198097218s
+ ** Commit matrix c time: 9.007274214s
+ ** Prover time of zkMatMul: 44.872682255s
+ ** Verifier time of zkMatMul : 232.751316ms
+ ** SRS generation time: 7.104672549s
+ ** Matrix generation time: 52.449821ms
+ ** Commit matrix a time: 6.848742692s
+ ** Commit matrix b time: 4.782753665s
+ ** Commit matrix c time: 7.995840695s
+ ** Prover time of zkMatMul: 41.768918124s
+ ** Verifier time of zkMatMul : 217.732815ms
+ ** SRS generation time: 7.10592589s
+ ** Matrix generation time: 58.031845ms
+ ** Commit matrix a time: 7.091313678s
+ ** Commit matrix b time: 4.712845826s
+ ** Commit matrix c time: 7.945884474s
+ ** Prover time of zkMatMul: 40.860063692s
+ ** Verifier time of zkMatMul : 217.486734ms
+ ** SRS generation time: 7.169937754s
+ ** Matrix generation time: 48.495944ms
+ ** Commit matrix a time: 7.25928028s
+ ** Commit matrix b time: 4.723896502s
+ ** Commit matrix c time: 7.9789872s
+ ** Prover time of zkMatMul: 36.046677613s
+ ** Verifier time of zkMatMul : 230.067682ms
+ ** SRS generation time: 7.063478501s
+ ** Matrix generation time: 46.876468ms
+ ** Commit matrix a time: 7.138849794s
+ ** Commit matrix b time: 4.62101825s
+ ** Commit matrix c time: 9.893197158s
+ ** Prover time of zkMatMul: 25.083484713s
+ ** Verifier time of zkMatMul : 218.65574ms
+ ** SRS generation time: 7.32976263s
+ ** Matrix generation time: 58.04473ms
+ ** Commit matrix a time: 7.956434932s
+ ** Commit matrix b time: 4.640564032s
+ ** Commit matrix c time: 8.119842581s
+ ** SRS generation time: 7.128630962s
+ ** Matrix generation time: 52.583783ms
+ ** Commit matrix a time: 6.960592328s
+ ** Commit matrix b time: 4.760354262s
+ ** Commit matrix c time: 8.055640975s
+ ** Prover time of zkMatMul: 49.520312497s
+ ** Verifier time of zkMatMul : 468.839318ms
+ ** SRS generation time: 7.08202151s
+ ** Matrix generation time: 47.295972ms
+ ** Commit matrix a time: 7.186406408s
+ ** Commit matrix b time: 4.903104312s
+ ** Commit matrix c time: 9.262401924s
+ ** Prover time of zkMatMul: 45.145623748s
+ ** Verifier time of zkMatMul : 478.048165ms

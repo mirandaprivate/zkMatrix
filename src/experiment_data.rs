@@ -274,33 +274,7 @@ pub fn diag_kronecker_dense_from_i64_to_i128(a: &Vec<i64>, b: &Vec<Vec<i64>>
     })
 }
 
-pub fn dense_to_sprs_i64(a: &Vec<Vec<i64>>) -> Vec<(usize, usize, i64)> {
-    let mut sprs = Vec::new();
 
-    for i in 0..a.len() {
-        for j in 0..a[0].len() {
-            if a[i][j] != 0 {
-                sprs.push((i, j, a[i][j]));
-            }
-        }
-    }
-
-    sprs
-}
-
-pub fn dense_to_sprs_i128(a: &Vec<Vec<i128>>) -> Vec<(usize, usize, i128)> {
-    let mut sprs = Vec::new();
-
-    for i in 0..a.len() {
-        for j in 0..a[0].len() {
-            if a[i][j] != 0 {
-                sprs.push((i, j, a[i][j]));
-            }
-        }
-    }
-
-    sprs
-}
 
 /// Generate the sparse matrices used for experiments
 /// 

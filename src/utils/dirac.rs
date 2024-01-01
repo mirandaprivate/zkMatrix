@@ -91,21 +91,26 @@ impl BraKet for Mat<ZpElement> {
 
 impl BraKetZp for Mat<i64> {
     fn bra_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        proj_left_opt_i64_to_zp(&self, v_base)
+        // proj_left_opt_i64_to_zp(&self, v_base)
+        proj_left(&self, v_base)
     }
 
     fn ket_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        proj_right_opt_i64_to_zp(&self, v_base)
+        // proj_right_opt_i64_to_zp(&self, v_base)
+        proj_right(&self, v_base)
+
     }
 }
 
 impl BraKetZp for Mat<i128> {
     fn bra_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        proj_left_opt_i128_to_zp(&self, v_base)
+        // proj_left_opt_i128_to_zp(&self, v_base)
+        proj_left(&self, v_base)
     }
 
     fn ket_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        proj_right_opt_i128_to_zp(&self, v_base)
+        // proj_right_opt_i128_to_zp(&self, v_base)
+        proj_right(&self, v_base)
     }
 }
 
@@ -126,15 +131,9 @@ where
     V: 'a + Clone + Copy + Send + Sync + Add + Zero,
 {
     let length = std::cmp::min(vec_a.len(), vec_b.len());
+    let vec_a: Vec<T> = vec_a[..length].into();
+    let vec_b: Vec<U> = vec_b[..length].into();
 
-    if length <= NUM_THREADS {
-        return vec_a.iter()
-        .zip(vec_b.iter())
-        .fold(
-            V::zero(),
-            |acc, (&a_val, &b_val)| acc + a_val * b_val,
-        );
-    }
 
     let pool = ThreadPoolBuilder::new()
         .num_threads(NUM_THREADS)
@@ -715,250 +714,6 @@ pub fn ket_opt_i128(mat_a: &Mat<i128>, v_base: &Vec<G2Element>) -> Vec<G2Element
 
 
 
-pub fn proj_left_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>
-) -> Vec<ZpElement> {
-
-    let n_row = mat_a.shape.0;
-    let n_col = mat_a.shape.1;
-    let mut v_base_mut = v_base[..n_row].to_vec();
-       
-    let pool = ThreadPoolBuilder::new()
-        .num_threads(NUM_THREADS)
-        .build()
-        .unwrap();
-
-    let a_abs_sign: Vec<(usize, usize, u64, bool)> =  pool.install(
-            || {
-                mat_a.data.par_iter().map(
-                    |&(row, col, val)| 
-                    (row, col, val.abs() as u64, val < 0,)
-                ).collect()
-            }
-        );
-
-    let result_mutexes: Vec<Mutex<ZpElement>> = (0..n_col).map(
-        |_| Mutex::new(ZpElement::zero())
-        ).collect();
-    
-    
-    for j_bit in 0..64{
-        let v_base_arc = Arc::new(v_base_mut.clone());
-        
-        pool.install(|| {
-            a_abs_sign.par_iter().for_each(|&(row, col, val, sign)| {
-                let v_base_clone = Arc::clone(&v_base_arc);
-                let result_mutex = &result_mutexes[col];
-                let mut result = result_mutex.lock().unwrap();
-                if (val >> j_bit) & 1 == 1 {
-                    if sign {
-                        *result += - v_base_clone[row];
-                    } else {
-                        *result += v_base_clone[row];
-                    }
-                }
-            });
-        });
-
-        pool.install(|| {
-            v_base_mut.par_iter_mut().for_each(|v| {
-                *v = v.double();
-            });
-        });
-
-    }
-
-
-    result_mutexes.into_iter().map(
-        |mutex| mutex.into_inner().unwrap()
-    ).collect()
-    
-}
-
-
-pub fn proj_right_opt_i64_to_zp(mat_a: &Mat<i64>, v_base: &Vec<ZpElement>
-) -> Vec<ZpElement> {
-
-    let n_row = mat_a.shape.0;
-    let n_col = mat_a.shape.1;
-    let mut v_base_mut = v_base[..n_col].to_vec();
-       
-    let pool = ThreadPoolBuilder::new()
-        .num_threads(NUM_THREADS)
-        .build()
-        .unwrap();
-
-    let a_abs_sign: Vec<(usize, usize, u64, bool)> =  pool.install(
-            || {
-                mat_a.data.par_iter().map(|&(row, col, val)| 
-                    (
-                        row, col, val.abs() as u64, val < 0,
-                    )
-                ).collect()
-            }
-        );
-
-    let result_mutexes: Vec<Mutex<ZpElement>> = (0..n_row).map(
-        |_| Mutex::new(ZpElement::zero())
-        ).collect();
-    
-    
-    for j_bit in 0..64{
-        let v_base_arc = Arc::new(v_base_mut.clone());
-        
-        pool.install(|| {
-            a_abs_sign.par_iter().for_each(|&(row, col, val, sign)| {
-                let v_base_clone = Arc::clone(&v_base_arc);
-                let result_mutex = &result_mutexes[row];
-                let mut result = result_mutex.lock().unwrap();
-                if (val >> j_bit) & 1 == 1 {
-                    if sign {
-                        *result += - v_base_clone[col];
-                    } else {
-                        *result += v_base_clone[col];
-                    }
-                }
-            });
-        });
-
-        pool.install(|| {
-            v_base_mut.par_iter_mut().for_each(|v| {
-                *v = v.double();
-            });
-        });
-
-    }
-
-
-    result_mutexes.into_iter().map(
-        |mutex| mutex.into_inner().unwrap()
-    ).collect()
-    
-}
-
-
-
-pub fn proj_left_opt_i128_to_zp(mat_a: &Mat<i128>, v_base: &Vec<ZpElement>
-) -> Vec<ZpElement> {
-
-    let n_row = mat_a.shape.0;
-    let n_col = mat_a.shape.1;
-    let mut v_base_mut = v_base[..n_row].to_vec();
-       
-    let pool = ThreadPoolBuilder::new()
-        .num_threads(NUM_THREADS)
-        .build()
-        .unwrap();
-
-    let a_abs_sign: Vec<(usize, usize, u128, bool)> =  pool.install(
-            || {
-                mat_a.data.par_iter().map(|&(row, col, val)| 
-                    (
-                        row, col, val.abs() as u128, val < 0,
-                    )
-                ).collect()
-            }
-        );
-
-    let result_mutexes: Vec<Mutex<ZpElement>> = (0..n_col).map(
-        |_| Mutex::new(ZpElement::zero())
-        ).collect();
-    
-    
-    for j_bit in 0..128{
-        let v_base_arc = Arc::new(v_base_mut.clone());
-        
-        pool.install(|| {
-            a_abs_sign.par_iter().for_each(|&(row, col, val, sign)| {
-                let v_base_clone = Arc::clone(&v_base_arc);
-                let result_mutex = &result_mutexes[col];
-                let mut result = result_mutex.lock().unwrap();
-                if (val >> j_bit) & 1 == 1 {
-                    if sign {
-                        *result += - v_base_clone[row];
-                    } else {
-                        *result += v_base_clone[row];
-                    }
-                }
-            });
-        });
-
-        pool.install(|| {
-            v_base_mut.par_iter_mut().for_each(|v| {
-                *v = v.double();
-            });
-        });
-
-    }
-
-
-    result_mutexes.into_iter().map(
-        |mutex| mutex.into_inner().unwrap()
-    ).collect()
-    
-}
-
-
-pub fn proj_right_opt_i128_to_zp(mat_a: &Mat<i128>, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-
-    let n_row = mat_a.shape.0;
-    let n_col = mat_a.shape.1;
-    let mut v_base_mut = v_base[..n_col].to_vec();
-       
-    let pool = ThreadPoolBuilder::new()
-        .num_threads(NUM_THREADS)
-        .build()
-        .unwrap();
-
-    let a_abs_sign: Vec<(usize, usize, u128, bool)> =  pool.install(
-            || {
-                mat_a.data.par_iter().map(|&(row, col, val)| 
-                    (
-                        row, col, val.abs() as u128, val < 0,
-                    )
-                ).collect()
-            }
-        );
-
-    let result_mutexes: Vec<Mutex<ZpElement>> = (0..n_row).map(
-        |_| Mutex::new(ZpElement::zero())
-        ).collect();
-    
-    
-    for j_bit in 0..128{
-        let v_base_arc = Arc::new(v_base_mut.clone());
-        
-        pool.install(|| {
-            a_abs_sign.par_iter().for_each(|&(row, col, val, sign)| {
-                let v_base_clone = Arc::clone(&v_base_arc);
-                let result_mutex = &result_mutexes[row];
-                let mut result = result_mutex.lock().unwrap();
-                if (val >> j_bit) & 1 == 1 {
-                    if sign {
-                        *result += - v_base_clone[col];
-                    } else {
-                        *result += v_base_clone[col];
-                    }
-                }
-            });
-        });
-
-        pool.install(|| {
-            v_base_mut.par_iter_mut().for_each(|v| {
-                *v = v.double();
-            });
-        });
-
-    }
-
-
-    result_mutexes.into_iter().map(
-        |mutex| mutex.into_inner().unwrap()
-    ).collect()
-    
-}
-
-
-
 
 #[cfg(test)]
 mod tests {
@@ -1085,27 +840,6 @@ mod tests {
     
         assert_eq!(result_bra_opt_128, result_bra_no_opt_128);
         println!(" * Assert Equal of opt Bra and no opt Bra");
-    
-        let yc_no_opt = proj_left(
-            &c_zp, &y_vec);
-    
-        let yc_opt = proj_left_opt_i128_to_zp(
-            &c, &y_vec);
-    
-        assert_eq!(yc_no_opt, yc_opt);
-    
-        println!(" * Assert Equal of opt Bra on Zp and no opt Bra on Zp");
-    
-    
-        let cy_no_opt = proj_right(
-            &c_zp, &y_vec);
-    
-        let cy_opt = proj_right_opt_i128_to_zp(
-            &c, &y_vec);
-    
-        assert_eq!(cy_no_opt, cy_opt);
-    
-        println!(" * Assert Equal of opt Ket on Zp and no opt Ket on Zp");
         
     }
 }

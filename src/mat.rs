@@ -9,7 +9,8 @@ use serde::{Serialize, Deserialize};
 use crate::utils::to_file::FileIO;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Mat<T> {
+pub struct Mat<T> 
+{
     pub id: String,
     pub shape: (usize, usize),
     pub data: Vec<(usize, usize, T)>,

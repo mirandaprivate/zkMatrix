@@ -58,9 +58,9 @@ impl MatMul {
     pub fn prove<T, U, V>(
         &self, srs: &SRS, 
         trans_seq: &mut TranSeq, 
-        mat_c: &Mat<T>, 
-        mat_a: &Mat<U>, 
-        mat_b: &Mat<V>,
+        mat_c: Mat<T>, 
+        mat_a: Mat<U>, 
+        mat_b: Mat<V>,
         cache_c: &Vec<G1Element>,
         cache_a: &Vec<G2Element>,
         cache_b: &Vec<G1Element>,
@@ -130,13 +130,6 @@ impl MatMul {
         trans_seq.push(TranElem::Gt(a_y_com));
         trans_seq.push(TranElem::Gt(b_y_com));
 
-        let ip1 = ScalarProjPoly::new(
-            d_com, 
-            self.c_com,
-            (m,n), 
-            y,
-        );
-
         let ip2 = LeftProjPoly::new(
             a_y_com, 
             self.a_com,
@@ -144,6 +137,8 @@ impl MatMul {
             y,
             n,
         );
+        ip2.prove::<U>(srs, trans_seq, &mat_a, cache_a);
+        std::mem::drop(mat_a);
 
         let ip3 = RightProjPoly::new(
             b_y_com, 
@@ -152,15 +147,24 @@ impl MatMul {
             y,
             1,
         );
+        ip3.prove::<V>(srs, trans_seq, &mat_b, cache_b);
+        std::mem::drop(mat_b);
+
+        let ip1 = ScalarProjPoly::new(
+            d_com, 
+            self.c_com,
+            (m,n), 
+            y,
+        );
+
+        ip1.prove_cm::<T>(srs, trans_seq, &mat_c, cache_c);
+        std::mem::drop(mat_c);
 
         let ip4 = IpGt::new(
             d_com + a_y_com + b_y_com,
             l, 
         );
 
-        ip1.prove_cm::<T>(srs, trans_seq, mat_c, cache_c);
-        ip2.prove::<U>(srs, trans_seq, mat_a, cache_a);
-        ip3.prove::<V>(srs, trans_seq, mat_b, cache_b);
         ip4.prove::<ZpElement>(srs, trans_seq,&a_y, &b_y);
      
     }
@@ -262,9 +266,9 @@ impl MatMul {
             l, 
         );
 
-        let check1 = ip1.verify_as_subprotocol_cm(srs, trans_seq);
         let check2 = ip2.verify_as_subprotocol(srs, trans_seq);
         let check3 = ip3.verify_as_subprotocol(srs, trans_seq);
+        let check1 = ip1.verify_as_subprotocol_cm(srs, trans_seq);
         let check4 = ip4.verify_as_subprotocol(srs, trans_seq);
 
         println!("Check of Ip1 in MatMul: {:?}", check1);
@@ -337,7 +341,7 @@ mod tests {
         matmul_protocol.prove::<i128, i64, i64>(
             &srs,
             &mut trans_seq,
-            &c, &a, &b,
+            c, a, b,
             &c_cache_cm, &a_cache_rm, &b_cache_cm, 
         );
 

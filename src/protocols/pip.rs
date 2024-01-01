@@ -31,6 +31,8 @@ impl PipG1 {
 
     pub fn prove(&self, srs: &SRS, trans_seq: &mut TranSeq)  {
 
+        println!("Proving the PIPs...");
+
         trans_seq.push(TranElem::G1(self.v));
 
         let s = trans_seq.gen_challenge();

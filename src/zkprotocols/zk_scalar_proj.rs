@@ -8,6 +8,10 @@
 //! C_a = < \vec{G}, \bm{a}, \vec{H} > + a_tilde * blind_base,
 //! C_c = (l^T \bm{a} r) e(\hat{G}, \hat{H}) + c_tilde * blind_base,
 // 
+
+use std::time::Instant;
+
+
 use crate::mat::Mat;
 use crate::setup::SRS;
 
@@ -217,7 +221,11 @@ pub trait ZkScalarProjCmProof: ZkScalarProjInterface {
         let l_vec = self.get_l_vec();
         let r_vec = self.get_r_vec();
 
+        let timer = Instant::now();
+
         let la = mat_a.bra_zp(&l_vec);
+
+        println!(" * Time for bra_zp: {:?}", timer.elapsed());
 
         let mut v_current = dirac::vec_convert_to_zp_vec(
             &la);
@@ -230,35 +238,39 @@ pub trait ZkScalarProjCmProof: ZkScalarProjInterface {
  
 
         for j in 0..log_n {
+
+            println!("Within scalar_proj proving iteration");
+
+
             let current_len = n / 2usize.pow(j as u32);
             
             let v_left = 
-                v_current[0..current_len/2].to_vec();
+                v_current[0..current_len/2].into();
             let v_right = 
-                v_current[current_len/2..current_len].to_vec();
+                v_current[current_len/2..current_len].into();
 
             let capital_a_left = 
-                capital_a_current[0..current_len/2].to_vec();
+                capital_a_current[0..current_len/2].into();
             let capital_a_right = 
-                capital_a_current[current_len/2..current_len].to_vec();
+                capital_a_current[current_len/2..current_len].into();
             
             let r_left = 
-                r_current[0..current_len/2].to_vec();
+                r_current[0..current_len/2].into();
             let r_right = 
-                r_current[current_len/2..current_len].to_vec();
+                r_current[current_len/2..current_len].into();
             
 
             let h_left = 
-                h_vec_current[0..current_len/2].to_vec();
+                h_vec_current[0..current_len/2].into();
             let h_right = 
-                h_vec_current[current_len/2..current_len].to_vec();
+                h_vec_current[current_len/2..current_len].into();
 
             let l_tr = 
                 dirac::inner_product(&capital_a_left, &h_right)
-                + u_0 * x * dirac::inner_product(&v_left, &r_right);
+                + x * dirac::inner_product(&v_left, &r_right) * u_0;
             let r_tr = 
                 dirac::inner_product(&capital_a_right, &h_left)
-                + u_0 * x * dirac::inner_product(&v_right, &r_left);
+                + x * dirac::inner_product(&v_right, &r_left) * u_0;
 
             zk_trans_seq.push_gen_blinding(TranElem::Gt(l_tr));
             zk_trans_seq.push_gen_blinding(TranElem::Gt(r_tr));
@@ -295,9 +307,14 @@ pub trait ZkScalarProjCmProof: ZkScalarProjInterface {
 
         }
 
+        println!("Computing ket_zp...");
+
+        let timer = Instant::now();
+
         let xi_n_inv = xi::xi_from_challenges(&challenges_inv_n);
         let a_xi_inv = mat_a.ket_zp(&xi_n_inv);
 
+        println!(" * Time for ket_zp: {:?}", timer.elapsed());
 
         let h_reduce = h_vec_current[0];
         let r_reduce = r_current[0];
@@ -312,32 +329,36 @@ pub trait ZkScalarProjCmProof: ZkScalarProjInterface {
         
 
         for j in 0..log_m {
+
+            println!("Within scalar_proj proving iteration");
+
+
             let current_len = m / 2usize.pow(j as u32);
             
             let a_left = 
-                a_current[0..current_len/2].to_vec();
+                a_current[0..current_len/2].into();
             let a_right = 
-                a_current[current_len/2..current_len].to_vec();
+                a_current[current_len/2..current_len].into();
             
             let l_left = 
-                l_current[0..current_len/2].to_vec();
+                l_current[0..current_len/2].into();
             let l_right = 
-                l_current[current_len/2..current_len].to_vec();
+                l_current[current_len/2..current_len].into();
             
 
             let g_left = 
-                g_vec_current[0..current_len/2].to_vec();
+                g_vec_current[0..current_len/2].into();
             let g_right = 
-                g_vec_current[current_len/2..current_len].to_vec();
+                g_vec_current[current_len/2..current_len].into();
 
             let l_tr = 
                 h_reduce * dirac::inner_product(&a_left, &g_right)
-                + u_0 * x * r_reduce 
-                * dirac::inner_product(&a_left, &l_right);
+                + x * r_reduce 
+                * dirac::inner_product(&a_left, &l_right) * u_0;
             let r_tr = 
                 h_reduce * dirac::inner_product(&a_right, &g_left)
-                + u_0 * x * r_reduce 
-                * dirac::inner_product(&a_right, &l_left);
+                + x * r_reduce 
+                * dirac::inner_product(&a_right, &l_left) * u_0;
 
             zk_trans_seq.push_gen_blinding(TranElem::Gt(l_tr));
             zk_trans_seq.push_gen_blinding(TranElem::Gt(r_tr));
