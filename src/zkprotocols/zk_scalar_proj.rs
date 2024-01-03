@@ -239,7 +239,7 @@ pub trait ZkScalarProjCmProof: ZkScalarProjInterface {
 
         for j in 0..log_n {
 
-            println!("Within scalar_proj proving iteration");
+            // println!("Within scalar_proj proving iteration");
 
 
             let current_len = n / 2usize.pow(j as u32);
@@ -307,7 +307,6 @@ pub trait ZkScalarProjCmProof: ZkScalarProjInterface {
 
         }
 
-        println!("Computing ket_zp...");
 
         let timer = Instant::now();
 
@@ -330,7 +329,7 @@ pub trait ZkScalarProjCmProof: ZkScalarProjInterface {
 
         for j in 0..log_m {
 
-            println!("Within scalar_proj proving iteration");
+            // println!("Within scalar_proj proving iteration");
 
 
             let current_len = m / 2usize.pow(j as u32);

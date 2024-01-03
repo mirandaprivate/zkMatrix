@@ -70,6 +70,7 @@ impl BraKet for Mat<i64> {
 
 impl BraKet for Mat<i128> {
     fn bra(&self, v_base: &Vec<G1Element>) -> Vec<G1Element> {
+        // We have tested that this is ~2X faster than proj_left
         bra_opt_i128(&self, v_base)
     }
 
@@ -91,12 +92,10 @@ impl BraKet for Mat<ZpElement> {
 
 impl BraKetZp for Mat<i64> {
     fn bra_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        // proj_left_opt_i64_to_zp(&self, v_base)
         proj_left(&self, v_base)
     }
 
     fn ket_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        // proj_right_opt_i64_to_zp(&self, v_base)
         proj_right(&self, v_base)
 
     }
@@ -104,12 +103,10 @@ impl BraKetZp for Mat<i64> {
 
 impl BraKetZp for Mat<i128> {
     fn bra_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        // proj_left_opt_i128_to_zp(&self, v_base)
         proj_left(&self, v_base)
     }
 
     fn ket_zp(&self, v_base: &Vec<ZpElement>) -> Vec<ZpElement> {
-        // proj_right_opt_i128_to_zp(&self, v_base)
         proj_right(&self, v_base)
     }
 }

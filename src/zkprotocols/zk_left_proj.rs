@@ -204,7 +204,7 @@ pub trait ZkLeftProjProof: ZkLeftProjInterface {
 
         for j in 0..log_m {
 
-            println!("Within left_proj proving iteration");
+            // println!("Within left_proj proving iteration");
 
 
             let current_len = m / 2usize.pow(j as u32);
@@ -283,7 +283,7 @@ pub trait ZkLeftProjProof: ZkLeftProjInterface {
 
         for j in 0..log_n {
 
-            println!("Within left_proj proving iteration");
+            // println!("Within left_proj proving iteration");
 
 
             let current_len = n / 2usize.pow(j as u32);
