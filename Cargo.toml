@@ -40,14 +40,10 @@ features = ["num-bigint"]
 criterion = "0.5"
 
 [[bench]]
-name = "my_benchmark"
-harness = true
-path = "benches/my_benchmark.rs"
+name = "experiment"
+harness = false
+path = "benches/experiment.rs"
 
-[[bench]]
-name = "bench_25519"
-harness = true
-path = "benches/bench_25519.rs"
 
 [package.metadata.docs.rs]
 rustdoc-args = [ "--html-in-header", "assets/mathjax_support.html" ]

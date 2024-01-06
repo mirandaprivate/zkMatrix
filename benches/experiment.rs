@@ -5,12 +5,11 @@
 //! The experiment parameters are configured in config.rs
 //! 
 //! Use the following command to run the experiment:
-//! ''' cargo run --release '''
+//! ''' cargo bench --release '''
 //! 
 //! Note using the release mode is important for the performance.
 //! 
 #![allow(dead_code)]
-
 use std::time::Instant;
 
 use std::fs::OpenOptions;

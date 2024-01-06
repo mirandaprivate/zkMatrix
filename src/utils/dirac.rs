@@ -717,7 +717,6 @@ mod tests {
     use super::*;
 
     use std::time::Instant;
-    use rand::Rng;
 
     use crate::setup::SRS;
     use crate::utils::curve::{G1Element, G2Element, GtElement};
@@ -765,15 +764,6 @@ mod tests {
     fn test_opt(){
 
         let srs = SRS::new(2* SQRT_MATRIX_DIM_TEST * SQRT_MATRIX_DIM_TEST);
-    
-        let length = SQRT_MATRIX_DIM_TEST * SQRT_MATRIX_DIM_TEST;
-    
-        let y = ZpElement::from(rand::thread_rng().gen::<u64>());
-    
-        let y_vec: Vec<ZpElement> = std::iter::successors(
-            Some(y), 
-            |&x| Some(x * y)
-        ).take(length).collect();
     
         let (c, a, b) 
             = experiment_data::gen_matrices_sparse(SQRT_MATRIX_DIM_TEST);
