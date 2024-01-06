@@ -1,9 +1,9 @@
-# zkMatrix: Conquering Zero-Knowledge Proof for Large Matrix Multiplication
+# DualMatrix
 
 This folder contains codes for our paper
-*Pairing-Based zkMatrix: Conquering Zero-Knowledge Proof for Large Matrix Multiplication*.
+*DualMatrix: Conquering zk-SNARK for Large Matrix Multiplication*.
 
-## Overview
+## Introduction
 
 Given a pairing
 $e: \mathbb{G}_1 \times \mathbb{G}_2 \mapsto \mathbb{G}_T$, 
@@ -21,7 +21,7 @@ $$
 : = \bigoplus_{i=1}^m \bigoplus_{j=1}^n a_{ij} e(G_i, H_j).
 $$ 
 
-Suppose the prover has made commitments to three $m \times n$ matrix 
+Suppose the prover has made commitments to three matrices 
 $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ as follows:
 
 $$ 
@@ -45,7 +45,7 @@ for the relation:
 $$
 \mathcal{R} = \lbrace
      C_c \in \mathbb{G}_T, C_a \in \mathbb{G}_T, C_b \in \mathbb{G}_T;
-    \hat{\mathbf{G}} \in \mathbb{G}_1^{q} , \hat{\mathbf{H}} \in \mathbb{G}_2^{q} 
+    \hat{\mathbf{G}} \in \mathbb{G}_1^{q-1} , \hat{\mathbf{H}} \in \mathbb{G}_2^{q-1} 
 $$
 
 $$
@@ -75,14 +75,14 @@ DualMatrix contains four subprotocols:
 - Scalar projection argument
 - Left projection argument
 - Right projection argument
-- Inner product argument in $$\mathbb{G}_T$$
+- Inner product argument in $\mathbb{G}_T$
 
 The scalar projection argument, for example, is for the following relation:
 
 $$
 \mathcal{R} = \lbrace
      C_c \in \mathbb{G}_T, C_a \in \mathbb{G}_T, 
-     \hat{\mathbf{l}} \in \mathbb{Z}_p^{m}, \hat{\mathbf{r}} \in \mathbb{Z}_p^{n};
+     \vec{\mathbf{l}} \in \mathbb{Z}_p^{m}, \vec{\mathbf{r}} \in \mathbb{Z}_p^{n};
      \hat{G}_0 \in \mathbb{G}_1, \hat{H}_0 \in \mathbb{G}_2,
     \hat{\mathbf{G}} \in \mathbb{G}_1^{q-1} , \hat{\mathbf{H}} \in \mathbb{G}_2^{q-1} 
 $$
@@ -93,7 +93,7 @@ $$
 
 $$
 |   C_c =
-     \langle \hat{G}_0  |  \hat{\mathbf{L}}^T\mathbf{a} \hat{\mathbf{r}}  |  \hat{H}_0 \rangle
+     \langle \hat{G}_0  |  \vec{\mathbf{l}}^T\mathbf{a} \vec{\mathbf{r}}  |  \hat{H}_0 \rangle
     \wedge C_a =
      \langle \hat{\mathbf{G}}  |  \mathbf{a}   |  \hat{\mathbf{H}} \rangle 
 \rbrace.
@@ -128,4 +128,6 @@ cargo bench
 ## Citing
 
 If our work benefits to your research, please cite our paper as follows:
+
+Anonymous
 
