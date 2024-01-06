@@ -35,7 +35,7 @@ MARKER_SIZE_BIG = 30
 
 Y_SUBTITLE = -0.4
 
-COLOR = 'black'
+COLOR = 'blue'
 LINE_STYLE = ':'
 LINE_WIDTH = 0.75
 
