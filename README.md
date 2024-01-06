@@ -69,6 +69,27 @@ We employ the random oracle approach.
 
 For more details, refer to the math in our paper. 
 
+### Running the Code
+
+To run the experiment in the DualMatrix paper, run the following command:
+```bash
+cd /path/to/zkmatrix
+cargo bench
+```
+
+## Compatibility Note
+
+- **Rust Toolchain:** 3.10.12
+- **Environment:** Ubuntu 22.04
+
+
+## Directory Contents
+
+- **util/** Utility functions for Fiat-Shamir transformation, matrix projections, and inner products.
+- **protocols/** The MatMul protocol and its sub-protocols.
+- **zkprotocols/** The zero-knowledge MatMul protocol and its sub-protocols.
+
+
 ## Subprotocols
 
 DualMatrix contains four subprotocols:
@@ -102,26 +123,6 @@ $$
 The pseudo-code for this subprotocol is as follows:
 
 ![alg](assets/scalar_proj.png)
-
-### Running the Code
-
-To run the experiment in the DualMatrix paper, run the following command:
-```bash
-cd /path/to/zkmatrix
-cargo bench
-```
-
-## Compatibility Note
-
-- **Rust Toolchain:** 3.10.12
-- **Environment:** Ubuntu 22.04
-
-
-## Directory Contents
-
-- **util/** Utility functions for Fiat-Shamir transformation, matrix projections, and inner products.
-- **protocols/** The MatMul protocol and its sub-protocols.
-- **zkprotocols/** The zero-knowledge MatMul protocol and its sub-protocols.
 
 --- 
 

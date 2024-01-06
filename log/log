@@ -51,7 +51,7 @@ Check of Ip4 in MatMul: true
 Computing ket_zp...
  * Time for ket_zp: 3.584609ms
  ** Prover time of zkMatMul: 1.599271398s
- ===== File data/public/tr_2e4.tr written; Size 79224 Bytes 
+ ===== File data/public/tr_2e4.tr written; Size 72924 Bytes 
  -----------------------------------------------------  
 Check of Ip1 in MatMul: true
 Check of Ip2 in MatMul: true
