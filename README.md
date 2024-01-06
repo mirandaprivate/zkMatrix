@@ -8,11 +8,11 @@ This folder contains codes for our paper
 Given a pairing
 $e: \mathbb{G}_1 \times \mathbb{G}_2 \mapsto \mathbb{G}_T$, 
 and two vectors 
-$\hat{\mathbf{G}} \in \mathbb{G}_1^{q}$ 
+$\hat{\mathbf{G}} \in \mathbb{G}_1^{q-1}$ 
 and 
-$\hat{\mathbf{H}} \in \mathbb{G}_2^{q}$,
+$\hat{\mathbf{H}} \in \mathbb{G}_2^{q-1}$,
 
-then the two-tier commitment $C_a \in \mathbb{G}_T$ for a $m \times n$ ( $m,n \le q$ ) matrix 
+then the two-tier commitment $C_a \in \mathbb{G}_T$ for a $m \times n$ ( $m,n \le q-1$ ) matrix 
 
 $\mathbf{a} = \lbrace a_{ij} \rbrace \in \mathbb{Z}_p^{m\times n}$ is defined by:
 
@@ -39,7 +39,7 @@ C_c =  \langle \hat{\mathbf{G}}  |  \mathbf{c}  |  \hat{\mathbf{H}} \rangle
 \in \mathbb{G}_T .
 $$
 
-Then, the prover can generate a zero-knowledge proof with $O(m+n+l)$ time complexity
+Then, the prover can generate a zero-knowledge proof with $O(m+n+l)$ group operations
 for the relation:
 
 $$
@@ -69,22 +69,46 @@ We employ the random oracle approach.
 
 For more details, refer to the math in our paper. 
 
-![alg](assets/alg7.png)
+## Subprotocols
 
----
+DualMatrix contains four subprotocols:
+- Scalar projection argument
+- Left projection argument
+- Right projection argument
+- Inner product argument in $$\mathbb{G}_T$$
 
-## Introduction 
+The scalar projection argument, for example, is for the following relation:
 
+$$
+\mathcal{R} = \lbrace
+     C_c \in \mathbb{G}_T, C_a \in \mathbb{G}_T, 
+     \hat{\mathbf{l}} \in \mathbb{Z}_p^{m}, \hat{\mathbf{r}} \in \mathbb{Z}_p^{n};
+     \hat{G}_0 \in \mathbb{G}_1, \hat{H}_0 \in \mathbb{G}_2,
+    \hat{\mathbf{G}} \in \mathbb{G}_1^{q-1} , \hat{\mathbf{H}} \in \mathbb{G}_2^{q-1} 
+$$
 
+$$
+: \mathbf{a} \in \mathbb{Z}_p^{m \times n}
+$$
 
-## Getting Started
+$$
+|   C_c =
+     \langle \hat{G}_0  |  \hat{\mathbf{L}}^T\mathbf{a} \hat{\mathbf{r}}  |  \hat{H}_0 \rangle
+    \wedge C_a =
+     \langle \hat{\mathbf{G}}  |  \mathbf{a}   |  \hat{\mathbf{H}} \rangle 
+\rbrace.
+$$
+
+The pseudo-code for this subprotocol is as follows:
+
+![alg](assets/scalar_proj.png)
 
 ### Running the Code
 
-To execute our program, run the following command:
+To run the experiment in the DualMatrix paper, run the following command:
 ```bash
 cd /path/to/zkmatrix
-cargo run
+cargo bench
 ```
 
 ## Compatibility Note
@@ -92,29 +116,12 @@ cargo run
 - **Rust Toolchain:** 3.10.12
 - **Environment:** Ubuntu 22.04
 
----
-
-## Algorithms
-
-### Matrix Commitment
-
-### Inner-Product Argument
-
-### Semi-Inner-Product Argument
-
-### High-Dimensional Semi-Inner-Product Argument
-
-### Protocol MatMul
-
----
 
 ## Directory Contents
 
-- **lib.rs:** The primary entry point for the program.
-- **util/** Utility functions.
-- **op/** Zero-knowledge proofs for various matrix oprators.
-
-For more
+- **util/** Utility functions for Fiat-Shamir transformation, matrix projections, and inner products.
+- **protocols/** The MatMul protocol and its sub-protocols.
+- **zkprotocols/** The zero-knowledge MatMul protocol and its sub-protocols.
 
 --- 
 
@@ -122,6 +129,3 @@ For more
 
 If our work benefits to your research, please cite our paper as follows:
 
-This is math in README file:
-
-$$ \sqrt{\mathbf{x}}$$
