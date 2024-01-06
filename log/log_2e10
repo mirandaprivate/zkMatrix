@@ -40,3 +40,54 @@
  ** Verifier time of zkMatMul : 322.160098ms
  ** SRS generation time: 488.786034ms
  ** Matrix generation time: 13.922569ms
+ ** SRS generation time: 51.24824ms
+ ** Matrix generation time: 9.612524ms
+ ** Commit matrix a time: 506.276124ms
+ ** Commit matrix b time: 353.028925ms
+ ** Commit matrix c time: 432.72886ms
+ ** Prover time of zkMatMul: 3.16638316s
+ ** Verifier time of zkMatMul : 0.27768795830000004s
+ ** SRS generation time: 141.046079ms
+ ** Matrix generation time: 8.739857ms
+ ** Commit matrix a time: 392.808626ms
+ ** Commit matrix b time: 281.003902ms
+ ** Commit matrix c time: 428.880676ms
+ ** SRS generation time: 52.849628ms
+ ** Matrix generation time: 6.828961ms
+ ** Commit matrix a time: 210.610842ms
+ ** Commit matrix b time: 266.971254ms
+ ** Commit matrix c time: 361.29349ms
+ ** Prover time of zkMatMul: 2.903381119s
+ ** Verifier time of zkMatMul : 259.826861ms
+ ** SRS generation time: 136.808273ms
+ ** Matrix generation time: 8.143973ms
+ ** Commit matrix a time: 315.318805ms
+ ** Commit matrix b time: 259.592783ms
+ ** Commit matrix c time: 402.504394ms
+ ** Prover time of zkMatMul: 5.379049707s
+ ** SRS generation time: 54.963014ms
+ ** Matrix generation time: 10.346723ms
+ ** Commit matrix a time: 244.14433ms
+ ** Commit matrix b time: 303.671578ms
+ ** Commit matrix c time: 337.561611ms
+ ** Prover time of zkMatMul: 2.994446749s
+ ** Verifier time of zkMatMul : 254.89305350000006ms
+ ** SRS generation time: 134.381788ms
+ ** Matrix generation time: 10.520962ms
+ ** Commit matrix a time: 316.863809ms
+ ** Commit matrix b time: 250.429748ms
+ ** Commit matrix c time: 419.476465ms
+ ** Prover time of zkMatMul: 4.728014195s
+ ** Verifier time of zkMatMul : 303.76918199999994ms
+ ** SRS generation time: 470.050325ms
+ ** Matrix generation time: 10.750353ms
+ ** Commit matrix a time: 688.034309ms
+ ** Commit matrix b time: 514.038467ms
+ ** Commit matrix c time: 901.144346ms
+ ** Prover time of zkMatMul: 7.855186599s
+ ** Verifier time of zkMatMul : 353.87969740000005ms
+ ** SRS generation time: 1.775513288s
+ ** Matrix generation time: 14.338768ms
+ ** Commit matrix a time: 2.173558646s
+ ** Commit matrix b time: 1.430482076s
+ ** Commit matrix c time: 2.571612426s

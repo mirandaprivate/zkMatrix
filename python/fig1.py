@@ -8,16 +8,17 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 
 
-PIC_NAME_UNIT = 'fig1.png'
+PIC_NAME = 'fig1.png'
+INPUT_NAME = 'metric_csv.csv'
 
 FIG_SIZE_SINGLE_COLUMN = (8, 4)
-LABEL_SIZE_SINGLE_COLUMN = 12
+LABEL_SIZE_SINGLE_COLUMN = 10
 # TITLE_SIZE_SINGLE_COLUMN = 16
-TITLE_SIZE_SINGLE_COLUMN = 14
+TITLE_SIZE_SINGLE_COLUMN = 12
 
-FIG_SIZE_DOUBLE_COLUMN = (16, 4)
-LABEL_SIZE_DOUBLE_COLUMN = 10
-TITLE_SIZE_DOUBLE_COLUMN = 12
+# FIG_SIZE_DOUBLE_COLUMN = (16, 4)
+# LABEL_SIZE_DOUBLE_COLUMN = 10
+# TITLE_SIZE_DOUBLE_COLUMN = 12
 
 LABEL_SIZE_3D = 10
 TITLE_SIZE_3D = 12
@@ -28,12 +29,15 @@ LINE_WIDTH = 1.
 
 COLOR_PALETTE = ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b",
                  "#bdcf32", "#87bc45", "#00bfa0", "#27aeef", "#6481D9"]
-MARKER_STYLE = "d"
+MARKER_STYLE = "s"
 MARKER_SIZE = 4
 MARKER_SIZE_BIG = 30
 
 Y_SUBTITLE = -0.4
-IDS = np.arange(1, N+1, 1)
+
+COLOR = 'black'
+LINE_STYLE = ':'
+LINE_WIDTH = 0.75
 
 my_cmap = sns.diverging_palette(120., 255., s=100, as_cmap=True)
 
@@ -41,114 +45,142 @@ def plot_scatter():
     """The scatter plot for the RIM results and the closed-form solutions.
     """
 
-    inter_round = []
-    allocation_gd = []
-    allocation_fit = []
-    
-    with open(FILE_NAME, 'r', encoding='utf-8') as file:
-        reader = csv.reader(file)
+    n_label = []
+    capital_n_label = []
+    n_series = []
+    capital_n_series = []
+    setup_time = []
+    srs_size = []
+    commit_time = []
+    prover_time = []
+    transcript_size = []
+    verifier_time = []
 
-        count = 0
+   
+    with open(INPUT_NAME, 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        next(reader)
+
         for row in reader:
 
-            count = count + 1
+            n_label.append(row[0])
+            capital_n_label.append(row[1])
+            n_series.append(int(row[2]))
+            capital_n_series.append(int(row[3]))
+            setup_time.append(float(row[4]))
+            srs_size.append(float(row[5]))
+            commit_time.append(float(row[6]))
+            prover_time.append(float(row[7]))
+            transcript_size.append(float(row[8])/1000.)
+            verifier_time.append(float(row[9]))
 
-    x_grid = np.linspace(0, 700, 1000)
-    Y_grid = np.array(x_grid)
+    x_tick_label = [n_label[i] for i in range(0, len(n_label), 2)]
+    x_tick = [n_series[i] for i in range(0, len(n_series), 2)]
+    
+    x_capital_tick_label = [capital_n_label[i] for i in range(0, len(n_label), 2)]
+    x_capital_tick = [capital_n_series[i] for i in range(0, len(n_series), 2)]
 
-    with np.load(FILE_NAME_PVCG_RESULT) as data:
-        payments_rim = data['array1']
-        x_vec_rim = data['array2']
-        z_matrix_rim = data['array3']
-
-    z_diff = (z_matrix_rim - z_matrix_closed)/ z_matrix_closed
-    for i in range(N):
-        z_diff[i,i] = 0.
-
-    fig = plt.figure(figsize=(9,4))
+    fig = plt.figure(figsize=(9,6))
     gs = gridspec.GridSpec(
-        1, 3, 
-        width_ratios=(1.,1.,1.3), wspace=0.3) 
+        2, 3, 
+        width_ratios=(1.,1.,1.), wspace=0.5, hspace=0.6) 
 
     ax1 = plt.subplot(gs[0])
     ax2 = plt.subplot(gs[1])
     ax3 = plt.subplot(gs[2])
+    ax4 = plt.subplot(gs[3])
+    ax5 = plt.subplot(gs[4])
+    ax6 = plt.subplot(gs[5])
 
-    ax1.set_xlabel('Closed-Form Solution', size = LABEL_SIZE_SINGLE_COLUMN,
+    # ax1.set_aspect('equal', 'box') 
+    # ax2.set_aspect('equal', 'box')
+    # ax3.set_aspect('equal', 'box') 
+    # ax4.set_aspect('equal', 'box')
+    # ax5.set_aspect('equal', 'box') 
+    # ax6.set_aspect('equal', 'box')
+
+    ax1.set_title('(a) Setup Time (log-log)', size = TITLE_SIZE_SINGLE_COLUMN,
+                  y = 1.1)
+    ax2.set_title('(b) SRS Size (log-log)', size = TITLE_SIZE_SINGLE_COLUMN,
+                  y = 1.1)
+    ax3.set_title('(c) Commitment Time (log-log)', size = TITLE_SIZE_SINGLE_COLUMN,
+                  y = 1.1)
+    ax4.set_title('(d) Prover Time (log-log)', size = TITLE_SIZE_SINGLE_COLUMN,
+                  y = 1.1)
+    ax5.set_title('(e) Transcript Size (linear-log)', size = TITLE_SIZE_SINGLE_COLUMN,
+                  y = 1.1)
+    ax6.set_title('(f) Verifier Time (linear-log)', size = TITLE_SIZE_SINGLE_COLUMN,
+                  y = 1.1)
+
+
+    ax1.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
-    ax2.set_xlabel('Closed-Form Solution', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax1.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
+    ax1.loglog(n_series, setup_time, 
+               marker = MARKER_STYLE, markersize = MARKER_SIZE,
+                 color = COLOR, alpha = 0.75, 
+                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
+    ax1.grid(True, which="major", ls="-", color='0.93')
+    ax1.set_xticks(x_tick, x_tick_label)
+
+    ax2.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
+    ax2.set_ylabel('Size (bytes)', size = LABEL_SIZE_SINGLE_COLUMN)  
+    ax2.loglog(n_series, srs_size, 
+               marker = MARKER_STYLE, markersize = MARKER_SIZE,
+                 color = COLOR, alpha = 0.75, 
+                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
+    ax2.grid(True, which="major", ls="-", color='0.93')
+    ax2.set_xticks(x_tick, x_tick_label)
+
+    ax3.set_xlabel('# of Non-Zero Elements (N)', size = LABEL_SIZE_SINGLE_COLUMN,
+                   labelpad=4)
+    ax3.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
+    ax3.loglog(capital_n_series, srs_size, 
+               marker = MARKER_STYLE, markersize = MARKER_SIZE,
+                 color = COLOR, alpha = 0.75, 
+                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
+    ax3.grid(True, which="major", ls="-", color='0.93')
+    ax3.set_xticks(x_capital_tick, x_capital_tick_label)
+
+    ax4.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
+                   labelpad=4)
+    ax4.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
+    ax4.loglog(n_series, prover_time, 
+               marker = MARKER_STYLE, markersize = MARKER_SIZE,
+                 color = COLOR, alpha = 0.75, 
+                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
+    ax4.grid(True, which="major", ls="-", color='0.93')
+    ax4.set_xticks(x_tick, x_tick_label)
     
-    ax1.set_ylabel('RIM Result', size = LABEL_SIZE_SINGLE_COLUMN)    
-    ax2.set_ylabel('RIM Result', size = LABEL_SIZE_SINGLE_COLUMN)    
-    
-    ax1.set_aspect('equal', 'box') 
-    ax2.set_aspect('equal', 'box') 
+    ax5.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
+                   labelpad=4)
+    ax5.set_ylabel('Size (KB)', size = LABEL_SIZE_SINGLE_COLUMN)  
+    ax5.semilogx(n_series, transcript_size, 
+                 marker = MARKER_STYLE, markersize = MARKER_SIZE,
+                 color = COLOR, alpha = 0.75, 
+                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
+    ax5.grid(True, which="major", ls="-", color='0.93')
+    ax5.set_xticks(x_tick, x_tick_label)
 
-    ax1.set_title('(a) PVCG Payment', size = TITLE_SIZE_SINGLE_COLUMN,
-                  y = -0.5)
-    ax2.set_title('(b) Procurement Level', size = TITLE_SIZE_SINGLE_COLUMN,
-                  y = -0.5)
 
-    ax1.set_xlim(0., 250.)
-    ax1.set_ylim(0., 250.)
-    ax1.set_xticks(np.arange(0., 251., 50.))
-    ax1.set_yticks(np.arange(0., 251., 50.))
-
-    ax2.set_xlim(0., 5.5)
-    ax2.set_ylim(0., 5.5)
-    ax2.set_xticks(np.arange(0., 6., 1.))
-    ax2.set_yticks(np.arange(0., 6., 1.))
-
-    ax1.plot(x_grid, Y_grid, color = 'grey', linestyle = ':', linewidth = 0.75)
-    ax2.plot(x_grid, Y_grid, color = 'grey', linestyle = ':', linewidth = 0.75)
-
-    for i in range(N):
-        ax1.scatter(p_vec_closed[i], payments_rim[i], 
-                    color = COLOR_PALETTE[i], marker = MARKER_STYLE,
-                    s = MARKER_SIZE_BIG,
-                    label = 'Supplier ' + str(i+1))
-        ax2.scatter(x_vec_closed[i], x_vec_rim[i], 
-                    color = COLOR_PALETTE[i], marker = MARKER_STYLE,
-                    s = MARKER_SIZE_BIG)
-    
-    ax3.set_aspect('equal', 'box')
-    # print(z_diff)
-    sns.heatmap(z_diff, cmap=my_cmap, ax = ax3,
-                annot=False, linewidths=0.5, center = 0.,
-                vmin = -0.035, vmax = 0.035,
-                fmt = '.0%',
-                cbar_kws={
-                    "orientation": "vertical",
-                    "location": "right" ,
-                    "shrink": 0.52,
-                    "format": PercentFormatter(1, decimals=0)}
-                )
-    cbar = ax3.collections[0].colorbar
-    cbar.set_ticks([-0.03, -0.02,  -0.01, 
-                    0., 0.01, 0.02, 0.03])
-
-    ax3.set_xticklabels(['1', '2', '3', '4', '5',
-                         '6', '7', '8', '9', '10'])
-    ax3.set_yticklabels(['1', '2', '3', '4', '5',
-                         '6', '7', '8', '9', '10'])
-    ax3.invert_yaxis()
-    ax3.set_xlabel('Supplier ID', size = LABEL_SIZE_SINGLE_COLUMN,
-                    labelpad= 0)
-    ax3.set_ylabel('Supplier ID', size = LABEL_SIZE_SINGLE_COLUMN)   
-    ax3.set_title('         (c) Relative Error of z-Matrix', 
-                size = TITLE_SIZE_SINGLE_COLUMN,
-                y = -0.46)
+    ax6.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
+                   labelpad=4)
+    ax6.set_ylabel('Time (milliseconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
+    ax6.semilogx(n_series, verifier_time, 
+                 marker = MARKER_STYLE, markersize = MARKER_SIZE,
+                 color = COLOR, alpha = 0.75, 
+                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
+    ax6.grid(True, which="major", ls="-", color='0.93')
+    ax6.set_xticks(x_tick, x_tick_label)
 
     # fig.tight_layout()
-    fig.subplots_adjust(top = 1., hspace=0.5, wspace=0.25)
+    # fig.legend(loc='upper center', bbox_to_anchor=(0.5, 1.), ncol=5)
 
-    fig.legend(loc='upper center', bbox_to_anchor=(0.5, 1.), ncol=5)
-
-    plt.savefig(PIC_NAME_SCATTER, 
+    plt.savefig(PIC_NAME, 
                 transparent=True, bbox_inches='tight', pad_inches=0.02)
 
-    # plt.show()
+    plt.show()
 
 
 if __name__ == '__main__':

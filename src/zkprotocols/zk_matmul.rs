@@ -303,10 +303,10 @@ impl ZkMatMul {
         let check1 = ip1.verify_as_subprotocol_cm(srs, trans_seq);
         let check4 = ip4.verify_as_subprotocol(srs, trans_seq);
 
-        println!("Check of Ip1 in MatMul: {:?}", check1);
-        println!("Check of Ip2 in MatMul: {:?}", check2);
-        println!("Check of Ip3 in MatMul: {:?}", check3);
-        println!("Check of Ip4 in MatMul: {:?}", check4);
+        // println!("Check of Ip1 in MatMul: {:?}", check1);
+        // println!("Check of Ip2 in MatMul: {:?}", check2);
+        // println!("Check of Ip3 in MatMul: {:?}", check3);
+        // println!("Check of Ip4 in MatMul: {:?}", check4);
 
         return  check1 && check2 && check3 && check4;
         

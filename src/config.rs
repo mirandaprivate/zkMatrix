@@ -2,7 +2,7 @@
 //!
 pub const NUM_THREADS: usize = 64;
 
-pub const LOG_DIM: usize = 10;
+pub const LOG_DIM: usize = 20;
 
 pub const Q: usize = 2usize.pow(LOG_DIM as u32) + 2;
 

@@ -156,15 +156,29 @@ fn experiment(log_file: &mut File) {
             format!("tr_2e{:?}", log_dim)
         );
 
-        let timer_verify = Instant::now();
-
         let result = matmul_protocol.verify(&srs, &mut trans_read);
 
         println!(" * Verification of zkMatMul result: {:?}", result);
 
-        println!(" ** Verifier time of zkMatMul : {:?}", timer_verify.elapsed());
-        writeln!(log_file, " ** Verifier time of zkMatMul : {:?}", 
-            timer_verify.elapsed())
+
+        let mut verify_time: f64 = 0.;
+        let repeat = 10;
+        
+        for _ in 0..repeat {
+            let mut trans_read = TranSeq::read_from_file(
+                format!("tr_2e{:?}", log_dim)
+            );
+
+            let timer_verify = Instant::now();
+            matmul_protocol.verify(&srs, &mut trans_read);
+            verify_time += timer_verify.elapsed().as_secs_f64()/repeat as f64;
+        }
+
+        verify_time = verify_time * 1000.;
+
+        println!(" ** Verifier time of zkMatMul : {:?}ms", verify_time);
+        writeln!(log_file, " ** Verifier time of zkMatMul : {:?}ms", 
+            verify_time)
         .unwrap();
 
     }
