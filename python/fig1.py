@@ -1,9 +1,7 @@
 """Plot the Fig. 1 in the paper.
 """
 import csv
-import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.ticker import PercentFormatter
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 
