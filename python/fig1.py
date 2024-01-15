@@ -131,7 +131,7 @@ def plot_scatter():
     ax2.grid(True, which="major", ls="-", color='0.93')
     ax2.set_xticks(x_tick, x_tick_label)
 
-    ax3.set_xlabel('# of Non-Zero Elements (N)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax3.set_xlabel('# of Non-Zero Elements (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax3.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax3.loglog(capital_n_series, srs_size, 
