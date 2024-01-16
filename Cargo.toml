@@ -2,11 +2,10 @@
 name = "zkmatrix"
 version = "0.1.0"
 authors = [
-    "Miranda CONG <minsheu.cong@gmail.com>", 
-    "Darren Cui <hdcui@cs.hku.hk>",
+    "Anonymous", 
     ]
 edition = "2021"
-description = "Zero-knowledge Proofs for Linear Algebra"
+description = "zk-SNAKR soluctions for linear algebra"
 license = "MIT"
 # document = ["", "build-dependencies", "dev-dependencies"]
 
