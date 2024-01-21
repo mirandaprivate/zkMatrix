@@ -766,7 +766,7 @@ mod tests {
         let srs = SRS::new(2* SQRT_MATRIX_DIM_TEST * SQRT_MATRIX_DIM_TEST);
     
         let (c, a, b) 
-            = experiment_data::gen_matrices_sparse(SQRT_MATRIX_DIM_TEST);
+            = experiment_data::gen_matrices_sparse_from_kronecker(SQRT_MATRIX_DIM_TEST);
     
         let c_zp = experiment_data::sprs_i128_to_zp(&c);
         let a_zp = experiment_data::sprs_i64_to_zp(&a);

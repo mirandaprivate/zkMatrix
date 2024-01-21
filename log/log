@@ -1,208 +1,217 @@
-    Running benches/experiment.rs (target/release/deps/experiment-93b2d8dfb946ee6b)
+Running benches/experiment.rs (target/release/deps/experiment-93b2d8dfb946ee6b)
  ** Experiment for zkMatrix, Matrix Dim 2e4 times 2e4; Number of non-zero elements: 2e6 **
  ===== File data/public/srs_2e4.srs written; Size 6792 Bytes
  -----------------------------------------------------
- ** SRS generation time: 64.372476ms
- ** Matrix generation time: 10.4954ms
+ ** SRS generation time: 52.165701ms
+ *** Compute sparse matrix mulitplication time: 227.664µs
+ ** Matrix generation time: 8.968606ms
  ===== File data/private/a_sprs_i64_2e4_rp.cache written; Size 1800 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 42.765422ms
+ ** Commit matrix a time: 22.654848ms
  ===== File data/private/b_sprs_i64_2e4_lp.cache written; Size 1032 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 37.299071ms
+ ** Commit matrix b time: 22.54146ms
  ===== File data/private/c_sprs_i128_2e4_lp.cache written; Size 1032 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 52.161796ms
- * Time for computing bra_zp: 9.675ms
- * Time for Computing ket_zp: 6.887542ms
- * Time for bra_zp: 7.206393ms
- * Time for ket_zp: 8.371227ms
- ** Prover time of zkMatMul: 2.880964891s
+ ** Commit matrix c time: 29.725822ms
+ * Time for computing bra_zp: 3.551264ms
+ * Time for Computing ket_zp: 4.020368ms
+ * Time for bra_zp: 2.578161ms
+ * Time for ket_zp: 4.436532ms
+ ** Prover time of zkMatMul: 1.749387652s
  ===== File data/public/tr_2e4.tr written; Size 79224 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 277.46295580000003ms
+ ** Verifier time of zkMatMul : 337.5578567ms
  ** Experiment for zkMatrix, Matrix Dim 2e6 times 2e6; Number of non-zero elements: 2e9 **
  ===== File data/public/srs_2e6.srs written; Size 23688 Bytes
  -----------------------------------------------------
- ** SRS generation time: 158.427887ms
- ** Matrix generation time: 8.947991ms
+ ** SRS generation time: 176.144673ms
+ *** Compute sparse matrix mulitplication time: 1.820905ms
+ ** Matrix generation time: 5.869845ms
  ===== File data/private/a_sprs_i64_2e6_rp.cache written; Size 7176 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 59.235887ms
+ ** Commit matrix a time: 73.810533ms
  ===== File data/private/b_sprs_i64_2e6_lp.cache written; Size 4104 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 49.543114ms
+ ** Commit matrix b time: 75.659537ms
  ===== File data/private/c_sprs_i128_2e6_lp.cache written; Size 4104 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 84.661024ms
- * Time for computing bra_zp: 5.920682ms
- * Time for Computing ket_zp: 2.905354ms
- * Time for bra_zp: 4.774426ms
- * Time for ket_zp: 3.085235ms
- ** Prover time of zkMatMul: 2.800880624s
+ ** Commit matrix c time: 80.43372ms
+ * Time for computing bra_zp: 3.260104ms
+ * Time for Computing ket_zp: 4.089852ms
+ * Time for bra_zp: 10.986024ms
+ * Time for ket_zp: 3.018298ms
+ ** Prover time of zkMatMul: 2.774489449s
  ===== File data/public/tr_2e6.tr written; Size 96528 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 331.4124027ms
+ ** Verifier time of zkMatMul : 363.0536493ms
  ** Experiment for zkMatrix, Matrix Dim 2e8 times 2e8; Number of non-zero elements: 2e12 **
  ===== File data/public/srs_2e8.srs written; Size 91272 Bytes
  -----------------------------------------------------
- ** SRS generation time: 590.383658ms
- ** Matrix generation time: 5.147979ms
+ ** SRS generation time: 589.828085ms
+ *** Compute sparse matrix mulitplication time: 3.201497ms
+ ** Matrix generation time: 8.353724ms
  ===== File data/private/a_sprs_i64_2e8_rp.cache written; Size 28680 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 121.438221ms
+ ** Commit matrix a time: 130.084319ms
  ===== File data/private/b_sprs_i64_2e8_lp.cache written; Size 16392 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 117.108893ms
+ ** Commit matrix b time: 146.716851ms
  ===== File data/private/c_sprs_i128_2e8_lp.cache written; Size 16392 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 206.001877ms
- * Time for computing bra_zp: 2.833668ms
- * Time for Computing ket_zp: 2.773133ms
- * Time for bra_zp: 3.752182ms
- * Time for ket_zp: 2.874607ms
- ** Prover time of zkMatMul: 2.998707139s
-===== File data/public/tr_2e8.tr written; Size 113832 Bytes
+ ** Commit matrix c time: 194.407437ms
+ * Time for computing bra_zp: 3.228793ms
+ * Time for Computing ket_zp: 3.25854ms
+ * Time for bra_zp: 3.678513ms
+ * Time for ket_zp: 3.89739ms
+** Prover time of zkMatMul: 3.648274076s
+ ===== File data/public/tr_2e8.tr written; Size 113832 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 374.71074089999996ms
+ ** Verifier time of zkMatMul : 375.25212480000005ms
  ** Experiment for zkMatrix, Matrix Dim 2e10 times 2e10; Number of non-zero elements: 2e15 **
  ===== File data/public/srs_2e10.srs written; Size 361608 Bytes
  -----------------------------------------------------
- ** SRS generation time: 1.612164818s
- ** Matrix generation time: 6.985604ms
+ ** SRS generation time: 2.631719519s
+ *** Compute sparse matrix mulitplication time: 7.486952ms
+ ** Matrix generation time: 16.974225ms
  ===== File data/private/a_sprs_i64_2e10_rp.cache written; Size 114696 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 520.982172ms
+ ** Commit matrix a time: 533.4887ms
  ===== File data/private/b_sprs_i64_2e10_lp.cache written; Size 65544 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 469.555508ms
+ ** Commit matrix b time: 416.766671ms
  ===== File data/private/c_sprs_i128_2e10_lp.cache written; Size 65544 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 728.083819ms
- * Time for computing bra_zp: 4.460765ms
- * Time for Computing ket_zp: 4.546958ms
- * Time for bra_zp: 3.030572ms
- * Time for ket_zp: 3.440297ms
- ** Prover time of zkMatMul: 5.631059708s
+ ** Commit matrix c time: 651.571962ms
+ * Time for computing bra_zp: 3.709268ms
+ * Time for Computing ket_zp: 3.6204ms
+ * Time for bra_zp: 3.613443ms
+ * Time for ket_zp: 3.650825ms
+ ** Prover time of zkMatMul: 5.822338415s
  ===== File data/public/tr_2e10.tr written; Size 131136 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 423.9858887ms
+ ** Verifier time of zkMatMul : 465.7948444ms
  ** Experiment for zkMatrix, Matrix Dim 2e12 times 2e12; Number of non-zero elements: 2e18 **
  ===== File data/public/srs_2e12.srs written; Size 1442952 Bytes
  -----------------------------------------------------
- ** SRS generation time: 6.424819862s
- ** Matrix generation time: 20.535419ms
+ ** SRS generation time: 7.822874571s
+ *** Compute sparse matrix mulitplication time: 17.087283ms
+ ** Matrix generation time: 71.00082ms
  ===== File data/private/a_sprs_i64_2e12_rp.cache written; Size 458760 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 2.102267556s
+ ** Commit matrix a time: 2.035990353s
  ===== File data/private/b_sprs_i64_2e12_lp.cache written; Size 262152 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 2.144550702s
+ ** Commit matrix b time: 2.057076019s
  ===== File data/private/c_sprs_i128_2e12_lp.cache written; Size 262152 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 3.688750787s
- * Time for computing bra_zp: 8.358334ms
- * Time for Computing ket_zp: 5.940306ms
- * Time for bra_zp: 9.656811ms
- * Time for ket_zp: 7.806278ms
- ** Prover time of zkMatMul: 12.550076098s
+ ** Commit matrix c time: 3.249709337s
+ * Time for computing bra_zp: 5.221945ms
+ * Time for Computing ket_zp: 5.120969ms
+ * Time for bra_zp: 4.811295ms
+ * Time for ket_zp: 5.199869ms
+ ** Prover time of zkMatMul: 11.350820812s
  ===== File data/public/tr_2e12.tr written; Size 148440 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 475.80064569999996ms
+ ** Verifier time of zkMatMul : 475.0586744ms
  ** Experiment for zkMatrix, Matrix Dim 2e14 times 2e14; Number of non-zero elements: 2e21 **
  ===== File data/public/srs_2e14.srs written; Size 5768328 Bytes
  -----------------------------------------------------
- ** SRS generation time: 25.480141446s
- ** Matrix generation time: 128.590265ms
+ ** SRS generation time: 29.317332303s
+ *** Compute sparse matrix mulitplication time: 341.101488ms
+ ** Matrix generation time: 791.846032ms
  ===== File data/private/a_sprs_i64_2e14_rp.cache written; Size 1835016 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 12.711949896s
+ ** Commit matrix a time: 16.645780512s
  ===== File data/private/b_sprs_i64_2e14_lp.cache written; Size 1048584 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 12.403640384s
+ ** Commit matrix b time: 12.390445679s
  ===== File data/private/c_sprs_i128_2e14_lp.cache written; Size 1048584 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 23.694039403s
- * Time for computing bra_zp: 21.990382ms
- * Time for Computing ket_zp: 22.070157ms
- * Time for bra_zp: 21.827915ms
- * Time for ket_zp: 28.760415ms
- ** Prover time of zkMatMul: 32.387572548s
+ ** Commit matrix c time: 23.410860515s
+ * Time for computing bra_zp: 19.231024ms
+ * Time for Computing ket_zp: 30.098544ms
+ * Time for bra_zp: 36.556414ms
+ * Time for ket_zp: 26.32161ms
+ ** Prover time of zkMatMul: 34.39839527s
  ===== File data/public/tr_2e14.tr written; Size 165744 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 524.8047956999999ms
+ ** Verifier time of zkMatMul : 525.2588645ms
  ** Experiment for zkMatrix, Matrix Dim 2e16 times 2e16; Number of non-zero elements: 2e24 **
  ===== File data/public/srs_2e16.srs written; Size 23069832 Bytes
  -----------------------------------------------------
- ** SRS generation time: 101.981737372s
- ** Matrix generation time: 1.070104867s
+ ** SRS generation time: 104.7749819s
+ *** Compute sparse matrix mulitplication time: 1.258689655s
+ ** Matrix generation time: 4.56841984s
  ===== File data/private/a_sprs_i64_2e16_rp.cache written; Size 7340040 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 93.169456042s
+ ** Commit matrix a time: 108.077903019s
  ===== File data/private/b_sprs_i64_2e16_lp.cache written; Size 4194312 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 91.633236716s
+ ** Commit matrix b time: 95.834581478s
  ===== File data/private/c_sprs_i128_2e16_lp.cache written; Size 4194312 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 174.99830453s
- * Time for computing bra_zp: 203.700098ms
- * Time for Computing ket_zp: 227.268574ms
- * Time for bra_zp: 309.851526ms
- * Time for ket_zp: 172.130352ms
- ** Prover time of zkMatMul: 100.995494251s
+ ** Commit matrix c time: 182.564193284s
+ * Time for computing bra_zp: 172.511024ms
+ * Time for Computing ket_zp: 355.425038ms
+ * Time for bra_zp: 205.811882ms
+ * Time for ket_zp: 221.161011ms
+ ** Prover time of zkMatMul: 140.582531789s
  ===== File data/public/tr_2e16.tr written; Size 183048 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 574.5729869999999ms
+ ** Verifier time of zkMatMul : 670.7971724ms
  ** Experiment for zkMatrix, Matrix Dim 2e18 times 2e18; Number of non-zero elements: 2e27 **
  ===== File data/public/srs_2e18.srs written; Size 92275848 Bytes
  -----------------------------------------------------
- ** SRS generation time: 404.300332392s
- ** Matrix generation time: 8.82875755s
+ ** SRS generation time: 403.464899167s
+ *** Compute sparse matrix mulitplication time: 11.102291794s
+ ** Matrix generation time: 32.352718198s
  ===== File data/private/a_sprs_i64_2e18_rp.cache written; Size 29360136 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 885.328545154s
+ ** Commit matrix a time: 812.861071126s
  ===== File data/private/b_sprs_i64_2e18_lp.cache written; Size 16777224 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 825.854063303s
+ ** Commit matrix b time: 810.768167118s
  ===== File data/private/c_sprs_i128_2e18_lp.cache written; Size 16777224 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 1716.843416129s
- * Time for computing bra_zp: 2.726585935s
- * Time for Computing ket_zp: 3.141791348s
- * Time for bra_zp: 3.948950646s
- * Time for ket_zp: 3.134522961s
- ** Prover time of zkMatMul: 366.096235865s
+ ** Commit matrix c time: 1381.580062287s
+ * Time for computing bra_zp: 1.695421592s
+ * Time for Computing ket_zp: 1.526996918s
+ * Time for bra_zp: 2.588616477s
+ * Time for ket_zp: 2.680821667s
+ ** Prover time of zkMatMul: 528.922972768s
  ===== File data/public/tr_2e18.tr written; Size 200352 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 624.3276211000001ms
+ ** Verifier time of zkMatMul : 724.9876372000001ms
  ** Experiment for zkMatrix, Matrix Dim 2e20 times 2e20; Number of non-zero elements: 2e30 **
  ===== File data/public/srs_2e20.srs written; Size 369099912 Bytes
  -----------------------------------------------------
- ** SRS generation time: 1610.470714595s
- ** Matrix generation time: 66.145428663s
+ ** SRS generation time: 1659.056065369s
+ *** Compute sparse matrix mulitplication time: 200.217762116s
+** Matrix generation time: 362.081842013s
  ===== File data/private/a_sprs_i64_2e20_rp.cache written; Size 117440520 Bytes
  -----------------------------------------------------
- ** Commit matrix a time: 6305.838777961s
+ ** Commit matrix a time: 6386.207348753s
  ===== File data/private/b_sprs_i64_2e20_lp.cache written; Size 67108872 Bytes
  -----------------------------------------------------
- ** Commit matrix b time: 5620.267845469s
+ ** Commit matrix b time: 5232.816030919s
  ===== File data/private/c_sprs_i128_2e20_lp.cache written; Size 67108872 Bytes
  -----------------------------------------------------
- ** Commit matrix c time: 11125.435280755s
- * Time for computing bra_zp: 21.526987507s
- * Time for Computing ket_zp: 23.956716875s
- * Time for bra_zp: 28.493531607s
- * Time for ket_zp: 25.399954543s
- ** Prover time of zkMatMul: 1404.991410443s
+ ** Commit matrix c time: 11321.988539055s
+ * Time for computing bra_zp: 135.793087315s
+ * Time for Computing ket_zp: 77.581707189s
+ * Time for bra_zp: 82.767565206s
+ * Time for ket_zp: 26.448139538s
+ ** Prover time of zkMatMul: 2509.93664824s
  ===== File data/public/tr_2e20.tr written; Size 217656 Bytes
  -----------------------------------------------------
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 674.7118939000001ms
+ ** Verifier time of zkMatMul : 827.9619584ms

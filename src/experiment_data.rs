@@ -1,17 +1,10 @@
 //! Matrices for experiments.
 //! 
-//! We use kronecker product of a random diagonal sparse (26bits for each element)
-//! matrix and a random dense matrix (26bits for each element) to generate
-//! the random sparse matrices (52bits for each element).
-//!
-//! The dimension of the resulting matrix is:
-//!     (SQRT_MATRIX_DIM * SQRT_MATRIX_DIM, SQRT_MATRIX_DIM * SQRT_MATRIX_DIM)
+//! We pack sqrt(n) random dense matrices of size sqrt(n) * sqrt(n) to generate
+//! a n * n sparse matrix with n^{1.5} non-zero elements (52bits for each element).
 //! 
-//! The product matrix is also a sparse matrix (each element be a i128 number).
-//! 
-//! To generate random dense matrices, we generate two random i64 random matrices
-//! (52 bits for each element) and multiply them to get the product matrix
-//! (each element is a i128 number).
+//! The multiplication of two such sparse matrices will generate a sparse matrix
+//! with n^{1.5} non-zero elements (each element be a i128 number).
 //! 
 //! We constrain the number to be 52 bits because this is the length of 
 //! the mantissa for double-precision floating-point numbers
@@ -19,6 +12,7 @@
 //! 
 
 #![allow(dead_code)]
+use std::time::Instant;
 
 use curv::arithmetic::Zero;
 use rand::Rng;
@@ -30,6 +24,7 @@ use crate::mat::Mat;
 
 use crate::utils::curve::ZpElement;
 
+use crate::config::NUM_THREADS;
 
 
 /// Generate a random dense i64 matrix
@@ -52,6 +47,125 @@ pub fn gen_mat_rand_diag_i64(sqrt_dim: usize, max_bit: u32) -> Vec<i64>{
     }).collect::<Vec<i64>>()  
 }
 
+/// Pack n n*n dense matrix to a (n^2) * (n^2) sparse matrix (each element is i64)
+pub fn pack_dense_to_sprs_i64(
+    dense_vec: &Vec<Vec<Vec<i64>>>
+) -> Vec<(usize, usize, i64)> {
+
+    let sqrt_n = dense_vec.len();
+    let mut sprs = Vec::new();
+
+    for i in 0..sqrt_n {
+        for j in 0..sqrt_n {
+            for k in 0..sqrt_n {
+                sprs.push((i*sqrt_n + k, j * sqrt_n +k, dense_vec[k][i][j]));
+            }
+        }
+    }
+
+    sprs
+}
+
+/// Pack n n*n dense matrix to a (n^2) * (n^2) sparse matrix (each element is i128)
+pub fn pack_dense_to_sprs_i128(
+    dense_vec: &Vec<Vec<Vec<i128>>>
+) -> Vec<(usize, usize, i128)> {
+
+    let sqrt_n = dense_vec.len();
+    let mut sprs = Vec::new();
+
+    for i in 0..sqrt_n {
+        for j in 0..sqrt_n {
+            for k in 0..sqrt_n {
+                sprs.push((i*sqrt_n + k, j * sqrt_n +k, dense_vec[k][i][j]));
+            }
+        }
+    }
+
+    sprs
+}
+
+
+/// Compute the multiplication of two i64 sparse matrices packed by the dense matrices
+pub fn mat_mul_pack_i64_to_i128(
+    a_mat_vec: &Vec<Vec<Vec<i64>>>,
+    b_mat_vec: &Vec<Vec<Vec<i64>>>,
+) -> Vec<Vec<Vec<i128>>> {
+    let sqrt_n = a_mat_vec.len();
+    let mut result = Vec::new();
+
+    let pool = ThreadPoolBuilder::new()
+    .num_threads(NUM_THREADS)
+    .build()
+    .unwrap();
+
+    let timer = Instant::now();
+
+    for l in 0..sqrt_n {
+        let mut result_l = 
+            vec![vec![0 as i128; sqrt_n]; sqrt_n];
+
+        pool.install(|| {
+            result_l.par_iter_mut().enumerate().for_each(
+                |(i, row)| {
+                for j in 0..sqrt_n {
+                    for k in 0..sqrt_n {
+                        row[j] += a_mat_vec[l][i][k] as i128 * b_mat_vec[l][k][j] as i128;
+                    }
+                }
+                }
+            );
+        });
+
+        result.push(result_l);
+    }
+
+    println!(" *** Compute sparse matrix mulitplication time: {:?}", timer.elapsed());
+    
+    result
+}
+
+/// Generate the sparse matrices used for experiments
+pub fn gen_matrices_sparse(sqrt_dim: usize) 
+-> (Mat<i128>, Mat<i64>, Mat<i64>) {
+
+    let dim = sqrt_dim * sqrt_dim;
+    let log_dim = (dim as u64).ilog2() as usize;
+
+    let a_mat_vec = (0..sqrt_dim).map(|_| {
+        gen_mat_rand_dense_i64(sqrt_dim, 52)
+    }).collect::<Vec<Vec<Vec<i64>>>>();
+
+    let b_mat_vec = (0..sqrt_dim).map(|_| {
+        gen_mat_rand_dense_i64(sqrt_dim, 52)
+    }).collect::<Vec<Vec<Vec<i64>>>>();
+
+    let c_mat_vec = mat_mul_pack_i64_to_i128(
+        &a_mat_vec, &b_mat_vec
+    );
+
+    let a = Mat::new_from_data_vec(
+        &format!("a_sprs_i64_2e{:?}", log_dim),
+        (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
+        pack_dense_to_sprs_i64(&a_mat_vec)
+    );
+
+    let b = Mat::new_from_data_vec(
+        &format!("b_sprs_i64_2e{:?}", log_dim),
+        (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
+        pack_dense_to_sprs_i64(&b_mat_vec)
+    );
+
+    let c = Mat::new_from_data_vec(
+        &format!("c_sprs_i128_2e{:?}", log_dim),
+        (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim), 
+        pack_dense_to_sprs_i128(&c_mat_vec)
+    );
+
+    (c, a, b)
+
+}
+
 /// Compute the multiplication of two i64 dense matrices
 /// 
 fn mat_mul_dense_i64_to_zp(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>) 
@@ -64,7 +178,7 @@ fn mat_mul_dense_i64_to_zp(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>)
         vec![vec![ZpElement::zero(); b_cols]; a_rows];
 
     let pool = ThreadPoolBuilder::new()
-        .num_threads(8)
+        .num_threads(NUM_THREADS)
         .build()
         .unwrap();
 
@@ -95,7 +209,7 @@ fn mat_mul_dense_i64_to_i64(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
         vec![vec![0 as i64; b_cols]; a_rows];
 
     let pool = ThreadPoolBuilder::new()
-        .num_threads(8)
+        .num_threads(NUM_THREADS)
         .build()
         .unwrap();
 
@@ -128,9 +242,11 @@ pub fn mat_mul_dense_i64_to_i128(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
         vec![vec![0 as i128; b_cols]; a_rows];
 
     let pool = ThreadPoolBuilder::new()
-        .num_threads(8)
+        .num_threads(NUM_THREADS)
         .build()
         .unwrap();
+
+    let timer = Instant::now();
 
     pool.install(|| {
         result.par_iter_mut().enumerate().for_each(
@@ -142,6 +258,8 @@ pub fn mat_mul_dense_i64_to_i128(a: &Vec<Vec<i64>>, b: &Vec<Vec<i64>>
             }
         });
     });
+
+    println!(" *** Compute dense matrix mulitplication time: {:?}", timer.elapsed());
 
     result
 }
@@ -276,14 +394,15 @@ pub fn diag_kronecker_dense_from_i64_to_i128(a: &Vec<i64>, b: &Vec<Vec<i64>>
 
 
 
-/// Generate the sparse matrices used for experiments
+/// Generate the sparse matrices from kronecker product of a diagonal matrix 
+/// and a dense matrix (each of size sqrt_dim * sqrt_dim)
 /// 
 /// The dimension of the resulting matrix is:
-///     (SQRT_MATRIX_DIM * SQRT_MATRIX_DIM, SQRT_MATRIX_DIM * SQRT_MATRIX_DIM)
+///     (sqrt_dim * sqrt_dim, sqrt_dim * sqrt_dim)
 /// 
 /// The elements of the matrices are i128, i64, i64 respectively.
 /// 
-pub fn gen_matrices_sparse(sqrt_dim: usize) 
+pub fn gen_matrices_sparse_from_kronecker(sqrt_dim: usize) 
     -> (Mat<i128>, Mat<i64>, Mat<i64>) {
     
     let dim = sqrt_dim * sqrt_dim;
@@ -369,7 +488,7 @@ pub fn sprs_i64_to_zp(sprs: &Mat<i64>) -> Mat<ZpElement> {
 /// 
 /// 
 #[cfg(test)]
-pub fn gen_matrices_sparse_zp(sqrt_dim: usize
+pub fn gen_matrices_sparse_zp_from_kronecker(sqrt_dim: usize
 ) -> (Mat<ZpElement>, Mat<ZpElement>, Mat<ZpElement>) {
     
     let dim = sqrt_dim * sqrt_dim;
@@ -566,10 +685,27 @@ mod tests{
     #[test]
     fn test_experiment_data(){
         let (_c, _a, _b) = 
-            gen_matrices_sparse_zp(SQRT_MATRIX_DIM_TEST);
+            gen_matrices_sparse_zp_from_kronecker(SQRT_MATRIX_DIM_TEST);
 
         let (_c_d, _a_d, _b_d) = 
             gen_matrices_dense(SQRT_MATRIX_DIM_TEST);
+
+        let a_d_dense = sprs_to_dense_from_i64_to_zp(
+            &_a_d
+        );
+        let b_d_dense = sprs_to_dense_from_i64_to_zp(
+            &_b_d
+        );
+        let c_d_dense = sprs_to_dense_from_i128_to_zp(
+            &_c_d
+        );
+
+        assert_eq!(mat_mul_dense_zp_to_zp(&a_d_dense, &b_d_dense), c_d_dense);
+
+
+        let (_c, _a, _b) = 
+            gen_matrices_sparse(SQRT_MATRIX_DIM_TEST);
+
 
         let a_d_dense = sprs_to_dense_from_i64_to_zp(
             &_a_d
