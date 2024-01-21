@@ -84,39 +84,39 @@ fn experiment(log_file: &mut File) {
         println!(" ** Matrix generation time: {:?}", mat_duration);
         writeln!(log_file, " ** Matrix generation time: {:?}", mat_duration).unwrap();
 
-        let commit_a_timer = Instant::now();
+        // let commit_a_timer = Instant::now();
 
         let a_tilde = ZpElement::rand();
         let (a_com, a_cache) = 
             a.commit_rm(&srs);
         let a_blind = a_com + a_tilde * srs.blind_base;
 
-        let commit_a_duration = commit_a_timer.elapsed();
+        // let commit_a_duration = commit_a_timer.elapsed();
 
-        println!(" ** Commit matrix a time: {:?}", commit_a_duration);
-        writeln!(log_file, " ** Commit matrix a time: {:?}", commit_a_duration).unwrap();
+        // println!(" ** Commit matrix a time: {:?}", commit_a_duration);
+        // writeln!(log_file, " ** Commit matrix a time: {:?}", commit_a_duration).unwrap();
         
-        let commit_b_timer = Instant::now();
+        // let commit_b_timer = Instant::now();
 
         let b_tilde = ZpElement::rand();
         let (b_com, b_cache) = b.commit_cm(&srs);
         let b_blind = b_com + b_tilde * srs.blind_base;
 
-        let commit_b_duration = commit_b_timer.elapsed();
+        // let commit_b_duration = commit_b_timer.elapsed();
 
-        println!(" ** Commit matrix b time: {:?}", commit_b_duration);
-        writeln!(log_file, " ** Commit matrix b time: {:?}", commit_b_duration).unwrap();
+        // println!(" ** Commit matrix b time: {:?}", commit_b_duration);
+        // writeln!(log_file, " ** Commit matrix b time: {:?}", commit_b_duration).unwrap();
 
-        let commit_c_timer = Instant::now();
+        // let commit_c_timer = Instant::now();
 
         let c_tilde = ZpElement::rand();
         let (c_com, c_cache) = c.commit_cm(&srs);
         let c_blind = c_com + c_tilde * srs.blind_base;
 
-        let commit_c_duration = commit_c_timer.elapsed();
+        // let commit_c_duration = commit_c_timer.elapsed();
 
-        println!(" ** Commit matrix c time: {:?}", commit_c_duration);
-        writeln!(log_file, " ** Commit matrix c time: {:?}", commit_c_duration).unwrap();
+        // println!(" ** Commit matrix c time: {:?}", commit_c_duration);
+        // writeln!(log_file, " ** Commit matrix c time: {:?}", commit_c_duration).unwrap();
 
         let commit_cab: Vec<GtElement> = [c_blind, a_blind, b_blind].to_vec();
 
@@ -216,39 +216,39 @@ fn experiment_dense(log_file: &mut File) {
     println!(" ** Matrix generation time: {:?}", mat_duration);
     writeln!(log_file, " ** Matrix generation time: {:?}", mat_duration).unwrap();
 
-    let commit_a_timer = Instant::now();
+    // let commit_a_timer = Instant::now();
 
     let a_tilde = ZpElement::rand();
     let (a_com, a_cache) = 
         a.commit_rm(&srs);
     let a_blind = a_com + a_tilde * srs.blind_base;
 
-    let commit_a_duration = commit_a_timer.elapsed();
+    // let commit_a_duration = commit_a_timer.elapsed();
 
-    println!(" ** Commit matrix a time: {:?}", commit_a_duration);
-    writeln!(log_file, " ** Commit matrix a time: {:?}", commit_a_duration).unwrap();
+    // println!(" ** Commit matrix a time: {:?}", commit_a_duration);
+    // writeln!(log_file, " ** Commit matrix a time: {:?}", commit_a_duration).unwrap();
     
-    let commit_b_timer = Instant::now();
+    // let commit_b_timer = Instant::now();
 
     let b_tilde = ZpElement::rand();
     let (b_com, b_cache) = b.commit_cm(&srs);
     let b_blind = b_com + b_tilde * srs.blind_base;
 
-    let commit_b_duration = commit_b_timer.elapsed();
+    // let commit_b_duration = commit_b_timer.elapsed();
 
-    println!(" ** Commit matrix b time: {:?}", commit_b_duration);
-    writeln!(log_file, " ** Commit matrix b time: {:?}", commit_b_duration).unwrap();
+    // println!(" ** Commit matrix b time: {:?}", commit_b_duration);
+    // writeln!(log_file, " ** Commit matrix b time: {:?}", commit_b_duration).unwrap();
 
-    let commit_c_timer = Instant::now();
+    // let commit_c_timer = Instant::now();
 
     let c_tilde = ZpElement::rand();
     let (c_com, c_cache) = c.commit_cm(&srs);
     let c_blind = c_com + c_tilde * srs.blind_base;
 
-    let commit_c_duration = commit_c_timer.elapsed();
+    // let commit_c_duration = commit_c_timer.elapsed();
 
-    println!(" ** Commit matrix c time: {:?}", commit_c_duration);
-    writeln!(log_file, " ** Commit matrix c time: {:?}", commit_c_duration).unwrap();
+    // println!(" ** Commit matrix c time: {:?}", commit_c_duration);
+    // writeln!(log_file, " ** Commit matrix c time: {:?}", commit_c_duration).unwrap();
 
     let commit_cab: Vec<GtElement> = [c_blind, a_blind, b_blind].to_vec();
 

@@ -5,6 +5,8 @@
 //! 
 //! The commitments are published to data/public.
 //! 
+//! 
+use std::time::Instant;
 
 use crate::mat::Mat;
 use crate::setup::SRS;
@@ -38,26 +40,43 @@ impl CommitMat for Mat<u64> {
     fn commit_row_major(
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
     ) -> (GtElement, Vec<G2Element>) {
+        
+        let timer = Instant::now();
+
         let right_cache = self.ket(&h_base_vec);
+               
+        let result = dirac::inner_product(
+            &g_base_vec, &right_cache);
+    
+
+        println!(" ** Time for matrix commitment: {:?}", timer.elapsed());
+
         right_cache.to_file(
             format!("{}_rp.cache", self.id), false)
         .unwrap();
 
-        let result = dirac::inner_product(
-            &g_base_vec, &right_cache);
         (result, right_cache.clone())
+
     }
 
     fn commit_col_major(
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
     ) -> (GtElement, Vec<G1Element>) {
+
+        let timer = Instant::now();
+
         let left_cache = self.bra(&g_base_vec);
-        left_cache.to_file(
-            format!("{}_lp.cache", self.id), false)
-        .unwrap();
+        
         
         let result = dirac::inner_product(
             &left_cache, &h_base_vec);
+
+        println!(" ** Time for matrix commitment: {:?}", timer.elapsed());
+
+        left_cache.to_file(
+                format!("{}_lp.cache", self.id), false)
+            .unwrap();
+
         (result, left_cache.clone())
     }
 }
@@ -67,13 +86,19 @@ impl CommitMat for Mat<i64> {
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
     ) -> (GtElement, Vec<G2Element>) {
 
+        let timer = Instant::now();
+
         let right_cache = self.ket(&h_base_vec);
+        
+        let result = dirac::inner_product(
+            &g_base_vec, &right_cache);
+        
+        println!(" ** Time for matrix commitment: {:?}", timer.elapsed());
+
         right_cache.to_file(
             format!("{}_rp.cache", self.id), false)
         .unwrap();
-
-        let result = dirac::inner_product(
-            &g_base_vec, &right_cache);
+    
         (result, right_cache.clone())
     }
 
@@ -81,14 +106,19 @@ impl CommitMat for Mat<i64> {
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
     ) -> (GtElement, Vec<G1Element>) {
 
+        let timer = Instant::now();
+
         let left_cache = self.bra(&g_base_vec);
-        left_cache.to_file(
-            format!("{}_lp.cache", self.id), false)
-        .unwrap();
+        
         
         let result = dirac::inner_product(
             &left_cache, &h_base_vec);
         
+        println!(" ** Time for matrix commitment: {:?}", timer.elapsed());
+
+        left_cache.to_file(
+            format!("{}_lp.cache", self.id), false)
+        .unwrap();
         (result, left_cache.clone())
     }
 }
@@ -98,28 +128,39 @@ impl CommitMat for Mat<i128> {
         &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
     ) -> (GtElement, Vec<G2Element>) {
 
+        let timer = Instant::now();
+
         let right_cache = self.ket(&h_base_vec);
-        right_cache.to_file(
-            format!("{}_rp.cache", self.id), false)
-        .unwrap();
+       
 
         let result = dirac::inner_product(
             &g_base_vec, &right_cache);
+        
+        println!(" ** Time for matrix commitment: {:?}", timer.elapsed());
+
+        right_cache.to_file(
+            format!("{}_rp.cache", self.id), false)
+        .unwrap();
         (result, right_cache.clone())
+
     }
 
     fn commit_col_major(
             &self, g_base_vec: &Vec<G1Element>, h_base_vec: &Vec<G2Element>
     ) -> (GtElement, Vec<G1Element>) {
 
+        let timer = Instant::now();
+
         let left_cache = self.bra(&g_base_vec);
-        left_cache.to_file(
-            format!("{}_lp.cache", self.id), false)
-        .unwrap();
         
         let result = dirac::inner_product(
             &left_cache, &h_base_vec);
         
+        println!(" ** Time for matrix commitment: {:?}", timer.elapsed());
+
+        left_cache.to_file(
+            format!("{}_lp.cache", self.id), false)
+        .unwrap();
         (result, left_cache.clone())
     }
 }
