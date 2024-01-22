@@ -45,8 +45,8 @@ fn main(){
     // experiment_gen_matrices(&mut log_file);
     // experiment_commit_matrices(&mut log_file);
     // experiment_matmul(&mut log_file);
-    experiment(&mut log_file);
-    // experiment_dense(&mut log_file);
+    // experiment(&mut log_file);
+    experiment_dense(&mut log_file);
 }
 
 

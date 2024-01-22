@@ -1,31 +1,30 @@
-     Running benches/experiment.rs (target/release/deps/experiment-93b2d8dfb946ee6b)
  ** Experiment for zkMatrix, Matrix Dim 2e10 times 2e10; Number of non-zero elements: 2e20 ** 
  ===== File data/public/srs_2e10.srs written; Size 361608 Bytes 
  -----------------------------------------------------  
- ** SRS generation time: 1.800701608s
- *** Compute dense matrix mulitplication time: 114.269165ms
+ ** SRS generation time: 1.937631727s
+ *** Compute dense matrix mulitplication time: 107.405452ms
  ===== File data/private/c_dense_i128_2e10 written; Size 33554481 Bytes 
  -----------------------------------------------------  
  ===== File data/private/a_dense_i64_2e10 written; Size 25165872 Bytes 
  -----------------------------------------------------  
  ===== File data/private/b_dense_i64_2e10 written; Size 25165872 Bytes 
  -----------------------------------------------------  
- ** Matrix generation time: 438.448983ms
+ ** Matrix generation time: 336.61643ms
+ ** Time for matrix commitment: 6.247651908s
  ===== File data/private/a_dense_i64_2e10_rp.cache written; Size 114696 Bytes 
  -----------------------------------------------------  
- ** Commit matrix a time: 6.748254117s
+ ** Time for matrix commitment: 5.789086034s
  ===== File data/private/b_dense_i64_2e10_lp.cache written; Size 65544 Bytes 
  -----------------------------------------------------  
- ** Commit matrix b time: 5.771092096s
+ ** Time for matrix commitment: 11.337081104s
  ===== File data/private/c_dense_i128_2e10_lp.cache written; Size 65544 Bytes 
  -----------------------------------------------------  
- ** Commit matrix c time: 11.353815435s
- * Time for computing bra_zp: 9.401021ms
- * Time for Computing ket_zp: 7.188916ms
- * Time for bra_zp: 9.138381ms
- * Time for ket_zp: 8.690187ms
- ** Prover time of zkMatMul: 5.197757256s
+ * Time for computing bra_zp: 10.169712ms
+ * Time for Computing ket_zp: 8.328759ms
+ * Time for bra_zp: 9.189184ms
+ * Time for ket_zp: 11.43816ms
+ ** Prover time of zkMatMul: 5.932644826s
  ===== File data/public/tr_2e10.tr written; Size 131136 Bytes 
  -----------------------------------------------------  
  * Verification of zkMatMul result: true
- ** Verifier time of zkMatMul : 424.24852249999986
+ ** Verifier time of zkMatMul : 469.5043355
