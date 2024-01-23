@@ -81,6 +81,10 @@ fn experiment(log_file: &mut File) {
 
         let mat_duration = mat_timer.elapsed();
 
+        // c.to_file(c.id.to_string(), false).unwrap();
+        // a.to_file(a.id.to_string(), false).unwrap();
+        // b.to_file(b.id.to_string(), false).unwrap();
+
         println!(" ** Matrix generation time: {:?}", mat_duration);
         writeln!(log_file, " ** Matrix generation time: {:?}", mat_duration).unwrap();
 
@@ -207,9 +211,9 @@ fn experiment_dense(log_file: &mut File) {
     let (c, a, b) = 
         experiment_data::gen_matrices_dense(SQRT_MATRIX_DIM);
     
-    c.to_file(c.id.to_string(), false).unwrap();
-    a.to_file(a.id.to_string(), false).unwrap();
-    b.to_file(b.id.to_string(), false).unwrap();
+    // c.to_file(c.id.to_string(), false).unwrap();
+    // a.to_file(a.id.to_string(), false).unwrap();
+    // b.to_file(b.id.to_string(), false).unwrap();
 
     let mat_duration = mat_timer.elapsed();
 
