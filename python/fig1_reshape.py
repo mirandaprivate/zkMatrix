@@ -134,7 +134,7 @@ def plot_scatter():
     ax3.set_xlabel('# of Non-Zero Entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax3.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
-    ax3.loglog(capital_n_series, srs_size, 
+    ax3.loglog(capital_n_series, commit_time, 
                marker = MARKER_STYLE, markersize = MARKER_SIZE,
                  color = COLOR, alpha = 0.75, 
                  linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
