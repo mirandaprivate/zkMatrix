@@ -13,6 +13,8 @@ FIG_SIZE_SINGLE_COLUMN = (10, 5)
 LABEL_SIZE_SINGLE_COLUMN = 14
 # TITLE_SIZE_SINGLE_COLUMN = 16
 TITLE_SIZE_SINGLE_COLUMN = 16
+TICK_SIZE = 12
+SPLINE_WIDTH = 1
 
 # FIG_SIZE_DOUBLE_COLUMN = (16, 4)
 # LABEL_SIZE_DOUBLE_COLUMN = 10
@@ -117,9 +119,17 @@ def plot_scatter():
     ax1.loglog(n_series, setup_time, 
                marker = MARKER_STYLE, markersize = MARKER_SIZE,
                  color = COLOR, alpha = 0.75, 
-                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
+                 linestyle = LINE_STYLE, linewidth = LINE_WIDTH,
+                 )
     ax1.grid(True, which="major", ls="-", color='0.93')
     ax1.set_xticks(x_tick, x_tick_label)
+
+    ax1.tick_params(axis='both', which='major', labelsize=TICK_SIZE)
+    ax1.spines['top'].set_linewidth(SPLINE_WIDTH)
+    ax1.spines['right'].set_linewidth(SPLINE_WIDTH)
+    ax1.spines['bottom'].set_linewidth(SPLINE_WIDTH)
+    ax1.spines['left'].set_linewidth(SPLINE_WIDTH)
+   
 
     ax2.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
@@ -129,9 +139,15 @@ def plot_scatter():
                  color = COLOR, alpha = 0.75, 
                  linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
     ax2.grid(True, which="major", ls="-", color='0.93')
-    ax2.set_xticks(x_tick, x_tick_label)
+    ax2.set_xticks(x_tick, x_tick_label, size = TICK_SIZE)
 
-    ax3.set_xlabel('# of Non-Zero Elements (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax2.tick_params(axis='both', which='major', labelsize=TICK_SIZE)
+    ax2.spines['top'].set_linewidth(SPLINE_WIDTH)
+    ax2.spines['right'].set_linewidth(SPLINE_WIDTH)
+    ax2.spines['bottom'].set_linewidth(SPLINE_WIDTH)
+    ax2.spines['left'].set_linewidth(SPLINE_WIDTH)
+
+    ax3.set_xlabel('# of Non-Zero Entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax3.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax3.loglog(capital_n_series, srs_size, 
@@ -139,18 +155,30 @@ def plot_scatter():
                  color = COLOR, alpha = 0.75, 
                  linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
     ax3.grid(True, which="major", ls="-", color='0.93')
-    ax3.set_xticks(x_capital_tick, x_capital_tick_label)
+    ax3.set_xticks(x_capital_tick, x_capital_tick_label, size = TICK_SIZE)
 
-    ax4.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax3.tick_params(axis='both', which='major', labelsize=TICK_SIZE)
+    ax3.spines['top'].set_linewidth(SPLINE_WIDTH)
+    ax3.spines['right'].set_linewidth(SPLINE_WIDTH)
+    ax3.spines['bottom'].set_linewidth(SPLINE_WIDTH)
+    ax3.spines['left'].set_linewidth(SPLINE_WIDTH)
+
+    ax4.set_xlabel('# of Non-Zero Entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax4.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
-    ax4.loglog(n_series, prover_time, 
+    ax4.loglog(capital_n_series, prover_time, 
                marker = MARKER_STYLE, markersize = MARKER_SIZE,
                  color = COLOR, alpha = 0.75, 
                  linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
     ax4.grid(True, which="major", ls="-", color='0.93')
-    ax4.set_xticks(x_tick, x_tick_label)
+    ax4.set_xticks(x_capital_tick, x_capital_tick_label, size = TICK_SIZE)
     
+    ax4.tick_params(axis='both', which='major', labelsize=TICK_SIZE)
+    ax4.spines['top'].set_linewidth(SPLINE_WIDTH)
+    ax4.spines['right'].set_linewidth(SPLINE_WIDTH)
+    ax4.spines['bottom'].set_linewidth(SPLINE_WIDTH)
+    ax4.spines['left'].set_linewidth(SPLINE_WIDTH)
+
     ax5.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax5.set_ylabel('Size (KB)', size = LABEL_SIZE_SINGLE_COLUMN)  
@@ -159,8 +187,13 @@ def plot_scatter():
                  color = COLOR, alpha = 0.75, 
                  linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
     ax5.grid(True, which="major", ls="-", color='0.93')
-    ax5.set_xticks(x_tick, x_tick_label)
+    ax5.set_xticks(x_tick, x_tick_label, size = TICK_SIZE)
 
+    ax5.tick_params(axis='both', which='major', labelsize=TICK_SIZE)
+    ax5.spines['top'].set_linewidth(SPLINE_WIDTH)
+    ax5.spines['right'].set_linewidth(SPLINE_WIDTH)
+    ax5.spines['bottom'].set_linewidth(SPLINE_WIDTH)
+    ax5.spines['left'].set_linewidth(SPLINE_WIDTH)
 
     ax6.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
@@ -170,8 +203,13 @@ def plot_scatter():
                  color = COLOR, alpha = 0.75, 
                  linestyle = LINE_STYLE, linewidth = LINE_WIDTH)
     ax6.grid(True, which="major", ls="-", color='0.93')
-    ax6.set_xticks(x_tick, x_tick_label)
+    ax6.set_xticks(x_tick, x_tick_label, size = TICK_SIZE)
 
+    ax6.tick_params(axis='both', which='major', labelsize=TICK_SIZE)
+    ax6.spines['top'].set_linewidth(SPLINE_WIDTH)
+    ax6.spines['right'].set_linewidth(SPLINE_WIDTH)
+    ax6.spines['bottom'].set_linewidth(SPLINE_WIDTH)
+    ax6.spines['left'].set_linewidth(SPLINE_WIDTH)
     # fig.tight_layout()
     # fig.legend(loc='upper center', bbox_to_anchor=(0.5, 1.), ncol=5)
 
