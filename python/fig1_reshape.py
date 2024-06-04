@@ -10,9 +10,9 @@ PIC_NAME = 'fig1_double.png'
 INPUT_NAME = 'metric_csv.csv'
 
 FIG_SIZE_SINGLE_COLUMN = (8, 4)
-LABEL_SIZE_SINGLE_COLUMN = 10
+LABEL_SIZE_SINGLE_COLUMN = 12
 # TITLE_SIZE_SINGLE_COLUMN = 16
-TITLE_SIZE_SINGLE_COLUMN = 12
+TITLE_SIZE_SINGLE_COLUMN = 14
 
 # FIG_SIZE_DOUBLE_COLUMN = (16, 4)
 # LABEL_SIZE_DOUBLE_COLUMN = 10
@@ -78,10 +78,10 @@ def plot_scatter():
     x_capital_tick_label = [capital_n_label[i] for i in range(0, len(n_label), 2)]
     x_capital_tick = [capital_n_series[i] for i in range(0, len(n_series), 2)]
 
-    fig = plt.figure(figsize=(6,9))
+    fig = plt.figure(figsize=(6.,9))
     gs = gridspec.GridSpec(
         3, 2, 
-        width_ratios=(1.,1.), wspace=0.5, hspace=0.6) 
+        width_ratios=(1.,1.), wspace=0.8, hspace=0.7) 
 
     ax1 = plt.subplot(gs[0])
     ax2 = plt.subplot(gs[1])
