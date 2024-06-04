@@ -147,7 +147,7 @@ def plot_scatter():
     ax2.spines['bottom'].set_linewidth(SPLINE_WIDTH)
     ax2.spines['left'].set_linewidth(SPLINE_WIDTH)
 
-    ax3.set_xlabel('# Non-Zero entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax3.set_xlabel('# Non-zero entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax3.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax3.loglog(capital_n_series, srs_size, 
