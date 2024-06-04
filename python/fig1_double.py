@@ -131,7 +131,7 @@ def plot_scatter():
     ax1.spines['left'].set_linewidth(SPLINE_WIDTH)
    
 
-    ax2.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax2.set_xlabel('Matrix dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax2.set_ylabel('Size (bytes)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax2.loglog(n_series, srs_size, 
@@ -147,7 +147,7 @@ def plot_scatter():
     ax2.spines['bottom'].set_linewidth(SPLINE_WIDTH)
     ax2.spines['left'].set_linewidth(SPLINE_WIDTH)
 
-    ax3.set_xlabel('# of Non-Zero Entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax3.set_xlabel('# Non-Zero entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax3.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax3.loglog(capital_n_series, srs_size, 
@@ -163,7 +163,7 @@ def plot_scatter():
     ax3.spines['bottom'].set_linewidth(SPLINE_WIDTH)
     ax3.spines['left'].set_linewidth(SPLINE_WIDTH)
 
-    ax4.set_xlabel('# of Non-Zero Entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax4.set_xlabel('# Non-zero entries (N/3)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax4.set_ylabel('Time (seconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax4.loglog(capital_n_series, prover_time, 
@@ -179,7 +179,7 @@ def plot_scatter():
     ax4.spines['bottom'].set_linewidth(SPLINE_WIDTH)
     ax4.spines['left'].set_linewidth(SPLINE_WIDTH)
 
-    ax5.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax5.set_xlabel('Matrix dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax5.set_ylabel('Size (KB)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax5.semilogx(n_series, transcript_size, 
@@ -195,7 +195,7 @@ def plot_scatter():
     ax5.spines['bottom'].set_linewidth(SPLINE_WIDTH)
     ax5.spines['left'].set_linewidth(SPLINE_WIDTH)
 
-    ax6.set_xlabel('Matrix Dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
+    ax6.set_xlabel('Matrix dimension (n)', size = LABEL_SIZE_SINGLE_COLUMN,
                    labelpad=4)
     ax6.set_ylabel('Time (milliseconds)', size = LABEL_SIZE_SINGLE_COLUMN)  
     ax6.semilogx(n_series, verifier_time, 
